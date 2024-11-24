@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 interface FileUploaderProps {
   onFileUpload: (file: File, type: "master" | "local") => void;
