@@ -2,6 +2,7 @@ import { Calendar, Users, FileText, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { useDashboardMetrics, useRecentActivities, useUpcomingDeadlines } from "@/hooks/useDashboard";
 import { useToast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
 
 const MetricCard = ({
   title,
@@ -46,13 +47,15 @@ const Index = () => {
   const { data: activities, isError: isActivitiesError } = useRecentActivities();
   const { data: deadlines, isError: isDeadlinesError } = useUpcomingDeadlines();
 
-  if (isMetricsError || isActivitiesError || isDeadlinesError) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to load dashboard data. Please try again later.",
-    });
-  }
+  useEffect(() => {
+    if (isMetricsError || isActivitiesError || isDeadlinesError) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load dashboard data. Please try again later.",
+      });
+    }
+  }, [isMetricsError, isActivitiesError, isDeadlinesError, toast]);
 
   return (
     <DashboardLayout>
