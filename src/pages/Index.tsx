@@ -1,5 +1,7 @@
 import { Calendar, Users, FileText, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useDashboardMetrics, useRecentActivities, useUpcomingDeadlines } from "@/hooks/useDashboard";
+import { useToast } from "@/components/ui/use-toast";
 
 const MetricCard = ({
   title,
@@ -39,6 +41,19 @@ const DeadlineItem = ({ date, text }: { date: string; text: string }) => (
 );
 
 const Index = () => {
+  const { toast } = useToast();
+  const { data: metrics, isError: isMetricsError } = useDashboardMetrics();
+  const { data: activities, isError: isActivitiesError } = useRecentActivities();
+  const { data: deadlines, isError: isDeadlinesError } = useUpcomingDeadlines();
+
+  if (isMetricsError || isActivitiesError || isDeadlinesError) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to load dashboard data. Please try again later.",
+    });
+  }
+
   return (
     <DashboardLayout>
       <div className="mb-8">
@@ -51,25 +66,25 @@ const Index = () => {
       <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Upcoming Deadlines"
-          value="5"
+          value={metrics?.upcoming_deadlines ?? 0}
           icon={Calendar}
           className="bg-blue-500"
         />
         <MetricCard
           title="Active Clients"
-          value="24"
+          value={metrics?.active_clients ?? 0}
           icon={Users}
           className="bg-green-500"
         />
         <MetricCard
           title="Documents Pending"
-          value="12"
+          value={metrics?.documents_pending ?? 0}
           icon={FileText}
           className="bg-yellow-500"
         />
         <MetricCard
           title="Compliance Alerts"
-          value="3"
+          value={metrics?.compliance_alerts ?? 0}
           icon={AlertCircle}
           className="bg-red-500"
         />
@@ -81,10 +96,9 @@ const Index = () => {
             Recent Activity
           </h2>
           <div className="space-y-4">
-            <ActivityItem text="Local File updated for Client A" />
-            <ActivityItem text="New benchmark analysis completed" />
-            <ActivityItem text="Transfer pricing documentation reviewed" />
-            <ActivityItem text="Compliance check completed for Client B" />
+            {activities?.map((activity) => (
+              <ActivityItem key={activity.id} text={activity.text} />
+            ))}
           </div>
         </div>
 
@@ -93,22 +107,13 @@ const Index = () => {
             Upcoming Deadlines
           </h2>
           <div className="space-y-4">
-            <DeadlineItem
-              date="March 31"
-              text="Master File submission"
-            />
-            <DeadlineItem
-              date="April 15"
-              text="Local File preparation"
-            />
-            <DeadlineItem
-              date="April 30"
-              text="Quarterly compliance review"
-            />
-            <DeadlineItem
-              date="May 15"
-              text="Annual tax filing"
-            />
+            {deadlines?.map((deadline) => (
+              <DeadlineItem
+                key={deadline.id}
+                date={deadline.date}
+                text={deadline.text}
+              />
+            ))}
           </div>
         </div>
       </div>
