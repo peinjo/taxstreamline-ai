@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Document } from "./types";
+import { RichTextEditor } from "./RichTextEditor";
 
 interface EditDocumentDialogProps {
   document: Document | null;
@@ -25,11 +25,7 @@ export function EditDocumentDialog({
           <DialogTitle>Edit Document</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 p-4">
-          <Textarea
-            value={editedContent}
-            onChange={(e) => onContentChange(e.target.value)}
-            className="min-h-[400px] font-mono"
-          />
+          <RichTextEditor content={editedContent} onChange={onContentChange} />
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onClose}>
               Cancel

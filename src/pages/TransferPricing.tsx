@@ -1,15 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { FileText, Upload } from "lucide-react";
+import { FileText } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { DocumentCard } from "@/components/transfer-pricing/DocumentCard";
-import { EditDocumentDialog } from "@/components/transfer-pricing/EditDocumentDialog";
 import { Document, Activity } from "@/components/transfer-pricing/types";
 import { defaultTemplate } from "@/components/transfer-pricing/constants";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { EditDocumentDialog } from "@/components/transfer-pricing/EditDocumentDialog";
+import { FileUploader } from "@/components/transfer-pricing/FileUploader";
+import { ActivityLog } from "@/components/transfer-pricing/ActivityLog";
+import { DocumentList } from "@/components/transfer-pricing/DocumentList";
 
 const TransferPricing = () => {
   const [activeTab, setActiveTab] = useState<"master" | "local">("master");
@@ -24,8 +24,6 @@ const TransferPricing = () => {
   const [isNewDocumentDialogOpen, setIsNewDocumentDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Document | null>(null);
   const [editedContent, setEditedContent] = useState("");
-  const [uploadType, setUploadType] = useState<"master" | "local">("master");
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addActivity = (action: string, documentTitle: string, documentType: "master" | "local") => {
     const newActivity: Activity = {
@@ -36,6 +34,25 @@ const TransferPricing = () => {
       timestamp: new Date().toLocaleString(),
     };
     setActivities([newActivity, ...activities]);
+  };
+
+  const handleFileUpload = async (file: File, type: "master" | "local") => {
+    try {
+      const content = await file.text();
+      const newDocument: Document = {
+        id: documents.length + 1,
+        title: file.name,
+        modified: new Date().toLocaleDateString(),
+        type,
+        content
+      };
+
+      setDocuments([...documents, newDocument]);
+      addActivity("Uploaded", file.name, type);
+      toast.success("File uploaded successfully");
+    } catch (error) {
+      toast.error("Error reading file");
+    }
   };
 
   const createNewDocument = () => {
@@ -71,6 +88,15 @@ const TransferPricing = () => {
     toast.success("Document title updated successfully");
   };
 
+  const handleDeleteDocument = (id: number) => {
+    const documentToDelete = documents.find(doc => doc.id === id);
+    if (documentToDelete) {
+      setDocuments(documents.filter(doc => doc.id !== id));
+      addActivity("Deleted", documentToDelete.title, documentToDelete.type);
+      toast.success("Document deleted successfully");
+    }
+  };
+
   const saveEditedDocument = () => {
     if (!editingDocument) return;
 
@@ -92,62 +118,13 @@ const TransferPricing = () => {
     toast.success("Document updated successfully");
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      const newDocument: Document = {
-        id: documents.length + 1,
-        title: file.name,
-        modified: new Date().toLocaleDateString(),
-        type: uploadType,
-        content
-      };
-
-      setDocuments([...documents, newDocument]);
-      addActivity("Uploaded", file.name, uploadType);
-      toast.success("File uploaded successfully");
-    };
-
-    reader.readAsText(file);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const filteredDocuments = documents.filter(doc => doc.type === activeTab);
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Transfer Pricing Documentation</h1>
           <div className="flex gap-4">
-            <div className="flex items-center gap-2">
-              <Input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                className="hidden"
-                accept=".txt,.doc,.docx,.pdf"
-              />
-              <Select value={uploadType} onValueChange={(value: "master" | "local") => setUploadType(value)}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Upload to..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="master">Master File</SelectItem>
-                  <SelectItem value="local">Local File</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button onClick={() => fileInputRef.current?.click()}>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload
-              </Button>
-            </div>
+            <FileUploader onFileUpload={handleFileUpload} />
             <Dialog open={isNewDocumentDialogOpen} onOpenChange={setIsNewDocumentDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -193,16 +170,13 @@ const TransferPricing = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDocuments.map((doc) => (
-              <DocumentCard 
-                key={doc.id} 
-                doc={doc} 
-                onEdit={handleEditDocument}
-                onTitleChange={handleTitleChange}
-              />
-            ))}
-          </div>
+          <DocumentList 
+            documents={documents}
+            activeTab={activeTab}
+            onEdit={handleEditDocument}
+            onTitleChange={handleTitleChange}
+            onDelete={handleDeleteDocument}
+          />
         </div>
 
         <EditDocumentDialog
@@ -213,25 +187,7 @@ const TransferPricing = () => {
           onContentChange={setEditedContent}
         />
 
-        <div className="mt-8">
-          <h2 className="mb-4 text-xl font-semibold">Recent Activity</h2>
-          <div className="space-y-2">
-            {activities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-center space-x-2 text-gray-600"
-              >
-                <div className="h-2 w-2 rounded-full bg-blue-600"></div>
-                <span className="text-sm">
-                  {activity.action} {activity.documentTitle} ({activity.documentType}) - {activity.timestamp}
-                </span>
-              </div>
-            ))}
-            {activities.length === 0 && (
-              <p className="text-sm text-gray-500">No recent activity</p>
-            )}
-          </div>
-        </div>
+        <ActivityLog activities={activities} />
       </div>
     </DashboardLayout>
   );
