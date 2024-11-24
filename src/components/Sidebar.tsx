@@ -33,7 +33,7 @@ const Sidebar = () => {
     <div className="fixed left-0 top-0 h-screen w-64 bg-sidebar p-4 text-white">
       <div className="mb-8 flex items-center gap-2 px-2">
         <img src="/lovable-uploads/14b7660e-0879-41c1-a1d8-b3327eeae3e4.png" alt="Logo" className="h-8 w-8" />
-        <span className="text-xl font-bold">TaxPro AI</span>
+        <span className="text-xl font-bold">Phester Consult</span>
       </div>
 
       <nav className="flex h-[calc(100%-6rem)] flex-col justify-between">
