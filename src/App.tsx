@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import TransferPricing from "./pages/TransferPricing";
 import GlobalReporting from "./pages/GlobalReporting";
 import Calendar from "./pages/Calendar";
+import ComplianceTracker from "./pages/Compliance";
+import AIAssistant from "./pages/AIAssistant";
 
 const queryClient = new QueryClient();
 
@@ -21,8 +23,8 @@ const App = () => (
           <Route path="/transfer-pricing" element={<TransferPricing />} />
           <Route path="/global-reporting" element={<GlobalReporting />} />
           <Route path="/calendar" element={<Calendar />} />
-          <Route path="/compliance" element={<Index />} />
-          <Route path="/ai-assistant" element={<Index />} />
+          <Route path="/compliance" element={<ComplianceTracker />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
           <Route path="/notifications" element={<Index />} />
           <Route path="/settings" element={<Index />} />
         </Routes>
