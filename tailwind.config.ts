@@ -24,8 +24,12 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        sidebar: {
+          DEFAULT: "#1e1f25",
+          hover: "#2d2e35",
+        },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#1e40af",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
