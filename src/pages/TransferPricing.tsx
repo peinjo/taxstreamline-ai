@@ -11,7 +11,25 @@ interface Document {
   title: string;
   modified: string;
   type: "master" | "local";
+  content?: string;
 }
+
+const defaultTemplate = `Transfer Pricing Local File template sample
+
+Below you find a table of contents of a Transfer Pricing local file in the format the OECD describes. The TOC is generated with our software solution at Phester Consult.
+The below structure is an example for an entity named [Company] and has four intercompany transactions included.
+
+Table of Contents
+
+• Abbreviations
+• 1 Introduction
+  ○ Scope and purpose
+  ○ Structure of the report
+• 2 Executive Summary
+  ○ Summary for transaction Sale of goods and materials
+  ○ Summary for transaction Provision of Services
+  ○ Summary for transaction Licensing of intellectual property
+  ○ Summary for transaction Financial Transaction`;
 
 const TransferPricing = () => {
   const [activeTab, setActiveTab] = useState<"master" | "local">("master");
@@ -33,12 +51,13 @@ const TransferPricing = () => {
         month: "short",
         day: "numeric"
       }),
-      type: "local"
+      type: "local",
+      content: defaultTemplate
     };
 
     setDocuments([...documents, newDocument]);
     setIsNewDocumentDialogOpen(false);
-    toast.success("New document created successfully");
+    toast.success("New document created successfully with default template");
   };
 
   const filteredDocuments = documents.filter(doc => doc.type === activeTab);
@@ -103,6 +122,11 @@ const TransferPricing = () => {
                       <p className="text-sm text-gray-500">
                         Last modified: {doc.modified}
                       </p>
+                      {doc.content && (
+                        <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+                          {doc.content.split('\n')[0]}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex space-x-2">
