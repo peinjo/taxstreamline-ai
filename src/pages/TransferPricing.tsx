@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Download, Share } from "lucide-react";
+import { FileText, Download, Share, Edit2 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Document {
   id: number;
@@ -37,10 +38,12 @@ const TransferPricing = () => {
     { id: 1, title: "Document 1", modified: "Mar 15, 2024", type: "master" },
     { id: 2, title: "Document 2", modified: "Mar 15, 2024", type: "master" },
     { id: 3, title: "Document 3", modified: "Mar 15, 2024", type: "master" },
-    { id: 4, title: "Local File 1", modified: "Mar 16, 2024", type: "local" },
+    { id: 4, title: "Local File 1", modified: "Mar 16, 2024", type: "local", content: defaultTemplate },
   ]);
 
   const [isNewDocumentDialogOpen, setIsNewDocumentDialogOpen] = useState(false);
+  const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+  const [editedContent, setEditedContent] = useState("");
 
   const createNewDocument = () => {
     const newDocument: Document = {
@@ -58,6 +61,34 @@ const TransferPricing = () => {
     setDocuments([...documents, newDocument]);
     setIsNewDocumentDialogOpen(false);
     toast.success("New document created successfully with default template");
+  };
+
+  const handleEditDocument = (document: Document) => {
+    setEditingDocument(document);
+    setEditedContent(document.content || "");
+  };
+
+  const saveEditedDocument = () => {
+    if (!editingDocument) return;
+
+    const updatedDocuments = documents.map(doc => {
+      if (doc.id === editingDocument.id) {
+        return {
+          ...doc,
+          content: editedContent,
+          modified: new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          })
+        };
+      }
+      return doc;
+    });
+
+    setDocuments(updatedDocuments);
+    setEditingDocument(null);
+    toast.success("Document updated successfully");
   };
 
   const filteredDocuments = documents.filter(doc => doc.type === activeTab);
@@ -138,12 +169,39 @@ const TransferPricing = () => {
                       <Share className="mr-2 h-4 w-4" />
                       Share
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleEditDocument(doc)}>
+                      <Edit2 className="mr-2 h-4 w-4" />
+                      Edit
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
+
+        <Dialog open={!!editingDocument} onOpenChange={() => setEditingDocument(null)}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Edit Document</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 p-4">
+              <Textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="min-h-[400px] font-mono"
+              />
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setEditingDocument(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={saveEditedDocument}>
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="mt-8">
           <h2 className="mb-4 text-xl font-semibold">Recent Activity</h2>
