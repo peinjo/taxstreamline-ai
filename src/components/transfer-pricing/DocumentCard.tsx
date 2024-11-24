@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface DocumentCardProps {
   doc: Document;
@@ -30,6 +31,7 @@ export function DocumentCard({ doc, onEdit, onTitleChange, onDelete }: DocumentC
   const handleTitleSave = () => {
     onTitleChange(doc.id, tempTitle);
     setIsEditingTitle(false);
+    toast.success("Title updated successfully");
   };
 
   const handleTitleCancel = () => {
@@ -40,6 +42,22 @@ export function DocumentCard({ doc, onEdit, onTitleChange, onDelete }: DocumentC
   const handleDelete = () => {
     onDelete(doc.id);
     setShowDeleteDialog(false);
+    toast.success("Document deleted successfully");
+  };
+
+  const handleDownload = () => {
+    if (doc.content) {
+      const blob = new Blob([doc.content], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${doc.title}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("File downloaded successfully");
+    }
   };
 
   return (
@@ -90,13 +108,13 @@ export function DocumentCard({ doc, onEdit, onTitleChange, onDelete }: DocumentC
               {doc.content && (
                 <div 
                   className="mt-2 text-sm text-gray-600 line-clamp-3"
-                  dangerouslySetInnerHTML={{ __html: doc.content.split('\n')[0] }}
+                  dangerouslySetInnerHTML={{ __html: doc.content }}
                 />
               )}
             </div>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleDownload}>
               <Download className="mr-2 h-4 w-4" />
               Download
             </Button>
