@@ -1,33 +1,53 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { EventDialog } from "@/components/calendar/EventDialog";
+import { useState } from "react";
+import { format, isTomorrow } from "date-fns";
+import { toast } from "sonner";
+
+interface Event {
+  id: string;
+  title: string;
+  date: Date;
+  company: string;
+}
 
 const Calendar = () => {
-  const upcomingEvents = [
-    {
-      title: "Transfer Pricing Documentation Due",
-      date: "March 31, 2024",
-      company: "Global Corp Ltd",
-    },
-    {
-      title: "Quarterly Tax Review",
-      date: "April 15, 2024",
-      company: "Tech Solutions Inc",
-    },
-    {
-      title: "Annual Compliance Check",
-      date: "April 30, 2024",
-      company: "Innovation Labs",
-    },
-  ];
+  const [events, setEvents] = useState<Event[]>([]);
+  const [date, setDate] = useState<Date>(new Date());
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleAddEvent = (eventData: Omit<Event, "id">) => {
+    const newEvent = {
+      ...eventData,
+      id: Math.random().toString(36).substr(2, 9),
+    };
+    setEvents((prev) => [...prev, newEvent]);
+
+    // Set notification for the day before
+    const notificationDate = new Date(eventData.date);
+    notificationDate.setDate(notificationDate.getDate() - 1);
+    
+    // Check if the event is tomorrow to show an immediate notification
+    if (isTomorrow(eventData.date)) {
+      toast.info(`Reminder: "${eventData.title}" is tomorrow!`);
+    }
+  };
+
+  const handleRemoveEvent = (id: string) => {
+    setEvents((prev) => prev.filter((event) => event.id !== id));
+    toast.success("Event removed successfully");
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Calendar</h1>
-          <Button>
+          <Button onClick={() => setDialogOpen(true)}>
             <span className="mr-2">Add Event</span>
             <CalendarIcon className="h-4 w-4" />
           </Button>
@@ -38,9 +58,9 @@ const Calendar = () => {
             <CardContent className="p-6">
               <h2 className="mb-4 text-xl font-semibold">Upcoming Events</h2>
               <div className="space-y-4">
-                {upcomingEvents.map((event, index) => (
+                {events.map((event) => (
                   <div
-                    key={index}
+                    key={event.id}
                     className="flex items-center justify-between border-b pb-4 last:border-0"
                   >
                     <div className="flex items-center space-x-4">
@@ -51,7 +71,7 @@ const Calendar = () => {
                         <p className="font-medium">{event.title}</p>
                         <div className="flex space-x-4">
                           <p className="text-sm text-gray-500">
-                            {event.date}
+                            {format(event.date, "MMMM dd, yyyy")}
                           </p>
                           <p className="text-sm text-gray-500">
                             {event.company}
@@ -59,28 +79,42 @@ const Calendar = () => {
                         </div>
                       </div>
                     </div>
-                    <Button variant="link" size="sm">
-                      View
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleRemoveEvent(event.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
+                {events.length === 0 && (
+                  <p className="text-center text-gray-500">No upcoming events</p>
+                )}
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-6">
-              <h2 className="mb-4 text-xl font-semibold">Today's Schedule</h2>
-              <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
-                <CalendarIcon className="h-12 w-12 text-gray-400" />
-                <p className="text-gray-500">No events scheduled for today</p>
-                <Button variant="link" className="text-blue-600">
-                  Schedule a meeting
-                </Button>
-              </div>
+              <h2 className="mb-4 text-xl font-semibold">Calendar</h2>
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                className="rounded-md border"
+              />
             </CardContent>
           </Card>
         </div>
+
+        <EventDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onSave={handleAddEvent}
+        />
       </div>
     </DashboardLayout>
   );
