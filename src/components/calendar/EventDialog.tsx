@@ -11,6 +11,7 @@ import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EventDialogProps {
   open: boolean;
@@ -39,42 +40,44 @@ export function EventDialog({ open, onOpenChange, onSave }: EventDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Add New Event</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <label htmlFor="title">Event Title</label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter event title"
-            />
-          </div>
-          <div className="grid gap-2">
-            <label>Date</label>
-            <div className="flex flex-col">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border"
+        <ScrollArea className="flex-1 px-4">
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <label htmlFor="title">Event Title</label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter event title"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label>Date</label>
+              <div className="flex flex-col">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="company">Company</label>
+              <Input
+                id="company"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Enter company name"
               />
             </div>
           </div>
-          <div className="grid gap-2">
-            <label htmlFor="company">Company</label>
-            <Input
-              id="company"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              placeholder="Enter company name"
-            />
-          </div>
-        </div>
-        <div className="flex justify-end">
+        </ScrollArea>
+        <div className="flex justify-end pt-4 border-t">
           <Button onClick={handleSave}>Save Event</Button>
         </div>
       </DialogContent>
