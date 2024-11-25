@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FileText, Download, Share, Edit2, Check, X, Trash2 } from "lucide-react";
+import { FileText, Download, Edit2, Check, X, Trash2 } from "lucide-react";
 import { Document } from "./types";
 import { useState } from "react";
 import {
@@ -117,10 +117,6 @@ export function DocumentCard({ doc, onEdit, onTitleChange, onDelete }: DocumentC
             <Button variant="outline" size="sm" onClick={handleDownload}>
               <Download className="mr-2 h-4 w-4" />
               Download
-            </Button>
-            <Button variant="outline" size="sm">
-              <Share className="mr-2 h-4 w-4" />
-              Share
             </Button>
             <Button variant="outline" size="sm" onClick={() => onEdit(doc)}>
               <Edit2 className="mr-2 h-4 w-4" />

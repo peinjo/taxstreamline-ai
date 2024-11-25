@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Document } from "./types";
 import { RichTextEditor } from "./RichTextEditor";
+import { X } from "lucide-react";
 
 interface EditDocumentDialogProps {
   document: Document | null;
@@ -18,22 +19,25 @@ export function EditDocumentDialog({
   onSave,
   onContentChange,
 }: EditDocumentDialogProps) {
+  if (!document) return null;
+
   return (
     <Dialog open={!!document} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Edit Document</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 p-4">
-          <RichTextEditor content={editedContent} onChange={onContentChange} />
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={onSave}>
+      <DialogContent className="max-w-4xl h-[80vh]">
+        <DialogHeader className="flex flex-row items-center justify-between">
+          <DialogTitle>{document.title}</DialogTitle>
+          <div className="flex items-center gap-2">
+            <Button onClick={onSave} className="bg-blue-600 hover:bg-blue-700 text-white">
               Save Changes
             </Button>
+            <Button variant="outline" onClick={onClose}>
+              <X className="h-4 w-4 mr-2" />
+              Close
+            </Button>
           </div>
+        </DialogHeader>
+        <div className="mt-4 flex-1 overflow-y-auto">
+          <RichTextEditor content={editedContent} onChange={onContentChange} />
         </div>
       </DialogContent>
     </Dialog>
