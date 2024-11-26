@@ -37,6 +37,10 @@ const AIAssistant = () => {
     setIsLoading(true);
 
     try {
+      if (!import.meta.env.VITE_OPENAI_API_KEY) {
+        throw new Error("OpenAI API key is not configured");
+      }
+
       const response = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
@@ -59,9 +63,11 @@ const AIAssistant = () => {
           { role: "assistant", content: assistantMessage },
         ]);
       }
-    } catch (error) {
-      toast.error("Failed to get response from AI. Please try again.");
+    } catch (error: any) {
       console.error("OpenAI API Error:", error);
+      toast.error(
+        `Failed to get response from AI: ${error.message || "Please try again"}`
+      );
     } finally {
       setIsLoading(false);
     }
