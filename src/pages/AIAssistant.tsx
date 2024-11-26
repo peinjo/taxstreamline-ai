@@ -41,7 +41,7 @@ const AIAssistant = () => {
         throw new Error("OpenAI API key is not configured");
       }
 
-      const response = await openai.chat.completions.create({
+      const completion = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           {
@@ -56,7 +56,7 @@ const AIAssistant = () => {
         ],
       });
 
-      const assistantMessage = response.choices[0]?.message?.content;
+      const assistantMessage = completion.choices[0]?.message?.content;
       if (assistantMessage) {
         setMessages((prev) => [
           ...prev,
