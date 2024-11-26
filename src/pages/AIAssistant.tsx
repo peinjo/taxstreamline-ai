@@ -41,8 +41,8 @@ const AIAssistant = () => {
         throw new Error("OpenAI API key is not configured");
       }
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",  // Updated to use the correct model
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
@@ -54,20 +54,35 @@ const AIAssistant = () => {
           })),
           { role: "user", content: userMessage },
         ],
+        temperature: 0.7,
+        max_tokens: 1000,
       });
 
-      const assistantMessage = completion.choices[0]?.message?.content;
+      const assistantMessage = response.choices[0]?.message?.content;
+      
       if (assistantMessage) {
         setMessages((prev) => [
           ...prev,
           { role: "assistant", content: assistantMessage },
         ]);
+      } else {
+        throw new Error("No response from assistant");
       }
     } catch (error: any) {
       console.error("OpenAI API Error:", error);
-      toast.error(
-        `Failed to get response from AI: ${error.message || "Please try again"}`
-      );
+      let errorMessage = "Failed to get response from AI. Please try again.";
+      
+      if (error.response) {
+        console.error("API Response:", {
+          status: error.response.status,
+          data: error.response.data
+        });
+        errorMessage = `API Error: ${error.response.data?.error?.message || error.message}`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
