@@ -72,7 +72,9 @@ const AIAssistant = () => {
       console.error("OpenAI API Error:", error);
       let errorMessage = "Failed to get response from AI. Please try again.";
       
-      if (error.response) {
+      if (error.response?.status === 429) {
+        errorMessage = "API rate limit exceeded or quota reached. Please check your OpenAI account billing status or try again later.";
+      } else if (error.response) {
         console.error("API Response:", {
           status: error.response.status,
           data: error.response.data
