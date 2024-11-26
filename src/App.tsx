@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
@@ -12,6 +13,7 @@ import GlobalReporting from "./pages/GlobalReporting";
 import Calendar from "./pages/Calendar";
 import ComplianceTracker from "./pages/Compliance";
 import AIAssistant from "./pages/AIAssistant";
+import { useAuth } from "./contexts/AuthContext";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -22,28 +24,94 @@ const queryClient = new QueryClient({
   },
 });
 
+// Protected Route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth/login" />;
+  }
+
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth/login" element={<Login />} />
-              <Route path="/auth/signup" element={<Signup />} />
-              <Route path="/transfer-pricing" element={<TransferPricing />} />
-              <Route path="/global-reporting" element={<GlobalReporting />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/compliance" element={<ComplianceTracker />} />
-              <Route path="/ai-assistant" element={<AIAssistant />} />
-              <Route path="/notifications" element={<Index />} />
-              <Route path="/settings" element={<Index />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth/login" element={<Login />} />
+                <Route path="/auth/signup" element={<Signup />} />
+                <Route
+                  path="/transfer-pricing"
+                  element={
+                    <ProtectedRoute>
+                      <TransferPricing />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/global-reporting"
+                  element={
+                    <ProtectedRoute>
+                      <GlobalReporting />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/calendar"
+                  element={
+                    <ProtectedRoute>
+                      <Calendar />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/compliance"
+                  element={
+                    <ProtectedRoute>
+                      <ComplianceTracker />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/ai-assistant"
+                  element={
+                    <ProtectedRoute>
+                      <AIAssistant />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/notifications"
+                  element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </React.StrictMode>
   );
