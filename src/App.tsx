@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
 import TransferPricing from "./pages/TransferPricing";
 import GlobalReporting from "./pages/GlobalReporting";
 import Calendar from "./pages/Calendar";
@@ -30,6 +32,8 @@ const App: React.FC = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/signup" element={<Signup />} />
               <Route path="/transfer-pricing" element={<TransferPricing />} />
               <Route path="/global-reporting" element={<GlobalReporting />} />
               <Route path="/calendar" element={<Calendar />} />
