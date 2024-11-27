@@ -14,6 +14,7 @@ import GlobalReporting from "./pages/GlobalReporting";
 import Calendar from "./pages/Calendar";
 import ComplianceTracker from "./pages/Compliance";
 import AIAssistant from "./pages/AIAssistant";
+import Notifications from "./pages/Notifications";
 import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient({
@@ -143,7 +144,7 @@ const App: React.FC = () => {
                   path="/notifications"
                   element={
                     <ProtectedRoute>
-                      <Dashboard />
+                      <Notifications />
                     </ProtectedRoute>
                   }
                 />
