@@ -15,7 +15,6 @@ import ComplianceTracker from "./pages/Compliance";
 import AIAssistant from "./pages/AIAssistant";
 import { useAuth } from "./contexts/AuthContext";
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -39,6 +38,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Public Route component - redirects to dashboard if user is authenticated
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (user) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
   return (
     <React.StrictMode>
@@ -49,9 +63,41 @@ const App: React.FC = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth/login" element={<Login />} />
-                <Route path="/auth/signup" element={<Signup />} />
+                {/* Public routes */}
+                <Route
+                  path="/"
+                  element={
+                    <PublicRoute>
+                      <Index />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/auth/login"
+                  element={
+                    <PublicRoute>
+                      <Login />
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/auth/signup"
+                  element={
+                    <PublicRoute>
+                      <Signup />
+                    </PublicRoute>
+                  }
+                />
+
+                {/* Protected routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <TransferPricing />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/transfer-pricing"
                   element={
@@ -96,7 +142,7 @@ const App: React.FC = () => {
                   path="/notifications"
                   element={
                     <ProtectedRoute>
-                      <Index />
+                      <TransferPricing />
                     </ProtectedRoute>
                   }
                 />
@@ -104,7 +150,7 @@ const App: React.FC = () => {
                   path="/settings"
                   element={
                     <ProtectedRoute>
-                      <Index />
+                      <TransferPricing />
                     </ProtectedRoute>
                   }
                 />
