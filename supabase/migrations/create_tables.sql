@@ -1,3 +1,9 @@
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS public.calendar_events;
+DROP TABLE IF EXISTS public.deadlines;
+DROP TABLE IF EXISTS public.activities;
+DROP TABLE IF EXISTS public.dashboard_metrics;
+
 -- Create dashboard_metrics table
 CREATE TABLE public.dashboard_metrics (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
