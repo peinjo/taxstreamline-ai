@@ -11,7 +11,9 @@ CREATE TABLE public.dashboard_metrics (
 -- Create activities table
 CREATE TABLE public.activities (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    text TEXT NOT NULL,
+    action TEXT NOT NULL,
+    document_title TEXT NOT NULL,
+    document_type TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
@@ -28,12 +30,12 @@ INSERT INTO public.dashboard_metrics
 (upcoming_deadlines, active_clients, documents_pending, compliance_alerts)
 VALUES (5, 12, 8, 3);
 
-INSERT INTO public.activities (text)
+INSERT INTO public.activities (action, document_title, document_type)
 VALUES 
-('Client tax return submitted for review'),
-('New document uploaded by client ABC Corp'),
-('Deadline reminder sent to XYZ Ltd'),
-('Meeting scheduled with client John Doe');
+('Client tax return submitted for review', 'Tax Return Document', 'PDF'),
+('New document uploaded by client ABC Corp', 'Document Uploaded', 'DOC'),
+('Deadline reminder sent to XYZ Ltd', 'Deadline Reminder', 'EMAIL'),
+('Meeting scheduled with client John Doe', 'Meeting Confirmation', 'CALENDAR');
 
 INSERT INTO public.deadlines (text, date)
 VALUES 
@@ -41,3 +43,18 @@ VALUES
 ('Quarterly Filing - XYZ Ltd', '2024-03-31'),
 ('Annual Review - John Doe LLC', '2024-05-01'),
 ('Document Submission - Smith Co', '2024-03-15');
+
+-- Create calendar_events table
+CREATE TABLE public.calendar_events (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    title TEXT NOT NULL,
+    date TIMESTAMP WITH TIME ZONE NOT NULL,
+    company TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- Insert sample calendar events
+INSERT INTO public.calendar_events (title, date, company)
+VALUES 
+('Quarterly Review', NOW() + INTERVAL '7 days', 'ABC Corp'),
+('Tax Filing', NOW() + INTERVAL '14 days', 'XYZ Ltd');

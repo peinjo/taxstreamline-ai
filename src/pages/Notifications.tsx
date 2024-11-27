@@ -10,15 +10,15 @@ import { format } from "date-fns";
 interface Activity {
   id: number;
   action: string;
-  documentTitle: string;
-  documentType: string;
-  timestamp: string;
+  document_title: string;
+  document_type: string;
+  created_at: string;
 }
 
 interface CalendarEvent {
-  id: string;
+  id: number;
   title: string;
-  date: Date;
+  date: string;
   company: string;
 }
 
@@ -29,7 +29,7 @@ const Notifications = () => {
       const { data, error } = await supabase
         .from("activities")
         .select("*")
-        .order("timestamp", { ascending: false });
+        .order("created_at", { ascending: false });
       
       if (error) throw error;
       return data as Activity[];
@@ -70,10 +70,10 @@ const Notifications = () => {
                       </div>
                       <div>
                         <p className="text-gray-900">
-                          {activity.action} {activity.documentTitle} ({activity.documentType})
+                          {activity.action} {activity.document_title} ({activity.document_type})
                         </p>
                         <p className="text-gray-500 text-xs">
-                          {new Date(activity.timestamp).toLocaleString()}
+                          {new Date(activity.created_at).toLocaleString()}
                         </p>
                       </div>
                     </div>
