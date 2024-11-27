@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import Dashboard from "./pages/Dashboard";
 import TransferPricing from "./pages/TransferPricing";
 import GlobalReporting from "./pages/GlobalReporting";
 import Calendar from "./pages/Calendar";
@@ -94,7 +95,7 @@ const App: React.FC = () => {
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
-                      <TransferPricing />
+                      <Dashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -142,7 +143,7 @@ const App: React.FC = () => {
                   path="/notifications"
                   element={
                     <ProtectedRoute>
-                      <TransferPricing />
+                      <Dashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -150,7 +151,7 @@ const App: React.FC = () => {
                   path="/settings"
                   element={
                     <ProtectedRoute>
-                      <TransferPricing />
+                      <Dashboard />
                     </ProtectedRoute>
                   }
                 />
