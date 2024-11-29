@@ -7,39 +7,81 @@ import { EventDialog } from "@/components/calendar/EventDialog";
 import { useState } from "react";
 import { format, isTomorrow } from "date-fns";
 import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 interface Event {
   id: string;
   title: string;
-  date: Date;
+  date: string;
   company: string;
 }
 
 const Calendar = () => {
-  const [events, setEvents] = useState<Event[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Fetch events
+  const { data: events = [] } = useQuery({
+    queryKey: ["calendar-events"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .select("*")
+        .order("date", { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Add event mutation
+  const addEventMutation = useMutation({
+    mutationFn: async (eventData: Omit<Event, "id">) => {
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .insert([eventData])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
+      toast.success("Event added successfully");
+      
+      // Check if the event is tomorrow to show notification
+      if (isTomorrow(new Date(date))) {
+        toast.info(`Reminder: Event is tomorrow!`);
+      }
+    },
+  });
+
+  // Remove event mutation
+  const removeEventMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("calendar_events")
+        .delete()
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
+      toast.success("Event removed successfully");
+    },
+  });
 
   const handleAddEvent = (eventData: Omit<Event, "id">) => {
-    const newEvent = {
-      ...eventData,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setEvents((prev) => [...prev, newEvent]);
-
-    // Set notification for the day before
-    const notificationDate = new Date(eventData.date);
-    notificationDate.setDate(notificationDate.getDate() - 1);
-    
-    // Check if the event is tomorrow to show an immediate notification
-    if (isTomorrow(eventData.date)) {
-      toast.info(`Reminder: "${eventData.title}" is tomorrow!`);
-    }
+    addEventMutation.mutate(eventData);
+    setDialogOpen(false);
   };
 
   const handleRemoveEvent = (id: string) => {
-    setEvents((prev) => prev.filter((event) => event.id !== id));
-    toast.success("Event removed successfully");
+    removeEventMutation.mutate(id);
   };
 
   return (
@@ -71,7 +113,7 @@ const Calendar = () => {
                         <p className="font-medium">{event.title}</p>
                         <div className="flex space-x-4">
                           <p className="text-sm text-gray-500">
-                            {format(event.date, "MMMM dd, yyyy")}
+                            {format(new Date(event.date), "MMMM dd, yyyy")}
                           </p>
                           <p className="text-sm text-gray-500">
                             {event.company}
