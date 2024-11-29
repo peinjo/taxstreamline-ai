@@ -8,6 +8,7 @@ import {
   Bot,
   Bell,
   Settings,
+  UserRound,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -15,6 +16,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { icon: LayoutDashboard, text: "Dashboard", path: "/" },
+    { icon: UserRound, text: "Personal Info", path: "/auth/personal-info" },
     { icon: FileText, text: "Transfer Pricing", path: "/transfer-pricing" },
     { icon: Globe, text: "Global Reporting", path: "/global-reporting" },
     { icon: Calendar, text: "Calendar", path: "/calendar" },
