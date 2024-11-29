@@ -75,9 +75,8 @@ const Calendar = () => {
     },
   });
 
-  const handleAddEvent = (eventData: Omit<Event, "id">) => {
+  const handleAddEvent = (eventData: { title: string; date: string; company: string }) => {
     addEventMutation.mutate(eventData);
-    setDialogOpen(false);
   };
 
   const handleRemoveEvent = (id: string) => {

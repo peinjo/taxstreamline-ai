@@ -16,7 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface EventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (event: { title: string; date: Date; company: string }) => void;
+  onSave: (event: { title: string; date: string; company: string }) => void;
 }
 
 export function EventDialog({ open, onOpenChange, onSave }: EventDialogProps) {
@@ -30,12 +30,16 @@ export function EventDialog({ open, onOpenChange, onSave }: EventDialogProps) {
       return;
     }
 
-    onSave({ title, date, company });
+    onSave({
+      title,
+      date: date.toISOString(),
+      company,
+    });
+    
     setTitle("");
     setDate(undefined);
     setCompany("");
     onOpenChange(false);
-    toast.success("Event added successfully");
   };
 
   return (
