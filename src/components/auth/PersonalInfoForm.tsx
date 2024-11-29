@@ -42,7 +42,7 @@ const PersonalInfoForm = () => {
       if (error) throw error;
 
       toast.success("Profile information saved successfully!");
-      navigate("/auth/login");
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Failed to save profile information. Please try again.");
     } finally {

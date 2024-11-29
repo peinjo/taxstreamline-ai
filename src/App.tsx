@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
+import PersonalInfoForm from "./components/auth/PersonalInfoForm";
 import Dashboard from "./pages/Dashboard";
 import TransferPricing from "./pages/TransferPricing";
 import GlobalReporting from "./pages/GlobalReporting";
@@ -88,6 +89,14 @@ const App: React.FC = () => {
                     <PublicRoute>
                       <Signup />
                     </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/auth/personal-info"
+                  element={
+                    <ProtectedRoute>
+                      <PersonalInfoForm />
+                    </ProtectedRoute>
                   }
                 />
 
