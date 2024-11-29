@@ -20,8 +20,8 @@ const Signup = () => {
     
     try {
       await signUp(email, password);
-      toast.success("Welcome to TaxStreamline AI! Please check your email to verify your account.");
-      navigate("/auth/login");
+      toast.success("Account created successfully! Please complete your profile.");
+      navigate("/auth/personal-info");
     } catch (error) {
       toast.error("Failed to create account. Please try again.");
     } finally {
