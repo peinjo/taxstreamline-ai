@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,39 @@ const PersonalInfoForm = () => {
     address: "",
   });
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          toast.error("No authenticated user found");
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setFormData({
+            fullName: data.full_name,
+            dateOfBirth: data.date_of_birth,
+            address: data.address,
+          });
+        }
+      } catch (error) {
+        toast.error("Failed to fetch profile information");
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -28,16 +61,38 @@ const PersonalInfoForm = () => {
         return;
       }
 
-      const { error } = await supabase
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
         .from('user_profiles')
-        .insert([
-          {
-            user_id: user.id,
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      let error;
+      
+      if (existingProfile) {
+        // Update existing profile
+        ({ error } = await supabase
+          .from('user_profiles')
+          .update({
             full_name: formData.fullName,
             date_of_birth: formData.dateOfBirth,
             address: formData.address,
-          }
-        ]);
+          })
+          .eq('user_id', user.id));
+      } else {
+        // Insert new profile
+        ({ error } = await supabase
+          .from('user_profiles')
+          .insert([
+            {
+              user_id: user.id,
+              full_name: formData.fullName,
+              date_of_birth: formData.dateOfBirth,
+              address: formData.address,
+            }
+          ]));
+      }
 
       if (error) throw error;
 
@@ -66,7 +121,7 @@ const PersonalInfoForm = () => {
         className="w-full max-w-md"
       >
         <Card className="p-8">
-          <h2 className="text-2xl font-bold text-center mb-6">Complete Your Profile</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">Personal Information</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium mb-1">
@@ -113,7 +168,7 @@ const PersonalInfoForm = () => {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Saving..." : "Complete Profile"}
+              {loading ? "Saving..." : "Save Information"}
             </Button>
           </form>
         </Card>
