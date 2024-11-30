@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   FileText,
@@ -7,12 +7,16 @@ import {
   ShieldCheck,
   Bot,
   Bell,
-  Settings,
+  LogOut,
   UserRound,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const menuItems = [
     { icon: LayoutDashboard, text: "Dashboard", path: "/" },
@@ -26,8 +30,17 @@ const Sidebar = () => {
 
   const bottomMenuItems = [
     { icon: Bell, text: "Notifications", path: "/notifications" },
-    { icon: Settings, text: "Settings", path: "/settings" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logged out successfully");
+      navigate("/auth/login");
+    } catch (error) {
+      toast.error("Failed to log out");
+    }
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -71,6 +84,13 @@ const Sidebar = () => {
               <span>{item.text}</span>
             </Link>
           ))}
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-gray-300 transition-colors hover:bg-sidebar-hover"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Log Out</span>
+          </button>
         </div>
       </nav>
     </div>
