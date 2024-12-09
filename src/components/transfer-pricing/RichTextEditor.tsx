@@ -36,7 +36,12 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     extensions: [
       StarterKit,
       Underline,
-      TextStyle,
+      TextStyle.configure({
+        types: ['textStyle'],
+        defaultOptions: {
+          types: ['paragraph', 'heading']
+        }
+      }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -56,7 +61,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   ];
 
   const setFontSize = (size: string) => {
-    editor.chain().focus().setStyle({ fontSize: size }).run();
+    editor.chain().focus().setStyle({ 'font-size': size }).run();
   };
 
   return (
