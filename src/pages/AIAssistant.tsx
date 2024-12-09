@@ -6,6 +6,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import OpenAI from "openai";
+import { executeAICommand } from "@/utils/aiCommands";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Message {
   role: "assistant" | "user";
@@ -16,11 +18,22 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I'm your AI tax assistant. I can help you with:\n\n- Creating transfer pricing documentation\n- Analyzing tax reports\n- Providing compliance guidance\n- Answering tax-related questions\n\nHow can I assist you today?",
+      content: `Hello! I'm your AI assistant. I can help you with:
+
+- Creating and managing calendar events
+- Handling transfer pricing documentation
+- Managing compliance tasks
+- And more!
+
+Try commands like:
+- "Add a calendar event titled 'Quarterly Review' on March 31, 2024"
+- "Create a new transfer pricing document"
+`,
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -37,49 +50,57 @@ const AIAssistant = () => {
     setIsLoading(true);
 
     try {
-      if (!import.meta.env.VITE_OPENAI_API_KEY) {
-        throw new Error("OpenAI API key is not configured");
-      }
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: "You are a knowledgeable tax assistant. Focus on providing accurate, helpful information about tax-related matters, transfer pricing, compliance, and financial reporting.",
-          },
-          ...messages.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-          { role: "user", content: userMessage },
-        ],
-        temperature: 0.7,
-        max_tokens: 1000,
-      });
-
-      const assistantMessage = response.choices[0]?.message?.content;
+      // First, try to execute the command
+      const commandResult = await executeAICommand(userMessage, queryClient);
       
-      if (assistantMessage) {
+      if (commandResult.success) {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: assistantMessage },
+          { role: "assistant", content: commandResult.message },
         ]);
+        toast.success(commandResult.message);
       } else {
-        throw new Error("No response from assistant");
+        // If command fails, use OpenAI for general response
+        if (!import.meta.env.VITE_OPENAI_API_KEY) {
+          throw new Error("OpenAI API key is not configured");
+        }
+
+        const response = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: "You are a knowledgeable tax assistant. Focus on providing accurate, helpful information about tax-related matters, transfer pricing, compliance, and financial reporting.",
+            },
+            ...messages.map(msg => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+            { role: "user", content: userMessage },
+          ],
+          temperature: 0.7,
+          max_tokens: 1000,
+        });
+
+        const assistantMessage = response.choices[0]?.message?.content;
+        
+        if (assistantMessage) {
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: assistantMessage },
+          ]);
+        } else {
+          throw new Error("No response from assistant");
+        }
       }
     } catch (error: any) {
-      console.error("OpenAI API Error:", error);
-      let errorMessage = "Failed to get response from AI. Please try again.";
+      console.error("AI Assistant Error:", error);
+      let errorMessage = "Failed to process your request. Please try again.";
       
       if (error.response?.status === 429) {
-        errorMessage = "API rate limit exceeded or quota reached. Please check your OpenAI account billing status or try again later.";
+        errorMessage = "API rate limit exceeded. Please try again later.";
       } else if (error.response) {
-        console.error("API Response:", {
-          status: error.response.status,
-          data: error.response.data
-        });
-        errorMessage = `API Error: ${error.response.data?.error?.message || error.message}`;
+        errorMessage = `Error: ${error.response.data?.error?.message || error.message}`;
       } else if (error.message) {
         errorMessage = error.message;
       }
