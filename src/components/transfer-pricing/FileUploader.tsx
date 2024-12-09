@@ -4,6 +4,7 @@ import { Upload } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import mammoth from 'mammoth';
 
 interface FileUploaderProps {
   onFileUpload: (file: File, type: "master" | "local") => void;
@@ -17,28 +18,36 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
     const file = event.target.files?.[0];
     if (file) {
       try {
-        // Check if file is a text file
+        let text: string | undefined;
+
+        // Handle different file types
         if (file.type === 'text/plain') {
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            const text = e.target?.result;
-            if (typeof text === 'string') {
-              const newFile = new File([text], file.name, {
-                type: 'text/plain',
-                lastModified: file.lastModified,
-              });
-              onFileUpload(newFile, uploadType);
-              toast.success("File uploaded successfully");
-            }
-          };
-          reader.readAsText(file);
+          text = await file.text();
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          // Handle .docx files
+          const arrayBuffer = await file.arrayBuffer();
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          text = result.value;
+        } else if (file.type === 'application/msword') {
+          // Handle .doc files
+          toast.error("Legacy .doc files are not supported. Please save as .docx and try again.");
+          return;
         } else {
-          // For other file types, show an error
-          toast.error("Only text files (.txt) are supported at the moment");
+          toast.error("Unsupported file type. Please use .txt or .docx files");
+          return;
+        }
+
+        if (text) {
+          const newFile = new File([text], file.name, {
+            type: 'text/plain',
+            lastModified: file.lastModified,
+          });
+          onFileUpload(newFile, uploadType);
+          toast.success("File uploaded successfully");
         }
       } catch (error) {
-        toast.error("Error reading file. Please ensure it's a valid text document.");
         console.error("Error reading file:", error);
+        toast.error("Error reading file. Please ensure it's a valid document.");
       }
 
       if (fileInputRef.current) {
@@ -54,7 +63,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
-        accept=".txt"
+        accept=".txt,.docx"
       />
       <Select value={uploadType} onValueChange={(value: "master" | "local") => setUploadType(value)}>
         <SelectTrigger className="w-32">
