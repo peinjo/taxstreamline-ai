@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { defaultTemplate } from "@/components/transfer-pricing/constants";
+import { Document } from "@/components/transfer-pricing/types";
 
 interface CommandResult {
   success: boolean;
@@ -12,7 +13,6 @@ export const executeAICommand = async (
   command: string,
   queryClient: QueryClient
 ): Promise<CommandResult> => {
-  // Parse the command to identify the target component and action
   const commandLower = command.toLowerCase();
 
   // Calendar commands
@@ -58,9 +58,10 @@ export const executeAICommand = async (
     }
   }
 
-  // Transfer Pricing commands
-  if (commandLower.includes("transfer pricing") || commandLower.includes("documentation")) {
-    if (commandLower.includes("create document") || commandLower.includes("new document")) {
+  // Transfer Pricing Document Operations
+  if (commandLower.includes("transfer pricing") || commandLower.includes("document")) {
+    // Create new document
+    if (commandLower.includes("create") || commandLower.includes("new")) {
       try {
         const newDocument = {
           title: "New Document",
@@ -85,11 +86,78 @@ export const executeAICommand = async (
         };
       }
     }
+
+    // Read document content
+    if (commandLower.includes("read") || commandLower.includes("show")) {
+      const titleMatch = command.match(/document (?:titled |called |named )"([^"]+)"/);
+      if (titleMatch) {
+        const title = titleMatch[1];
+        try {
+          // This is a mock implementation. In a real app, you would fetch from your database
+          const mockDocument: Document = {
+            id: 1,
+            title: title,
+            type: "local",
+            modified: new Date().toLocaleDateString(),
+            content: "This is the content of " + title,
+          };
+
+          return {
+            success: true,
+            message: `Here's the content of document "${title}"`,
+            data: mockDocument,
+          };
+        } catch (error) {
+          console.error("Error reading document:", error);
+          return {
+            success: false,
+            message: `Failed to read document "${title}"`,
+          };
+        }
+      }
+    }
+
+    // Edit document content
+    if (commandLower.includes("edit") || commandLower.includes("update")) {
+      const titleMatch = command.match(/document (?:titled |called |named )"([^"]+)"/);
+      const contentMatch = command.match(/content to "([^"]+)"/);
+      
+      if (titleMatch && contentMatch) {
+        const title = titleMatch[1];
+        const newContent = contentMatch[1];
+        
+        try {
+          // This is a mock implementation. In a real app, you would update your database
+          const updatedDocument: Document = {
+            id: 1,
+            title: title,
+            type: "local",
+            modified: new Date().toLocaleDateString(),
+            content: newContent,
+          };
+
+          return {
+            success: true,
+            message: `Document "${title}" has been updated.`,
+            data: updatedDocument,
+          };
+        } catch (error) {
+          console.error("Error updating document:", error);
+          return {
+            success: false,
+            message: `Failed to update document "${title}"`,
+          };
+        }
+      }
+    }
   }
 
   // Default response for unrecognized commands
   return {
     success: false,
-    message: "I'm sorry, I don't understand that command. Please try something else.",
+    message: "I'm sorry, I don't understand that command. For transfer pricing documents, you can try:\n" +
+            '- "Create a new document"\n' +
+            '- "Read document titled "Example Doc""\n' +
+            '- "Edit document titled "Example Doc" with content to "New content here""',
   };
 };
