@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import TextStyle from '@tiptap/extension-text-style';
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -35,6 +36,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     extensions: [
       StarterKit,
       Underline,
+      TextStyle,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -53,13 +55,17 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
     '12px', '14px', '16px', '18px', '20px', '24px', '30px', '36px'
   ];
 
+  const setFontSize = (size: string) => {
+    editor.chain().focus().setStyle({ fontSize: size }).run();
+  };
+
   return (
     <div className="border rounded-md">
       <div className="border-b p-2 space-y-2">
         <div className="flex items-center gap-2 pb-2 border-b">
           <Select
             value={editor.getAttributes('textStyle').fontSize}
-            onValueChange={(value) => editor.chain().focus().setFontSize(value).run()}
+            onValueChange={setFontSize}
           >
             <SelectTrigger className="w-24">
               <SelectValue placeholder="Size" />
