@@ -17,23 +17,27 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
     const file = event.target.files?.[0];
     if (file) {
       try {
-        // Read the file as text
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const text = e.target?.result;
-          if (typeof text === 'string') {
-            // Create a new file with the text content
-            const newFile = new File([text], file.name, {
-              type: file.type,
-              lastModified: file.lastModified,
-            });
-            onFileUpload(newFile, uploadType);
-            toast.success("File uploaded successfully");
-          }
-        };
-        reader.readAsText(file);
+        // Check if file is a text file
+        if (file.type === 'text/plain') {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const text = e.target?.result;
+            if (typeof text === 'string') {
+              const newFile = new File([text], file.name, {
+                type: 'text/plain',
+                lastModified: file.lastModified,
+              });
+              onFileUpload(newFile, uploadType);
+              toast.success("File uploaded successfully");
+            }
+          };
+          reader.readAsText(file);
+        } else {
+          // For other file types, show an error
+          toast.error("Only text files (.txt) are supported at the moment");
+        }
       } catch (error) {
-        toast.error("Error reading file");
+        toast.error("Error reading file. Please ensure it's a valid text document.");
         console.error("Error reading file:", error);
       }
 
@@ -50,7 +54,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
-        accept=".txt,.doc,.docx,.pdf"
+        accept=".txt"
       />
       <Select value={uploadType} onValueChange={(value: "master" | "local") => setUploadType(value)}>
         <SelectTrigger className="w-32">
