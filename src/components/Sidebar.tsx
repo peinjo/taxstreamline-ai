@@ -36,7 +36,7 @@ const Sidebar = () => {
     try {
       await signOut();
       toast.success("Logged out successfully");
-      navigate("/"); // Changed from "/auth/login" to "/"
+      navigate("/");
     } catch (error) {
       toast.error("Failed to log out");
     }
@@ -47,7 +47,11 @@ const Sidebar = () => {
   return (
     <div className="fixed left-0 top-0 h-screen w-64 bg-sidebar p-4 text-white">
       <div className="mb-8 flex items-center gap-2 px-2">
-        <img src="/lovable-uploads/14b7660e-0879-41c1-a1d8-b3327eeae3e4.png" alt="Logo" className="h-8 w-8" />
+        <img
+          src="/lovable-uploads/235a3f0b-697d-47c6-8c81-c2b3066c1717.png"
+          alt="Phester Consult Logo"
+          className="h-8 w-8"
+        />
         <span className="text-xl font-bold">Phester Consult</span>
       </div>
 
