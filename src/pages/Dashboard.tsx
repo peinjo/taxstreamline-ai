@@ -5,6 +5,7 @@ import { Calendar, Users, FileText, AlertOctagon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -53,20 +54,6 @@ const Dashboard = () => {
     },
   ];
 
-  const recentActivities = [
-    "Local File updated for Client A",
-    "New benchmark analysis completed",
-    "Transfer pricing documentation reviewed",
-    "Compliance check completed for Client B",
-  ];
-
-  const upcomingDeadlines = [
-    { task: "Master File submission", date: "March 31" },
-    { task: "Local File preparation", date: "April 15" },
-    { task: "Quarterly compliance review", date: "April 30" },
-    { task: "Annual tax filing", date: "May 15" },
-  ];
-
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -97,43 +84,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="mb-4 text-lg font-medium">Recent Activity</h3>
-              <div className="space-y-4">
-                {recentActivities.map((activity, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                  >
-                    <div className="h-2 w-2 rounded-full bg-blue-500" />
-                    <span>{activity}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="mb-4 text-lg font-medium">Upcoming Deadlines</h3>
-              <div className="space-y-4">
-                {upcomingDeadlines.map((deadline, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
-                  >
-                    <Calendar className="h-4 w-4 text-red-500" />
-                    <span>
-                      {deadline.task} - {deadline.date}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <TeamWorkspace />
       </div>
     </DashboardLayout>
   );
