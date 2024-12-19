@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
+import { TaskManagement } from "@/components/tasks/TaskManagement";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -84,7 +85,10 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <TeamWorkspace />
+        <div className="grid gap-8 md:grid-cols-2">
+          <TaskManagement />
+          <TeamWorkspace />
+        </div>
       </div>
     </DashboardLayout>
   );
