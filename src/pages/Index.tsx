@@ -16,7 +16,7 @@ const Index = () => {
           className="text-center mb-16"
         >
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Welcome to TaxStreamline AI
+            Welcome to Phester Consult Workspace
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             Your intelligent tax compliance and management solution. Streamline your tax processes, 
