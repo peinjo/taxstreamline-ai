@@ -52,8 +52,8 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      toast.error('Failed to create team');
       console.error('Error creating team:', error);
+      toast.error('Failed to create team');
     }
   };
 

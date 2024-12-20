@@ -18,7 +18,8 @@ export function TeamWorkspace() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('teams')
-        .select('*');
+        .select('*, team_members!inner(*)')
+        .eq('team_members.user_id', user?.id);
       
       if (error) {
         toast.error('Failed to load teams');
