@@ -6,7 +6,7 @@ import { Team } from '@/types/team';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-export function TeamDetails() {
+const TeamDetails = () => {
   const { teamId } = useParams();
 
   const { data: team, isLoading } = useQuery({
@@ -49,4 +49,6 @@ export function TeamDetails() {
       </Card>
     </div>
   );
-}
+};
+
+export default TeamDetails;
