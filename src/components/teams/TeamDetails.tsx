@@ -9,7 +9,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
-export default function TeamDetails() {
+const TeamDetails = () => {
   const { teamId } = useParams();
   const navigate = useNavigate();
 
@@ -73,4 +73,6 @@ export default function TeamDetails() {
       </div>
     </DashboardLayout>
   );
-}
+};
+
+export default TeamDetails;
