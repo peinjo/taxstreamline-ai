@@ -5,19 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import Index from "./pages/Index";
-import Login from "./pages/auth/Login";
-import Signup from "./pages/auth/Signup";
-import PersonalInfoForm from "./components/auth/PersonalInfoForm";
-import Dashboard from "./pages/Dashboard";
-import TransferPricing from "./pages/TransferPricing";
-import GlobalReporting from "./pages/GlobalReporting";
-import Calendar from "./pages/Calendar";
-import ComplianceTracker from "./pages/Compliance";
-import AIAssistant from "./pages/AIAssistant";
-import Notifications from "./pages/Notifications";
-import TaxWebApp from "./pages/TaxWebApp";
 import { useAuth } from "./contexts/AuthContext";
+import { routes } from "./config/routes";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,113 +56,19 @@ const App: React.FC = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                {/* Public routes */}
-                <Route
-                  path="/"
-                  element={
-                    <PublicRoute>
-                      <Index />
-                    </PublicRoute>
-                  }
-                />
-                <Route
-                  path="/auth/login"
-                  element={
-                    <PublicRoute>
-                      <Login />
-                    </PublicRoute>
-                  }
-                />
-                <Route
-                  path="/auth/signup"
-                  element={
-                    <PublicRoute>
-                      <Signup />
-                    </PublicRoute>
-                  }
-                />
-                <Route
-                  path="/auth/personal-info"
-                  element={
-                    <ProtectedRoute>
-                      <PersonalInfoForm />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Protected routes */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tax-web-app"
-                  element={
-                    <ProtectedRoute>
-                      <TaxWebApp />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/transfer-pricing"
-                  element={
-                    <ProtectedRoute>
-                      <TransferPricing />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/global-reporting"
-                  element={
-                    <ProtectedRoute>
-                      <GlobalReporting />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/calendar"
-                  element={
-                    <ProtectedRoute>
-                      <Calendar />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/compliance"
-                  element={
-                    <ProtectedRoute>
-                      <ComplianceTracker />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/ai-assistant"
-                  element={
-                    <ProtectedRoute>
-                      <AIAssistant />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/notifications"
-                  element={
-                    <ProtectedRoute>
-                      <Notifications />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                {routes.map((route) => (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={
+                      route.isProtected ? (
+                        <ProtectedRoute>{route.element}</ProtectedRoute>
+                      ) : (
+                        <PublicRoute>{route.element}</PublicRoute>
+                      )
+                    }
+                  />
+                ))}
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
