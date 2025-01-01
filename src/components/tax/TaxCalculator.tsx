@@ -9,14 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const TAX_TYPES = [
-  { id: "cit", name: "Corporate Income Tax", rate: 0.30 },
-  { id: "vat", name: "VAT", rate: 0.16 },
-  { id: "paye", name: "PAYE", rate: 0.25 },
-  { id: "cgt", name: "Capital Gain Tax", rate: 0.15 },
-  { id: "wht", name: "Withholding Tax", rate: 0.20 },
-];
+import { calculateTax, TAX_TYPES } from "@/utils/taxCalculations";
 
 const TaxCalculator = () => {
   const [income, setIncome] = useState<string>("");
@@ -24,10 +17,14 @@ const TaxCalculator = () => {
   const [calculatedTax, setCalculatedTax] = useState<number | null>(null);
 
   const handleCalculate = () => {
-    const selectedTax = TAX_TYPES.find((tax) => tax.id === selectedTaxType);
-    if (selectedTax && income) {
-      const taxAmount = parseFloat(income) * selectedTax.rate;
-      setCalculatedTax(taxAmount);
+    if (selectedTaxType && income) {
+      try {
+        const taxAmount = calculateTax(parseFloat(income), selectedTaxType);
+        setCalculatedTax(taxAmount);
+      } catch (error) {
+        console.error("Error calculating tax:", error);
+        // TODO: Add error handling with toast notifications
+      }
     }
   };
 
