@@ -16,6 +16,7 @@ import Calendar from "./pages/Calendar";
 import ComplianceTracker from "./pages/Compliance";
 import AIAssistant from "./pages/AIAssistant";
 import Notifications from "./pages/Notifications";
+import TaxWebApp from "./pages/TaxWebApp";
 import { useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient({
@@ -106,6 +107,14 @@ const App: React.FC = () => {
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tax-web-app"
+                  element={
+                    <ProtectedRoute>
+                      <TaxWebApp />
                     </ProtectedRoute>
                   }
                 />
