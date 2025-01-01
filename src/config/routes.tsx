@@ -11,6 +11,7 @@ import ComplianceTracker from "@/pages/Compliance";
 import AIAssistant from "@/pages/AIAssistant";
 import Notifications from "@/pages/Notifications";
 import TaxWebApp from "@/pages/TaxWebApp";
+import TaxDashboard from "@/pages/TaxDashboard";
 
 interface RouteConfig {
   path: string;
@@ -50,6 +51,11 @@ export const routes: RouteConfig[] = [
   {
     path: "/tax-web-app",
     element: <TaxWebApp />,
+    isProtected: true,
+  },
+  {
+    path: "/tax-dashboard",
+    element: <TaxDashboard />,
     isProtected: true,
   },
   {
