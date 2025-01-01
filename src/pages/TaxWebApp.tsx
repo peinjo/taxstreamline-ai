@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import TaxCalculator from "@/components/tax/TaxCalculator";
 
 const TaxWebApp = () => {
   return (
@@ -9,15 +9,11 @@ const TaxWebApp = () => {
         <div>
           <h1 className="text-2xl font-semibold">Tax Web Application</h1>
           <p className="text-muted-foreground">
-            Manage your tax calculations and submissions
+            Calculate different types of taxes based on your income
           </p>
         </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <p>Tax Web Application content will be implemented here.</p>
-          </CardContent>
-        </Card>
+        <TaxCalculator />
       </div>
     </DashboardLayout>
   );
