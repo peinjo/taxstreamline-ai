@@ -1,38 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { calculateTax, TAX_TYPES } from "@/utils/taxCalculations";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const TaxCalculator = () => {
   const [income, setIncome] = useState<string>("");
-  const [selectedTaxType, setSelectedTaxType] = useState<string>("");
   const [calculatedTax, setCalculatedTax] = useState<number | null>(null);
+  const { taxType } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const handleCalculate = () => {
-    if (selectedTaxType && income) {
-      try {
-        const taxAmount = calculateTax(parseFloat(income), selectedTaxType);
-        setCalculatedTax(taxAmount);
-      } catch (error) {
-        console.error("Error calculating tax:", error);
-        // TODO: Add error handling with toast notifications
-      }
+  useEffect(() => {
+    const selectedTaxType = TAX_TYPES.find((tax) => tax.id === taxType);
+    if (!selectedTaxType) {
+      navigate("/tax-web-app");
+    }
+  }, [taxType, navigate]);
+
+  const selectedTaxType = TAX_TYPES.find((tax) => tax.id === taxType);
+
+  const handleCalculate = async () => {
+    if (!selectedTaxType || !income || !user) return;
+
+    try {
+      const taxAmount = calculateTax(parseFloat(income), selectedTaxType.id);
+      setCalculatedTax(taxAmount);
+
+      // Store calculation in database
+      const { error } = await supabase.from("tax_calculations").insert({
+        tax_type: selectedTaxType.id,
+        income: parseFloat(income),
+        tax_amount: taxAmount,
+        user_id: user.id,
+      });
+
+      if (error) throw error;
+      toast.success("Tax calculation saved successfully");
+    } catch (error) {
+      console.error("Error calculating tax:", error);
+      toast.error("Failed to save tax calculation");
     }
   };
+
+  if (!selectedTaxType) return null;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Tax Calculator
+          {selectedTaxType.name} Calculator
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -50,26 +71,10 @@ const TaxCalculator = () => {
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Tax Type</label>
-          <Select value={selectedTaxType} onValueChange={setSelectedTaxType}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select tax type" />
-            </SelectTrigger>
-            <SelectContent>
-              {TAX_TYPES.map((tax) => (
-                <SelectItem key={tax.id} value={tax.id}>
-                  {tax.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <Button
           onClick={handleCalculate}
           className="w-full"
-          disabled={!income || !selectedTaxType}
+          disabled={!income}
         >
           Calculate Tax
         </Button>
@@ -78,7 +83,7 @@ const TaxCalculator = () => {
           <div className="mt-6 p-4 bg-primary/10 rounded-lg">
             <h3 className="text-lg font-semibold mb-2">Calculated Tax:</h3>
             <p className="text-2xl font-bold text-primary">
-              ${calculatedTax.toFixed(2)}
+              ₦{calculatedTax.toLocaleString()}
             </p>
           </div>
         )}

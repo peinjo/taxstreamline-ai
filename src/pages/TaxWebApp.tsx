@@ -1,6 +1,8 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { TaxDashboard } from "@/components/tax/TaxDashboard";
 import TaxCalculator from "@/components/tax/TaxCalculator";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 const TaxWebApp = () => {
   return (
@@ -9,11 +11,15 @@ const TaxWebApp = () => {
         <div>
           <h1 className="text-2xl font-semibold">Tax Web Application</h1>
           <p className="text-muted-foreground">
-            Calculate different types of taxes based on your income
+            Manage your tax calculations and documents
           </p>
         </div>
 
-        <TaxCalculator />
+        <Routes>
+          <Route index element={<TaxDashboard />} />
+          <Route path="calculator/:taxType" element={<TaxCalculator />} />
+          <Route path="*" element={<Navigate to="/tax-web-app" replace />} />
+        </Routes>
       </div>
     </DashboardLayout>
   );

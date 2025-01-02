@@ -271,6 +271,63 @@ export type Database = {
           },
         ]
       }
+      tax_calculations: {
+        Row: {
+          created_at: string
+          id: number
+          income: number
+          tax_amount: number
+          tax_type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          income: number
+          tax_amount: number
+          tax_type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          income?: number
+          tax_amount?: number
+          tax_type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tax_documents: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_path: string
+          filename: string
+          id: number
+          size: number
+          user_id: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_path: string
+          filename: string
+          id?: number
+          size: number
+          user_id?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_path?: string
+          filename?: string
+          id?: number
+          size?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           id: number
