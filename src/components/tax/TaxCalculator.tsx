@@ -23,7 +23,6 @@ const TaxCalculator = () => {
         setCalculatedTax(taxAmount);
       } catch (error) {
         console.error("Error calculating tax:", error);
-        // TODO: Add error handling with toast notifications
       }
     }
   };

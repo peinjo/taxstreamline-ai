@@ -5,7 +5,7 @@ import TaxCalculator from "@/components/tax/TaxCalculator";
 const TaxWebApp = () => {
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="container mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold">Tax Web Application</h1>
           <p className="text-muted-foreground">

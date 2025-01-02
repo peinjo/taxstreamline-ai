@@ -19,7 +19,5 @@ export const calculateTax = (income: number, taxTypeId: string): number => {
     throw new Error("Invalid tax type");
   }
 
-  // Placeholder logic - will be replaced with actual Nigerian tax calculations
-  // TODO: Integrate with backend API for more accurate calculations
   return income * taxType.rate;
 };
