@@ -38,13 +38,13 @@ export function DocumentList() {
       if (error) throw error;
 
       const url = window.URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = document.filename;
-      document.body.appendChild(a);
-      a.click();
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.filename;
+      window.document.body.appendChild(link);
+      link.click();
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      window.document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading file:', error);
       toast.error('Failed to download file');
