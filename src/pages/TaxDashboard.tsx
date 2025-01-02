@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { TaxCalculation } from "@/integrations/supabase/types/tax";
 
 const TaxDashboard = () => {
   const { data: recentCalculations, isLoading } = useQuery({
@@ -21,7 +22,7 @@ const TaxDashboard = () => {
         throw error;
       }
 
-      return data;
+      return data as TaxCalculation[];
     },
   });
 
@@ -79,7 +80,7 @@ const TaxDashboard = () => {
             <p>Loading recent calculations...</p>
           ) : recentCalculations?.length ? (
             <div className="space-y-4">
-              {recentCalculations.map((calc: any) => (
+              {recentCalculations.map((calc) => (
                 <div
                   key={calc.id}
                   className="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
