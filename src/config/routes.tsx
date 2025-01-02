@@ -53,6 +53,11 @@ export const routes: RouteConfig[] = [
     isProtected: true,
   },
   {
+    path: "/tax-web-app/calculator/:taxType",
+    element: <TaxWebApp />,
+    isProtected: true,
+  },
+  {
     path: "/transfer-pricing",
     element: <TransferPricing />,
     isProtected: true,
