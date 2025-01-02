@@ -48,33 +48,31 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App: React.FC = () => {
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {routes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={
-                      route.isProtected ? (
-                        <ProtectedRoute>{route.element}</ProtectedRoute>
-                      ) : (
-                        <PublicRoute>{route.element}</PublicRoute>
-                      )
-                    }
-                  />
-                ))}
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {routes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={
+                    route.isProtected ? (
+                      <ProtectedRoute>{route.element}</ProtectedRoute>
+                    ) : (
+                      <PublicRoute>{route.element}</PublicRoute>
+                    )
+                  }
+                />
+              ))}
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 
