@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Calculator, Upload, History } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import type { TaxCalculation } from "@/integrations/supabase/types/tax";
+import { DocumentUpload } from "@/components/tax/DocumentUpload";
+import { DocumentList } from "@/components/tax/DocumentList";
 
 const TaxDashboard = () => {
   const { data: recentCalculations, isLoading } = useQuery({
@@ -22,7 +23,7 @@ const TaxDashboard = () => {
         throw error;
       }
 
-      return data as TaxCalculation[];
+      return data;
     },
   });
 
@@ -52,28 +53,26 @@ const TaxDashboard = () => {
         ))}
       </div>
 
-      {/* Document Upload Section */}
+      {/* Document Management Section */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Upload Tax Documents
-          </CardTitle>
+          <CardTitle>Tax Documents</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Button variant="outline" className="w-full">
-            <Upload className="mr-2 h-4 w-4" /> Upload Documents
-          </Button>
+        <CardContent className="space-y-4">
+          <DocumentUpload onUploadSuccess={() => {
+            const documentList = document.querySelector('[data-testid="document-list"]');
+            if (documentList instanceof HTMLElement) {
+              documentList.click();
+            }
+          }} />
+          <DocumentList />
         </CardContent>
       </Card>
 
       {/* Recent Calculations History */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            Recent Calculations
-          </CardTitle>
+          <CardTitle>Recent Calculations</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
