@@ -19,12 +19,19 @@ export function DocumentList() {
   const { data: documents, isLoading, refetch } = useQuery({
     queryKey: ['taxDocuments'],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
       const { data, error } = await supabase
         .from('tax_documents')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching documents:', error);
+        throw error;
+      }
       return data as TaxDocument[];
     },
   });
