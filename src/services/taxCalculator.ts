@@ -18,6 +18,10 @@ export const saveTaxCalculation = async (
   inputData: Record<string, any>,
   calculationDetails: Record<string, any>
 ) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error("User must be authenticated to save tax calculations");
+
   const { data, error } = await supabase.from("tax_calculations").insert([
     {
       tax_type: taxType,
@@ -25,6 +29,7 @@ export const saveTaxCalculation = async (
       tax_amount: taxAmount,
       input_data: inputData,
       calculation_details: calculationDetails,
+      user_id: user.id
     },
   ]);
 
