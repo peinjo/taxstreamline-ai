@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, startTransition, Suspense } from "react";
 import { toast } from "sonner";
 import { Document, Activity } from "@/components/transfer-pricing/types";
 import { defaultTemplate } from "@/components/transfer-pricing/constants";
@@ -10,6 +10,27 @@ import { EditDocumentDialog } from "@/components/transfer-pricing/EditDocumentDi
 import { FileUploader } from "@/components/transfer-pricing/FileUploader";
 import { ActivityLog } from "@/components/transfer-pricing/ActivityLog";
 import { DocumentList } from "@/components/transfer-pricing/DocumentList";
+import { Loader2 } from "lucide-react";
+import { ErrorBoundary } from "react-error-boundary";
+
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
+
+const ErrorFallback = ({ error, resetErrorBoundary }) => (
+  <div className="p-4 rounded-md bg-destructive/10 text-destructive">
+    <h2 className="font-semibold mb-2">Something went wrong:</h2>
+    <p className="mb-4">{error.message}</p>
+    <button
+      onClick={resetErrorBoundary}
+      className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+    >
+      Try again
+    </button>
+  </div>
+);
 
 const TransferPricing = () => {
   const [activeTab, setActiveTab] = useState<"master" | "local">("master");
@@ -26,96 +47,110 @@ const TransferPricing = () => {
   const [editedContent, setEditedContent] = useState("");
 
   const addActivity = (action: string, documentTitle: string, documentType: "master" | "local") => {
-    const newActivity: Activity = {
-      id: activities.length + 1,
-      action,
-      documentTitle,
-      documentType,
-      timestamp: new Date().toLocaleString(),
-    };
-    setActivities([newActivity, ...activities]);
+    startTransition(() => {
+      const newActivity: Activity = {
+        id: activities.length + 1,
+        action,
+        documentTitle,
+        documentType,
+        timestamp: new Date().toLocaleString(),
+      };
+      setActivities([newActivity, ...activities]);
+    });
   };
 
   const handleFileUpload = async (file: File, type: "master" | "local") => {
     try {
       const content = await file.text();
-      const newDocument: Document = {
-        id: documents.length + 1,
-        title: file.name,
-        modified: new Date().toLocaleDateString(),
-        type,
-        content
-      };
+      startTransition(() => {
+        const newDocument: Document = {
+          id: documents.length + 1,
+          title: file.name,
+          modified: new Date().toLocaleDateString(),
+          type,
+          content
+        };
 
-      setDocuments([...documents, newDocument]);
-      addActivity("Uploaded", file.name, type);
-      toast.success("File uploaded successfully");
+        setDocuments([...documents, newDocument]);
+        addActivity("Uploaded", file.name, type);
+        toast.success("File uploaded successfully");
+      });
     } catch (error) {
       toast.error("Error reading file");
     }
   };
 
   const createNewDocument = () => {
-    const newDocument: Document = {
-      id: documents.length + 1,
-      title: `Local File ${documents.filter(doc => doc.type === "local").length + 1}`,
-      modified: new Date().toLocaleDateString(),
-      type: "local",
-      content: defaultTemplate
-    };
+    startTransition(() => {
+      const newDocument: Document = {
+        id: documents.length + 1,
+        title: `Local File ${documents.filter(doc => doc.type === "local").length + 1}`,
+        modified: new Date().toLocaleDateString(),
+        type: "local",
+        content: defaultTemplate
+      };
 
-    setDocuments([...documents, newDocument]);
-    setIsNewDocumentDialogOpen(false);
-    addActivity("Created", newDocument.title, newDocument.type);
-    toast.success("New document created successfully with default template");
+      setDocuments([...documents, newDocument]);
+      setIsNewDocumentDialogOpen(false);
+      addActivity("Created", newDocument.title, newDocument.type);
+      toast.success("New document created successfully with default template");
+    });
   };
 
   const handleEditDocument = (document: Document) => {
-    setEditingDocument(document);
-    setEditedContent(document.content || "");
+    startTransition(() => {
+      setEditingDocument(document);
+      setEditedContent(document.content || "");
+    });
   };
 
   const handleTitleChange = (id: number, newTitle: string) => {
-    const updatedDocuments = documents.map(doc => {
-      if (doc.id === id) {
-        const updatedDoc = { ...doc, title: newTitle, modified: new Date().toLocaleDateString() };
-        addActivity("Renamed", newTitle, doc.type);
-        return updatedDoc;
-      }
-      return doc;
+    startTransition(() => {
+      const updatedDocuments = documents.map(doc => {
+        if (doc.id === id) {
+          const updatedDoc = { ...doc, title: newTitle, modified: new Date().toLocaleDateString() };
+          addActivity("Renamed", newTitle, doc.type);
+          return updatedDoc;
+        }
+        return doc;
+      });
+      setDocuments(updatedDocuments);
+      toast.success("Document title updated successfully");
     });
-    setDocuments(updatedDocuments);
-    toast.success("Document title updated successfully");
   };
 
   const handleDeleteDocument = (id: number) => {
-    const documentToDelete = documents.find(doc => doc.id === id);
-    if (documentToDelete) {
-      setDocuments(documents.filter(doc => doc.id !== id));
-      addActivity("Deleted", documentToDelete.title, documentToDelete.type);
-      toast.success("Document deleted successfully");
-    }
+    startTransition(() => {
+      const documentToDelete = documents.find(doc => doc.id === id);
+      if (documentToDelete) {
+        setDocuments(documents.filter(doc => doc.id !== id));
+        addActivity("Deleted", documentToDelete.title, documentToDelete.type);
+        toast.success("Document deleted successfully");
+      }
+    });
   };
 
   const saveEditedDocument = () => {
     if (!editingDocument) return;
 
-    const updatedDocuments = documents.map(doc => {
-      if (doc.id === editingDocument.id) {
-        const updatedDoc = {
-          ...doc,
-          content: editedContent,
-          modified: new Date().toLocaleDateString()
-        };
-        addActivity("Edited", doc.title, doc.type);
-        return updatedDoc;
-      }
-      return doc;
-    });
+    startTransition(() => {
+      const updatedDocuments = documents.map(doc => {
+        if (doc.id === editingDocument.id) {
+          const updatedDoc = {
+            ...doc,
+            content: editedContent,
+            modified: new Date().toLocaleDateString()
+          };
+          addActivity("Edited", doc.title, doc.type);
+          return updatedDoc;
+        }
+        return doc;
+      });
 
-    setDocuments(updatedDocuments);
-    setEditingDocument(null);
-    toast.success("Document updated successfully");
+      setDocuments(updatedDocuments);
+      setEditingDocument(null);
+      toast.success("Document updated successfully");
+    });
   };
 
   return (
@@ -158,25 +193,29 @@ const TransferPricing = () => {
           <div className="flex space-x-4 border-b">
             <button 
               className={`px-4 py-2 ${activeTab === "master" ? "border-b-2 border-blue-600 text-blue-600 font-medium" : "text-gray-500 hover:text-gray-700"}`}
-              onClick={() => setActiveTab("master")}
+              onClick={() => startTransition(() => setActiveTab("master"))}
             >
               Master File
             </button>
             <button 
               className={`px-4 py-2 ${activeTab === "local" ? "border-b-2 border-blue-600 text-blue-600 font-medium" : "text-gray-500 hover:text-gray-700"}`}
-              onClick={() => setActiveTab("local")}
+              onClick={() => startTransition(() => setActiveTab("local"))}
             >
               Local File
             </button>
           </div>
 
-          <DocumentList 
-            documents={documents}
-            activeTab={activeTab}
-            onEdit={handleEditDocument}
-            onTitleChange={handleTitleChange}
-            onDelete={handleDeleteDocument}
-          />
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Suspense fallback={<LoadingSpinner />}>
+              <DocumentList 
+                documents={documents}
+                activeTab={activeTab}
+                onEdit={handleEditDocument}
+                onTitleChange={handleTitleChange}
+                onDelete={handleDeleteDocument}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </div>
 
         <EditDocumentDialog
@@ -187,7 +226,11 @@ const TransferPricing = () => {
           onContentChange={setEditedContent}
         />
 
-        <ActivityLog activities={activities} />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <Suspense fallback={<LoadingSpinner />}>
+            <ActivityLog activities={activities} />
+          </Suspense>
+        </ErrorBoundary>
       </div>
     </DashboardLayout>
   );
