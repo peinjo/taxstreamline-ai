@@ -38,13 +38,13 @@ export const routes: RouteConfig[] = [
   
   // Protected routes
   {
-    path: "/auth/personal-info",
-    element: <PersonalInfoForm />,
+    path: "/dashboard",
+    element: <Dashboard />,
     isProtected: true,
   },
   {
-    path: "/dashboard",
-    element: <Dashboard />,
+    path: "/auth/personal-info",
+    element: <PersonalInfoForm />,
     isProtected: true,
   },
   {
@@ -80,11 +80,6 @@ export const routes: RouteConfig[] = [
   {
     path: "/notifications",
     element: <Notifications />,
-    isProtected: true,
-  },
-  {
-    path: "/settings",
-    element: <Dashboard />,
     isProtected: true,
   },
 ];
