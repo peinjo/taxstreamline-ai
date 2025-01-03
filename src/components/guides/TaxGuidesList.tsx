@@ -33,11 +33,13 @@ export function TaxGuidesList() {
     });
   };
 
-  const filteredGuides = guides?.filter(
-    (guide) =>
-      guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guide.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredGuides = React.useMemo(() => {
+    return guides?.filter(
+      (guide) =>
+        guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        guide.content.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [guides, searchTerm]);
 
   if (isLoading) {
     return (

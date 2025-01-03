@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, startTransition } from "react";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,12 @@ const TAX_TYPES = [
 
 const TaxCalculator = () => {
   const [selectedTaxType, setSelectedTaxType] = useState<string>("");
+
+  const handleTaxTypeChange = (value: string) => {
+    startTransition(() => {
+      setSelectedTaxType(value);
+    });
+  };
 
   const renderCalculator = () => {
     switch (selectedTaxType) {
@@ -51,7 +57,7 @@ const TaxCalculator = () => {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <label className="text-sm font-medium">Tax Type</label>
-          <Select value={selectedTaxType} onValueChange={setSelectedTaxType}>
+          <Select value={selectedTaxType} onValueChange={handleTaxTypeChange}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select tax type" />
             </SelectTrigger>

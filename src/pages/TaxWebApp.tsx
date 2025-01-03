@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, startTransition } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import TaxCalculator from "@/components/tax/TaxCalculator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +27,12 @@ const LoadingSpinner = () => (
 );
 
 const TaxWebApp = () => {
+  const handleTabChange = (value: string) => {
+    startTransition(() => {
+      // Tab change logic if needed
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6 space-y-12">
@@ -49,7 +55,7 @@ const TaxWebApp = () => {
             Access and download tax templates and guides
           </p>
 
-          <Tabs defaultValue="templates" className="w-full">
+          <Tabs defaultValue="templates" className="w-full" onValueChange={handleTabChange}>
             <TabsList>
               <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="guides">Guides</TabsTrigger>
