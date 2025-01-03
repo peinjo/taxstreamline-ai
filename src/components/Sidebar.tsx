@@ -10,7 +10,6 @@ import {
   LogOut,
   UserRound,
   Calculator,
-  BookOpen,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -28,7 +27,6 @@ const Sidebar = () => {
     { icon: Globe, text: "Global Reporting", path: "/global-reporting" },
     { icon: Calendar, text: "Calendar", path: "/calendar" },
     { icon: ShieldCheck, text: "Compliance", path: "/compliance" },
-    { icon: BookOpen, text: "Templates & Guides", path: "/tax-templates-and-guides" },
     { icon: Bot, text: "AI Assistant", path: "/ai-assistant" },
   ];
 

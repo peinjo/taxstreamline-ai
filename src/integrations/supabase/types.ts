@@ -334,33 +334,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tax_guides: {
-        Row: {
-          category: string
-          content: string
-          created_at: string
-          id: number
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          category: string
-          content: string
-          created_at?: string
-          id?: number
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          category?: string
-          content?: string
-          created_at?: string
-          id?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       tax_rates: {
         Row: {
           category: string
