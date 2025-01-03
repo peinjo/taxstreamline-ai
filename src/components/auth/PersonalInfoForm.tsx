@@ -1,4 +1,4 @@
-import React, { startTransition } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,18 +11,6 @@ import { useProfileForm } from "@/hooks/useProfileForm";
 const PersonalInfoForm = () => {
   const navigate = useNavigate();
   const { formData, loading, handleSubmit, handleChange, setFormData } = useProfileForm();
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    startTransition(() => {
-      handleChange(e);
-    });
-  };
-
-  const handleAvatarChange = (url: string) => {
-    startTransition(() => {
-      setFormData(prev => ({ ...prev, avatarUrl: url }));
-    });
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 py-12 px-4">
@@ -40,14 +28,14 @@ const PersonalInfoForm = () => {
             <AvatarUpload
               avatarUrl={formData.avatarUrl}
               fullName={formData.fullName}
-              onAvatarChange={handleAvatarChange}
+              onAvatarChange={(url) => setFormData(prev => ({ ...prev, avatarUrl: url }))}
             />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <ProfileFormFields
               formData={formData}
-              onChange={handleFormChange}
+              onChange={handleChange}
             />
 
             <div className="flex justify-end space-x-4">
