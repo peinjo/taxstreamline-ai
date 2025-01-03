@@ -273,25 +273,31 @@ export type Database = {
       }
       tax_calculations: {
         Row: {
+          calculation_details: Json | null
           created_at: string
           id: number
           income: number
+          input_data: Json | null
           tax_amount: number
           tax_type: string
           user_id: string | null
         }
         Insert: {
+          calculation_details?: Json | null
           created_at?: string
           id?: number
           income: number
+          input_data?: Json | null
           tax_amount: number
           tax_type: string
           user_id?: string | null
         }
         Update: {
+          calculation_details?: Json | null
           created_at?: string
           id?: number
           income?: number
+          input_data?: Json | null
           tax_amount?: number
           tax_type?: string
           user_id?: string | null
@@ -325,6 +331,33 @@ export type Database = {
           id?: number
           size?: number
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      tax_rates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: number
+          rate: number
+          subcategory: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          rate: number
+          subcategory?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: number
+          rate?: number
+          subcategory?: string | null
         }
         Relationships: []
       }
