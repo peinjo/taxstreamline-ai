@@ -1,4 +1,4 @@
-import React from "react";
+import React, { startTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import {
@@ -27,6 +27,12 @@ export function TaxGuidesList() {
     },
   });
 
+  const handleSearch = (value: string) => {
+    startTransition(() => {
+      setSearchTerm(value);
+    });
+  };
+
   const filteredGuides = guides?.filter(
     (guide) =>
       guide.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,7 +52,7 @@ export function TaxGuidesList() {
       <Input
         placeholder="Search guides..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
         className="max-w-md"
       />
       <Accordion type="single" collapsible className="w-full">
