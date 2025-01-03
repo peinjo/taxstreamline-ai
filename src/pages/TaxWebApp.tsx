@@ -1,8 +1,20 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import TaxCalculator from "@/components/tax/TaxCalculator";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navigate } from "react-router-dom";
 
 const TaxWebApp = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth/login" />;
+  }
+
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6 space-y-6">
