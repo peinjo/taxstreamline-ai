@@ -1,29 +1,24 @@
-import { ReactNode } from "react";
-import Index from "@/pages/Index";
-import Login from "@/pages/auth/Login";
-import Signup from "@/pages/auth/Signup";
-import PersonalInfoForm from "@/components/auth/PersonalInfoForm";
-import Dashboard from "@/pages/Dashboard";
-import TransferPricing from "@/pages/TransferPricing";
-import GlobalReporting from "@/pages/GlobalReporting";
-import Calendar from "@/pages/Calendar";
-import ComplianceTracker from "@/pages/Compliance";
-import AIAssistant from "@/pages/AIAssistant";
-import Notifications from "@/pages/Notifications";
-import TaxWebApp from "@/pages/TaxWebApp";
+import { lazy } from "react";
 
-interface RouteConfig {
-  path: string;
-  element: ReactNode;
-  isProtected: boolean;
-}
+const Index = lazy(() => import("@/pages/Index"));
+const Login = lazy(() => import("@/pages/auth/Login"));
+const Signup = lazy(() => import("@/pages/auth/Signup"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const PersonalInfo = lazy(() => import("@/pages/auth/PersonalInfo"));
+const TaxWebApp = lazy(() => import("@/pages/TaxWebApp"));
+const TransferPricing = lazy(() => import("@/pages/TransferPricing"));
+const GlobalReporting = lazy(() => import("@/pages/GlobalReporting"));
+const Calendar = lazy(() => import("@/pages/Calendar"));
+const Compliance = lazy(() => import("@/pages/Compliance"));
+const AIAssistant = lazy(() => import("@/pages/AIAssistant"));
+const Notifications = lazy(() => import("@/pages/Notifications"));
+const TaxTemplatesAndGuides = lazy(() => import("@/pages/TaxTemplatesAndGuides"));
 
-export const routes: RouteConfig[] = [
-  // Public routes
+export const routes = [
   {
     path: "/",
-    element: <Index />,
-    isProtected: false,
+    element: <Dashboard />,
+    isProtected: true,
   },
   {
     path: "/auth/login",
@@ -35,16 +30,9 @@ export const routes: RouteConfig[] = [
     element: <Signup />,
     isProtected: false,
   },
-  
-  // Protected routes
-  {
-    path: "/dashboard",
-    element: <Dashboard />,
-    isProtected: true,
-  },
   {
     path: "/auth/personal-info",
-    element: <PersonalInfoForm />,
+    element: <PersonalInfo />,
     isProtected: true,
   },
   {
@@ -69,7 +57,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: "/compliance",
-    element: <ComplianceTracker />,
+    element: <Compliance />,
     isProtected: true,
   },
   {
@@ -80,6 +68,11 @@ export const routes: RouteConfig[] = [
   {
     path: "/notifications",
     element: <Notifications />,
+    isProtected: true,
+  },
+  {
+    path: "/tax-templates-and-guides",
+    element: <TaxTemplatesAndGuides />,
     isProtected: true,
   },
 ];
