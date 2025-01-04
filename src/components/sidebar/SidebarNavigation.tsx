@@ -17,7 +17,7 @@ const SidebarNavigation = ({ menuItems }: SidebarNavigationProps) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="custom-scrollbar overflow-y-auto px-4">
+    <div className="px-4">
       <div className="space-y-2">
         {menuItems.map((item) => (
           <Link

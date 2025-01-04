@@ -18,7 +18,7 @@ const SidebarFooter = ({ bottomMenuItems, onLogout }: SidebarFooterProps) => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="p-4">
+    <div className="mt-auto px-4 pb-4">
       <div className="space-y-2">
         {bottomMenuItems.map((item) => (
           <Link

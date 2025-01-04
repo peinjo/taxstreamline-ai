@@ -50,13 +50,13 @@ const Sidebar = () => {
   return (
     <div className="fixed left-0 top-0 flex h-screen w-64 flex-col bg-sidebar">
       <SidebarHeader />
-      <nav className="flex flex-1 flex-col justify-between">
+      <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto">
         <SidebarNavigation menuItems={menuItems} />
         <SidebarFooter 
           bottomMenuItems={bottomMenuItems} 
           onLogout={handleLogout}
         />
-      </nav>
+      </div>
     </div>
   );
 };
