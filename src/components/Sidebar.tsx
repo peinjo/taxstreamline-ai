@@ -10,6 +10,7 @@ import {
   LogOut,
   UserRound,
   Calculator,
+  ChartBar,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ const Sidebar = () => {
     { icon: LayoutDashboard, text: "Dashboard", path: "/" },
     { icon: UserRound, text: "Personal Info", path: "/auth/personal-info" },
     { icon: Calculator, text: "Tax Web App", path: "/tax-web-app" },
+    { icon: ChartBar, text: "Audit & Reporting", path: "/audit-reporting" },
     { icon: FileText, text: "Transfer Pricing", path: "/transfer-pricing" },
     { icon: Globe, text: "Global Reporting", path: "/global-reporting" },
     { icon: Calendar, text: "Calendar", path: "/calendar" },
