@@ -388,6 +388,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          file_type: string
+          id: number
+          template_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_type: string
+          id?: never
+          template_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_type?: string
+          id?: never
+          template_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       team_members: {
         Row: {
           id: number
