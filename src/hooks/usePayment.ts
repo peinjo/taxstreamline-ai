@@ -20,8 +20,10 @@ export const usePaymentStatus = (reference: string) => {
     queryKey: ["payment", reference],
     queryFn: () => verifyPayment(reference),
     enabled: !!reference,
-    onError: (error: Error) => {
-      handleError(error, "Payment verification");
+    meta: {
+      onError: (error: Error) => {
+        handleError(error, "Payment verification");
+      },
     },
   });
 };

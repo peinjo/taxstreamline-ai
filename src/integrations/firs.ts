@@ -22,7 +22,7 @@ export const submitTaxFiling = async (filingData: TaxFiling) => {
       .from("tax_filings")
       .insert({
         filing_type: filingData.type,
-        filing_data: filingData,
+        filing_data: JSON.stringify(filingData),
         firs_reference: data.reference,
         status: "submitted",
       })

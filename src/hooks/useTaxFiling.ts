@@ -24,8 +24,10 @@ export const useFilingStatus = (reference: string) => {
     queryKey: ["filing", reference],
     queryFn: () => getFilingStatus(reference),
     enabled: !!reference,
-    onError: (error: Error) => {
-      handleError(error, "Filing status check");
+    meta: {
+      onError: (error: Error) => {
+        handleError(error, "Filing status check");
+      },
     },
   });
 };
