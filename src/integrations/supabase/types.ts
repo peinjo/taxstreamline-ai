@@ -326,6 +326,45 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: number
+          metadata: Json | null
+          payment_reference: string
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: never
+          metadata?: Json | null
+          payment_reference: string
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: never
+          metadata?: Json | null
+          payment_reference?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_to: string | null
@@ -435,6 +474,39 @@ export type Database = {
           filename?: string
           id?: number
           size?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tax_filings: {
+        Row: {
+          created_at: string
+          filing_data: Json
+          filing_type: string
+          firs_reference: string | null
+          id: number
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          filing_data?: Json
+          filing_type: string
+          firs_reference?: string | null
+          id?: never
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          filing_data?: Json
+          filing_type?: string
+          firs_reference?: string | null
+          id?: never
+          status?: string
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []

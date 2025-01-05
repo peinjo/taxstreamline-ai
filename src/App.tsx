@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { ErrorProvider } from "./contexts/ErrorContext";
 import { routes } from "./config/routes";
 
 const queryClient = new QueryClient({
@@ -50,29 +51,31 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <NotificationProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                {routes.map((route) => (
-                  <Route
-                    key={route.path}
-                    path={route.path}
-                    element={
-                      route.isProtected ? (
-                        <ProtectedRoute>{route.element}</ProtectedRoute>
-                      ) : (
-                        <PublicRoute>{route.element}</PublicRoute>
-                      )
-                    }
-                  />
-                ))}
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </NotificationProvider>
+        <ErrorProvider>
+          <NotificationProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  {routes.map((route) => (
+                    <Route
+                      key={route.path}
+                      path={route.path}
+                      element={
+                        route.isProtected ? (
+                          <ProtectedRoute>{route.element}</ProtectedRoute>
+                        ) : (
+                          <PublicRoute>{route.element}</PublicRoute>
+                        )
+                      }
+                    />
+                  ))}
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </NotificationProvider>
+        </ErrorProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

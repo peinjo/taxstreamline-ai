@@ -38,3 +38,18 @@ export interface WithholdingTaxInput {
   paymentAmount: number;
   category: string;
 }
+
+export interface TaxFiling {
+  type: string;
+  year: number;
+  period: string;
+  data: Record<string, any>;
+}
+
+export interface PaymentDetails {
+  amount: number;
+  currency: string;
+  reference: string;
+  status: string;
+  metadata?: Record<string, any>;
+}
