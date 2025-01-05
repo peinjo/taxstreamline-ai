@@ -222,6 +222,45 @@ export type Database = {
         }
         Relationships: []
       }
+      document_metadata: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: Database["public"]["Enums"]["document_type"]
+          id: number
+          tax_year: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: Database["public"]["Enums"]["document_type"]
+          id?: number
+          tax_year: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: Database["public"]["Enums"]["document_type"]
+          id?: number
+          tax_year?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -645,6 +684,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      document_type: "receipt" | "filing" | "statement" | "report" | "other"
     }
     CompositeTypes: {
       [_ in never]: never

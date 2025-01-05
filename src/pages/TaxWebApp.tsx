@@ -2,6 +2,7 @@ import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import TaxCalculator from "@/components/tax/TaxCalculator";
 import { TemplatesAndGuides } from "@/components/tax/TemplatesAndGuides";
+import { DocumentManager } from "@/components/tax/DocumentManager";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -27,6 +28,11 @@ const TaxWebApp = () => {
         </div>
 
         <TaxCalculator />
+
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">Documents</h2>
+          <DocumentManager />
+        </div>
 
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Templates and Guides</h2>
