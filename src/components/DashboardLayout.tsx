@@ -1,11 +1,14 @@
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
+import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  useDeadlineChecker();
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />

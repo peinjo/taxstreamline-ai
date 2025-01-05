@@ -1,120 +1,100 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, FileText } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { Bell, Calendar, AlertCircle, CheckCircle2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { format } from "date-fns";
 
-interface Activity {
-  id: number;
-  action: string;
-  document_title: string;
-  document_type: string;
-  created_at: string;
-}
-
-interface CalendarEvent {
-  id: number;
-  title: string;
-  date: string;
-  company: string;
-}
-
 const Notifications = () => {
-  const { data: activities } = useQuery({
-    queryKey: ["activities"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("activities")
-        .select("*")
-        .order("created_at", { ascending: false });
-      
-      if (error) throw error;
-      return data as Activity[];
-    },
-  });
+  const { notifications, markAsRead, deleteNotification, isLoading } = useNotifications();
 
-  const { data: events } = useQuery({
-    queryKey: ["calendar-events"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("calendar_events")
-        .select("*")
-        .order("date", { ascending: true });
-      
-      if (error) throw error;
-      return data as CalendarEvent[];
-    },
-  });
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "deadline":
+        return <Calendar className="h-5 w-5 text-blue-500" />;
+      case "compliance":
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <Bell className="h-5 w-5 text-gray-500" />;
+    }
+  };
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Notifications</h1>
-        
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Recent Activities</h2>
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
-                  {activities?.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-start space-x-3 text-sm"
-                    >
-                      <div className="mt-0.5">
-                        <FileText className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <p className="text-gray-900">
-                          {activity.action} {activity.document_title} ({activity.document_type})
-                        </p>
-                        <p className="text-gray-500 text-xs">
-                          {new Date(activity.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {(!activities || activities.length === 0) && (
-                    <p className="text-gray-500 text-center">No recent activities</p>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <h2 className="text-lg font-semibold mb-4">Upcoming Events</h2>
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
-                  {events?.map((event) => (
-                    <div
-                      key={event.id}
-                      className="flex items-start space-x-3 text-sm"
-                    >
-                      <div className="mt-0.5">
-                        <Calendar className="h-5 w-5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="text-gray-900">{event.title}</p>
-                        <p className="text-gray-500 text-xs">
-                          {format(new Date(event.date), "MMMM dd, yyyy")} - {event.company}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {(!events || events.length === 0) && (
-                    <p className="text-gray-500 text-center">No upcoming events</p>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Notifications</h1>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => notifications.forEach((n) => markAsRead(n.id))}
+            >
+              Mark all as read
+            </Button>
+          </div>
         </div>
+
+        <Card>
+          <CardContent className="p-6">
+            <ScrollArea className="h-[600px] pr-4">
+              <div className="space-y-4">
+                {isLoading ? (
+                  <p className="text-center text-gray-500">Loading notifications...</p>
+                ) : notifications.length === 0 ? (
+                  <p className="text-center text-gray-500">No notifications</p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`flex items-start space-x-4 rounded-lg border p-4 ${
+                        notification.status === "unread"
+                          ? "bg-blue-50 border-blue-100"
+                          : "bg-white"
+                      }`}
+                    >
+                      <div className="mt-1">{getNotificationIcon(notification.type)}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold">{notification.title}</h3>
+                          <span className="text-sm text-gray-500">
+                            {format(new Date(notification.created_at), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-gray-600">{notification.message}</p>
+                        {notification.due_date && (
+                          <p className="mt-2 text-sm text-gray-500">
+                            Due: {format(new Date(notification.due_date), "MMM d, yyyy")}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        {notification.status === "unread" && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => deleteNotification(notification.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
