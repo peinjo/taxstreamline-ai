@@ -103,6 +103,10 @@ export function DocumentManager() {
     }
   };
 
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value as DocumentType);
+  };
+
   const formatFileSize = (bytes: number) => {
     const units = ["B", "KB", "MB", "GB"];
     let size = bytes;
@@ -139,7 +143,7 @@ export function DocumentManager() {
             </SelectContent>
           </Select>
 
-          <Select value={selectedType} onValueChange={setSelectedType}>
+          <Select value={selectedType} onValueChange={handleTypeChange}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Document Type" />
             </SelectTrigger>
