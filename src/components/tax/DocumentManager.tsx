@@ -2,24 +2,10 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-
-type DocumentType = "receipt" | "filing" | "statement" | "report" | "other";
-
-interface Document {
-  id: number;
-  file_name: string;
-  file_path: string;
-  file_type: DocumentType;
-  file_size: number;
-  tax_year: number;
-  description?: string;
-  created_at: string;
-}
+import { Document, DocumentType } from "./types/document-types";
+import { DocumentUploadForm } from "./components/DocumentUploadForm";
+import { DocumentList } from "./components/DocumentList";
 
 export function DocumentManager() {
   const [uploading, setUploading] = useState(false);
@@ -48,7 +34,6 @@ export function DocumentManager() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No authenticated user");
 
-      // Create a folder structure: tax_documents/user_id/year/filename
       const filePath = `${user.id}/${selectedYear}/${file.name}`;
 
       const { error: uploadError } = await supabase.storage
@@ -107,100 +92,24 @@ export function DocumentManager() {
     setSelectedType(value as DocumentType);
   };
 
-  const formatFileSize = (bytes: number) => {
-    const units = ["B", "KB", "MB", "GB"];
-    let size = bytes;
-    let unitIndex = 0;
-    
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  };
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Tax Documents</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-4">
-          <Select value={selectedYear} onValueChange={setSelectedYear}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Tax Year" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 5 }, (_, i) => {
-                const year = new Date().getFullYear() - i;
-                return (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedType} onValueChange={handleTypeChange}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Document Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="receipt">Receipt</SelectItem>
-              <SelectItem value="filing">Filing</SelectItem>
-              <SelectItem value="statement">Statement</SelectItem>
-              <SelectItem value="report">Report</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div>
-            <Input
-              type="file"
-              id="document-upload"
-              className="hidden"
-              onChange={handleFileUpload}
-              accept=".pdf,.doc,.docx,.txt,.csv,.xlsx"
-            />
-            <Button
-              onClick={() => document.getElementById("document-upload")?.click()}
-              disabled={uploading}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Document
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid gap-4">
-          {documents?.map((doc) => (
-            <div
-              key={doc.id}
-              className="flex items-center justify-between rounded-lg border p-4"
-            >
-              <div className="flex items-center space-x-4">
-                <FileText className="h-8 w-8 text-blue-500" />
-                <div>
-                  <p className="font-medium">{doc.file_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {doc.file_type} • {formatFileSize(doc.file_size)} • Tax Year: {doc.tax_year}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(doc.id, doc.file_path)}
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <DocumentUploadForm
+          selectedYear={selectedYear}
+          selectedType={selectedType}
+          uploading={uploading}
+          onYearChange={setSelectedYear}
+          onTypeChange={handleTypeChange}
+          onFileUpload={handleFileUpload}
+        />
+        <DocumentList 
+          documents={documents || []}
+          onDelete={handleDelete}
+        />
       </CardContent>
     </Card>
   );
