@@ -8,10 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, FileText, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+type DocumentType = "receipt" | "filing" | "statement" | "report" | "other";
+
 interface Document {
   id: number;
   file_name: string;
-  file_type: string;
+  file_path: string;
+  file_type: DocumentType;
   file_size: number;
   tax_year: number;
   description?: string;
@@ -21,7 +24,7 @@ interface Document {
 export function DocumentManager() {
   const [uploading, setUploading] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
-  const [selectedType, setSelectedType] = useState<string>("receipt");
+  const [selectedType, setSelectedType] = useState<DocumentType>("receipt");
 
   const { data: documents, refetch } = useQuery({
     queryKey: ["tax-documents"],
