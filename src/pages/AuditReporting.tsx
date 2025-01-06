@@ -59,6 +59,7 @@ const AuditReporting = () => {
           <TabsList>
             <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
             <TabsTrigger value="audit">Audit Logs</TabsTrigger>
+            <TabsTrigger value="export">Export Tax Report</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics" className="space-y-6">
@@ -82,6 +83,19 @@ const AuditReporting = () => {
             <div className="space-y-4">
               <ReportFilters filters={filters} onFilterChange={setFilters} />
               {activities && <AuditTable activities={activities} />}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="export" className="space-y-4">
+            <div className="grid gap-6">
+              <div className="bg-white p-6 rounded-lg shadow">
+                <h3 className="text-lg font-semibold mb-4">Export Settings</h3>
+                {/* Previous audit settings content */}
+                <div className="space-y-4">
+                  <ReportFilters filters={filters} onFilterChange={setFilters} />
+                  {activities && <AuditTable activities={activities} />}
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
