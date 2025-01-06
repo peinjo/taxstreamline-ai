@@ -1,6 +1,8 @@
 export interface Activity {
   id: number;
-  text: string;
+  action: string;
+  document_title: string;
+  document_type: string;
   created_at: string;
 }
 
