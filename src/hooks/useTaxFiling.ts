@@ -1,16 +1,16 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  submitTaxFiling,
-  getFilingStatus,
-  validateData,
-} from "@/integrations/firs";
+import { submitFiling, getFilingStatus } from "@/integrations/firs";
 import { useError } from "@/contexts/ErrorContext";
+import { toast } from "sonner";
 
-export const useSubmitTaxFiling = () => {
+export const useSubmitFiling = () => {
   const { handleError } = useError();
 
   return useMutation({
-    mutationFn: submitTaxFiling,
+    mutationFn: submitFiling,
+    onSuccess: () => {
+      toast.success("Tax filing submitted successfully");
+    },
     onError: (error: Error) => {
       handleError(error, "Tax filing submission");
     },
@@ -28,17 +28,6 @@ export const useFilingStatus = (reference: string) => {
       onError: (error: Error) => {
         handleError(error, "Filing status check");
       },
-    },
-  });
-};
-
-export const useValidateData = () => {
-  const { handleError } = useError();
-
-  return useMutation({
-    mutationFn: validateData,
-    onError: (error: Error) => {
-      handleError(error, "Data validation");
     },
   });
 };

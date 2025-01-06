@@ -1,23 +1,19 @@
 import { supabase } from "./supabase/client";
-import type { TaxFiling } from "@/types/tax";
 
-const FIRS_API_BASE_URL = "https://api.firs.gov.ng"; // Replace with actual FIRS API URL
+interface TaxFiling {
+  type: string;
+  data: Record<string, any>;
+}
 
-export const submitTaxFiling = async (filingData: TaxFiling) => {
+export const submitFiling = async (filingData: TaxFiling) => {
   try {
-    // Submit to FIRS API
-    const response = await fetch(`${FIRS_API_BASE_URL}/submit-filing`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Add FIRS API authentication headers here
-      },
-      body: JSON.stringify(filingData),
-    });
+    // Simulate FIRS API call
+    const data = {
+      reference: `FIRS-${Date.now()}`,
+      status: "success",
+    };
 
-    const data = await response.json();
-
-    // Store filing in Supabase
+    // Store filing data in Supabase
     const { data: filing, error } = await supabase
       .from("tax_filings")
       .insert({
@@ -32,41 +28,21 @@ export const submitTaxFiling = async (filingData: TaxFiling) => {
     if (error) throw error;
     return filing;
   } catch (error) {
-    console.error("Error submitting tax filing:", error);
-    throw error;
+    throw new Error("Failed to submit tax filing. Please try again later.");
   }
 };
 
 export const getFilingStatus = async (reference: string) => {
   try {
-    const response = await fetch(
-      `${FIRS_API_BASE_URL}/filing-status/${reference}`,
-      {
-        headers: {
-          // Add FIRS API authentication headers here
-        },
-      }
-    );
-    return await response.json();
-  } catch (error) {
-    console.error("Error getting filing status:", error);
-    throw error;
-  }
-};
+    const { data, error } = await supabase
+      .from("tax_filings")
+      .select("*")
+      .eq("firs_reference", reference)
+      .single();
 
-export const validateData = async (data: any) => {
-  try {
-    const response = await fetch(`${FIRS_API_BASE_URL}/validate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Add FIRS API authentication headers here
-      },
-      body: JSON.stringify(data),
-    });
-    return await response.json();
+    if (error) throw error;
+    return data;
   } catch (error) {
-    console.error("Error validating data:", error);
-    throw error;
+    throw new Error("Failed to fetch filing status. Please try again later.");
   }
 };
