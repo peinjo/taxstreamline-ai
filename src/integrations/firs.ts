@@ -18,9 +18,9 @@ export const submitFiling = async (filingData: TaxFiling) => {
       .from("tax_filings")
       .insert({
         filing_type: filingData.type,
-        filing_data: JSON.stringify(filingData),
+        filing_data: JSON.stringify(filingData.data),
+        status: "pending",
         firs_reference: data.reference,
-        status: "submitted",
       })
       .select()
       .single();
