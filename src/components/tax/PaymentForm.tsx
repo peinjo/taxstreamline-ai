@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useInitiatePayment } from "@/hooks/usePayment";
 
 export function PaymentForm() {
-  const { mutate: initiatePayment, isLoading } = useInitiatePayment();
+  const { mutate: initiatePayment, isPending } = useInitiatePayment();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,8 +60,8 @@ export function PaymentForm() {
         </div>
       </div>
 
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? "Processing..." : "Make Payment"}
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Processing..." : "Make Payment"}
       </Button>
     </form>
   );

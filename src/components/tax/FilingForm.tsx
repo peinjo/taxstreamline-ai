@@ -6,7 +6,7 @@ import { useSubmitFiling } from "@/hooks/useTaxFiling";
 import { toast } from "sonner";
 
 export function FilingForm() {
-  const { mutate: submitFiling, isLoading } = useSubmitFiling();
+  const { mutate: submitFiling, isPending } = useSubmitFiling();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,8 +79,8 @@ export function FilingForm() {
         </div>
       </div>
 
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? "Submitting..." : "Submit Filing"}
+      <Button type="submit" disabled={isPending}>
+        {isPending ? "Submitting..." : "Submit Filing"}
       </Button>
     </form>
   );
