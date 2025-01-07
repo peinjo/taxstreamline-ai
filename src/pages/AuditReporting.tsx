@@ -5,6 +5,8 @@ import { AuditTable } from "@/components/audit/AuditTable";
 import { AnalyticsCharts } from "@/components/audit/AnalyticsCharts";
 import { SummaryMetrics } from "@/components/audit/SummaryMetrics";
 import { ReportFilters } from "@/components/audit/ReportFilters";
+import { TaxSummaryTable } from "@/components/audit/TaxSummaryTable";
+import { TaxCharts } from "@/components/audit/TaxCharts";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,6 +25,27 @@ const AuditReporting = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: taxReports, isLoading: isLoadingReports } = useQuery({
+    queryKey: ["tax-reports", filters],
+    queryFn: async () => {
+      let query = supabase
+        .from("tax_reports")
+        .select("*")
+        .eq("tax_year", filters.year);
+
+      if (filters.taxType !== "all") {
+        query = query.eq("tax_type", filters.taxType);
+      }
+      if (filters.status !== "all") {
+        query = query.eq("status", filters.status);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -89,11 +112,14 @@ const AuditReporting = () => {
           <TabsContent value="export" className="space-y-4">
             <div className="grid gap-6">
               <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold mb-4">Export Settings</h3>
-                {/* Previous audit settings content */}
+                <h3 className="text-lg font-semibold mb-4">Tax Report Summary</h3>
                 <div className="space-y-4">
                   <ReportFilters filters={filters} onFilterChange={setFilters} />
-                  {activities && <AuditTable activities={activities} />}
+                  <TaxSummaryTable 
+                    data={taxReports || []} 
+                    isLoading={isLoadingReports} 
+                  />
+                  {taxReports && <TaxCharts data={taxReports} />}
                 </div>
               </div>
             </div>
