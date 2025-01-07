@@ -14,10 +14,10 @@ const Banner = ({ message, type = "info" }: BannerProps) => {
 
   const getAlertVariant = () => {
     switch (type) {
-      case "warning":
-        return "warning";
       case "error":
         return "destructive";
+      case "warning":
+        return "destructive"; // Map warning to destructive since it's the closest match
       default:
         return "default";
     }
