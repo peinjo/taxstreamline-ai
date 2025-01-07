@@ -1,6 +1,33 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { TaxRate, TaxCalculationResult } from "@/types/tax";
 
+export const calculateIndustryTax = (
+  inputs: Record<string, number>,
+  industry: string,
+  rate: number
+): TaxCalculationResult => {
+  const { revenue, operatingCosts, capitalAllowance } = inputs;
+  let taxableIncome = revenue - operatingCosts - capitalAllowance;
+
+  if (industry === "oil_and_gas") {
+    const { royalties, petroleumProfitTax } = inputs;
+    taxableIncome -= (royalties + petroleumProfitTax);
+  }
+
+  const taxAmount = Math.max(0, taxableIncome * (rate / 100));
+
+  return {
+    taxAmount,
+    effectiveRate: (taxAmount / revenue) * 100,
+    details: {
+      taxableIncome,
+      rateApplied: rate,
+      industry,
+      ...inputs,
+    },
+  };
+};
+
 export const fetchTaxRates = async (category: string): Promise<TaxRate[]> => {
   const { data, error } = await supabase
     .from("tax_rates")
