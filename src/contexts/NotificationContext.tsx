@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
+import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
 
 interface Notification {
   id: number;
@@ -26,6 +27,9 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+
+  // Use the deadline checker hook
+  useDeadlineChecker();
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications", user?.id],
