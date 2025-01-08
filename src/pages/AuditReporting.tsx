@@ -51,9 +51,19 @@ const AuditReporting = () => {
     },
   });
 
+  // Query for activities
+  const { data: activities = [] } = useQuery({
+    queryKey: ["audit-activities"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("activities").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const mockMetrics = {
     totalLiability: 15000000,
-    totalPaid: 12000000,
+    filingCount: 120, // Added filingCount
     pendingPayments: 3000000,
     complianceRate: 80,
   };
@@ -91,7 +101,7 @@ const AuditReporting = () => {
           </TabsContent>
 
           <TabsContent value="audit-log">
-            <AuditTable />
+            <AuditTable activities={activities} />
           </TabsContent>
         </Tabs>
       </div>
