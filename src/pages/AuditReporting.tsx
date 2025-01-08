@@ -10,9 +10,15 @@ import { TaxCharts } from "@/components/audit/TaxCharts";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface TaxReport {
+  tax_type: string;
+  amount: number;
+  status: string;
+}
+
 const AuditReporting = () => {
   const [filters, setFilters] = useState({
-    year: new Date().getFullYear(),
+    dateRange: "all",
     taxType: "all",
     status: "all",
   });
@@ -33,10 +39,22 @@ const AuditReporting = () => {
   const { data: taxReports, isLoading: isLoadingReports } = useQuery({
     queryKey: ["tax-reports", filters],
     queryFn: async () => {
-      let query = supabase
-        .from("tax_reports")
-        .select("*")
-        .eq("tax_year", filters.year);
+      let query = supabase.from("tax_reports").select("*");
+
+      if (filters.dateRange === "year") {
+        const currentYear = new Date().getFullYear();
+        query = query.eq("tax_year", currentYear);
+      } else if (filters.dateRange === "quarter") {
+        const now = new Date();
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setMonth(now.getMonth() - 3);
+        query = query.gte("created_at", threeMonthsAgo.toISOString());
+      } else if (filters.dateRange === "month") {
+        const now = new Date();
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+        query = query.gte("created_at", oneMonthAgo.toISOString());
+      }
 
       if (filters.taxType !== "all") {
         query = query.eq("tax_type", filters.taxType);
@@ -47,19 +65,9 @@ const AuditReporting = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data as TaxReport[];
     },
   });
-
-  // Mock data for demonstration
-  const mockChartData = [
-    { name: "Jan", value: 4000 },
-    { name: "Feb", value: 3000 },
-    { name: "Mar", value: 2000 },
-    { name: "Apr", value: 2780 },
-    { name: "May", value: 1890 },
-    { name: "Jun", value: 2390 },
-  ];
 
   const mockMetrics = {
     totalLiability: 15000000,
@@ -89,16 +97,8 @@ const AuditReporting = () => {
             <SummaryMetrics metrics={mockMetrics} />
             
             <div className="grid gap-6 md:grid-cols-2">
-              <AnalyticsCharts
-                taxData={mockChartData}
-                title="Monthly Tax Payments"
-                description="Overview of tax payments over time"
-              />
-              <AnalyticsCharts
-                taxData={mockChartData}
-                title="Filing Distribution"
-                description="Distribution of tax filings by type"
-              />
+              <AnalyticsCharts data={taxReports || []} />
+              <AnalyticsCharts data={taxReports || []} />
             </div>
           </TabsContent>
 
