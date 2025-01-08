@@ -9,6 +9,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface Organization {
+  id: number;
+  name: string;
+  created_at: string;
+  created_by: string;
+}
+
+interface OrganizationMember {
+  organizations: Organization;
+}
+
 export const AuditReportingDashboard = () => {
   const { user } = useAuth();
   const [filters, setFilters] = useState({
@@ -17,20 +28,22 @@ export const AuditReportingDashboard = () => {
     status: "all",
   });
 
-  const { data: organization } = useQuery({
+  const { data: memberData } = useQuery({
     queryKey: ["organization"],
     queryFn: async () => {
-      const { data: memberData, error } = await supabase
+      const { data, error } = await supabase
         .from("organization_members")
         .select("organizations(*)")
         .eq("user_id", user?.id)
         .maybeSingle();
 
       if (error) throw error;
-      return memberData?.organizations;
+      return data as OrganizationMember;
     },
     enabled: !!user,
   });
+
+  const organization = memberData?.organizations;
 
   const { data: reports, isLoading } = useQuery({
     queryKey: ["tax-reports", filters, organization?.id],
@@ -106,7 +119,7 @@ export const AuditReportingDashboard = () => {
 
       <TaxSummaryTable data={reports || []} isLoading={isLoading} />
       
-      <ActivityLog organizationId={organization.id} />
+      {organization && <ActivityLog organizationId={organization.id} />}
     </div>
   );
 };

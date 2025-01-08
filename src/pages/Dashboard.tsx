@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, FileText, AlertOctagon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
@@ -8,6 +8,24 @@ import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
 import { OrganizationActivity } from "@/components/organization/OrganizationActivity";
+
+interface Organization {
+  id: number;
+  name: string;
+  created_at: string;
+  created_by: string;
+}
+
+interface OrganizationMember {
+  organizations: Organization;
+}
+
+interface DashboardMetrics {
+  upcoming_deadlines: number;
+  active_clients: number;
+  documents_pending: number;
+  compliance_alerts: number;
+}
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -27,20 +45,22 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
-  const { data: organization } = useQuery({
+  const { data: memberData } = useQuery({
     queryKey: ['organization'],
     queryFn: async () => {
-      const { data: memberData, error } = await supabase
+      const { data, error } = await supabase
         .from('organization_members')
         .select('organizations(*)')
         .eq('user_id', user?.id)
         .maybeSingle();
       
       if (error) throw error;
-      return memberData?.organizations;
+      return data as OrganizationMember;
     },
     enabled: !!user?.id,
   });
+
+  const organization = memberData?.organizations;
 
   const { data: metrics } = useQuery({
     queryKey: ['dashboard-metrics', organization?.id],
@@ -52,7 +72,7 @@ const Dashboard = () => {
         .maybeSingle();
       
       if (error) throw error;
-      return data || {
+      return data as DashboardMetrics || {
         upcoming_deadlines: 0,
         active_clients: 0,
         documents_pending: 0,
@@ -136,7 +156,7 @@ const Dashboard = () => {
 
         <div className="grid gap-8 md:grid-cols-2">
           <TaskManagement />
-          <OrganizationActivity organizationId={organization.id} />
+          {organization && <OrganizationActivity organizationId={organization.id} />}
         </div>
       </div>
     </DashboardLayout>
