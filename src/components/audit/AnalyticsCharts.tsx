@@ -16,28 +16,35 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-interface ChartData {
-  name: string;
-  value: number;
+interface TaxReport {
+  tax_type: string;
+  amount: number;
+  status: string;
+  // ... add other fields as needed
 }
 
-interface AnalyticsChartsProps {
-  taxData: ChartData[];
-  title: string;
-  description: string;
-}
+export const AnalyticsCharts = ({ data }: { data: TaxReport[] }) => {
+  // Transform the data for the chart
+  const chartData = data.reduce((acc: any[], report) => {
+    const existingEntry = acc.find((entry) => entry.name === report.tax_type);
+    if (existingEntry) {
+      existingEntry.value += report.amount;
+    } else {
+      acc.push({ name: report.tax_type, value: report.amount });
+    }
+    return acc;
+  }, []);
 
-export const AnalyticsCharts = ({ taxData, title, description }: AnalyticsChartsProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle>Tax Distribution</CardTitle>
+        <CardDescription>Overview of tax amounts by type</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={taxData}>
+            <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
