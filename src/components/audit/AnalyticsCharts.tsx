@@ -1,45 +1,22 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import type { TaxReport } from "@/types";
 
-interface TaxReport {
-  tax_type: string;
-  amount: number;
-  status: string;
-  // ... add other fields as needed
+interface AnalyticsChartsProps {
+  data: TaxReport[];
 }
 
-export const AnalyticsCharts = ({ data }: { data: TaxReport[] }) => {
-  // Transform the data for the chart
-  const chartData = data.reduce((acc: any[], report) => {
-    const existingEntry = acc.find((entry) => entry.name === report.tax_type);
-    if (existingEntry) {
-      existingEntry.value += report.amount;
-    } else {
-      acc.push({ name: report.tax_type, value: report.amount });
-    }
-    return acc;
-  }, []);
+export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ data }) => {
+  const chartData = data.map(report => ({
+    name: report.tax_type,
+    amount: report.amount
+  }));
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Tax Distribution</CardTitle>
-        <CardDescription>Overview of tax amounts by type</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -49,7 +26,7 @@ export const AnalyticsCharts = ({ data }: { data: TaxReport[] }) => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="value" fill="#1e40af" />
+              <Bar dataKey="amount" fill="#3b82f6" />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -1,39 +1,20 @@
-import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardLayout from "@/components/DashboardLayout";
 import { AuditTable } from "@/components/audit/AuditTable";
-import { AnalyticsCharts } from "@/components/audit/AnalyticsCharts";
-import { SummaryMetrics } from "@/components/audit/SummaryMetrics";
 import { ReportFilters } from "@/components/audit/ReportFilters";
+import { SummaryMetrics } from "@/components/audit/SummaryMetrics";
+import { AnalyticsCharts } from "@/components/audit/AnalyticsCharts";
 import { TaxSummaryTable } from "@/components/audit/TaxSummaryTable";
-import { TaxCharts } from "@/components/audit/TaxCharts";
+import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-interface TaxReport {
-  tax_type: string;
-  amount: number;
-  status: string;
-}
+import type { TaxReport } from "@/types";
 
 const AuditReporting = () => {
   const [filters, setFilters] = useState({
     dateRange: "all",
     taxType: "all",
     status: "all",
-  });
-
-  const { data: activities } = useQuery({
-    queryKey: ["activities"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("activities")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
   });
 
   const { data: taxReports, isLoading: isLoadingReports } = useQuery({
@@ -59,6 +40,7 @@ const AuditReporting = () => {
       if (filters.taxType !== "all") {
         query = query.eq("tax_type", filters.taxType);
       }
+
       if (filters.status !== "all") {
         query = query.eq("status", filters.status);
       }
@@ -71,29 +53,31 @@ const AuditReporting = () => {
 
   const mockMetrics = {
     totalLiability: 15000000,
-    filingCount: 24,
-    pendingPayments: 3,
-    complianceRate: 92,
+    totalPaid: 12000000,
+    pendingPayments: 3000000,
+    complianceRate: 80,
   };
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-6 space-y-8">
+      <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold">Audit & Reporting</h1>
+          <h1 className="text-2xl font-semibold mb-2">Audit & Reporting</h1>
           <p className="text-muted-foreground">
-            View and analyze tax reports and activities
+            Monitor and analyze your tax compliance and reporting
           </p>
         </div>
 
-        <Tabs defaultValue="analytics" className="space-y-6">
+        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
-            <TabsTrigger value="audit">Audit Logs</TabsTrigger>
-            <TabsTrigger value="export">Export Tax Report</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="audit-log">Audit Log</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="analytics" className="space-y-6">
+          <TabsContent value="overview" className="space-y-6">
+            <ReportFilters filters={filters} onFilterChange={setFilters} />
+            
             <SummaryMetrics metrics={mockMetrics} />
             
             <div className="grid gap-6 md:grid-cols-2">
@@ -102,27 +86,12 @@ const AuditReporting = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="audit">
-            <div className="space-y-4">
-              <ReportFilters filters={filters} onFilterChange={setFilters} />
-              {activities && <AuditTable activities={activities} />}
-            </div>
+          <TabsContent value="reports">
+            <TaxSummaryTable data={taxReports || []} isLoading={isLoadingReports} />
           </TabsContent>
 
-          <TabsContent value="export" className="space-y-4">
-            <div className="grid gap-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold mb-4">Tax Report Summary</h3>
-                <div className="space-y-4">
-                  <ReportFilters filters={filters} onFilterChange={setFilters} />
-                  <TaxSummaryTable 
-                    data={taxReports || []} 
-                    isLoading={isLoadingReports} 
-                  />
-                  {taxReports && <TaxCharts data={taxReports} />}
-                </div>
-              </div>
-            </div>
+          <TabsContent value="audit-log">
+            <AuditTable />
           </TabsContent>
         </Tabs>
       </div>

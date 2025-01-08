@@ -53,3 +53,15 @@ export interface PaymentDetails {
   status: string;
   metadata?: Record<string, any>;
 }
+
+export interface TaxReport {
+  id: number;
+  tax_type: string;
+  tax_year: number;
+  amount: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  organization_id?: number;
+  user_id?: string;
+}
