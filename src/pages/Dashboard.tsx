@@ -50,12 +50,19 @@ const Dashboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('organization_members')
-        .select('organizations(*)')
+        .select(`
+          organizations (
+            id,
+            name,
+            created_at,
+            created_by
+          )
+        `)
         .eq('user_id', user?.id)
         .maybeSingle();
       
       if (error) throw error;
-      return data as OrganizationMember;
+      return data as unknown as OrganizationMember;
     },
     enabled: !!user?.id,
   });
