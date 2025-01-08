@@ -1,13 +1,13 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Users, FileText, AlertOctagon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
 import { OrganizationActivity } from "@/components/organization/OrganizationActivity";
+import { DashboardMetrics } from "@/components/dashboard/DashboardMetrics";
+import { CreateOrganizationDialog } from "@/components/dashboard/CreateOrganizationDialog";
 
 interface Organization {
   id: number;
@@ -41,7 +41,6 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
-  // Split the queries to avoid recursion
   const { data: organizationMember } = useQuery({
     queryKey: ['organization-member', user?.id],
     queryFn: async () => {
@@ -94,41 +93,15 @@ const Dashboard = () => {
 
   const firstName = profile?.full_name?.split(' ')[0] || "User";
 
-  const metricCards = [
-    {
-      title: "Upcoming Deadlines",
-      value: metrics?.upcoming_deadlines || "0",
-      icon: Calendar,
-      className: "bg-blue-500",
-    },
-    {
-      title: "Active Clients",
-      value: metrics?.active_clients || "0",
-      icon: Users,
-      className: "bg-green-500",
-    },
-    {
-      title: "Documents Pending",
-      value: metrics?.documents_pending || "0",
-      icon: FileText,
-      className: "bg-yellow-500",
-    },
-    {
-      title: "Compliance Alerts",
-      value: metrics?.compliance_alerts || "0",
-      icon: AlertOctagon,
-      className: "bg-red-500",
-    },
-  ];
-
   if (!organization) {
     return (
       <DashboardLayout>
         <div className="text-center py-8">
-          <h2 className="text-2xl font-semibold mb-2">No Organization Found</h2>
-          <p className="text-muted-foreground">
-            Please join or create an organization to access the dashboard.
+          <h2 className="text-2xl font-semibold mb-4">Welcome to TaxStreamline AI</h2>
+          <p className="text-muted-foreground mb-6">
+            To get started, create your organization
           </p>
+          <CreateOrganizationDialog />
         </div>
       </DashboardLayout>
     );
@@ -144,25 +117,12 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {metricCards.map((metric) => (
-            <Card key={metric.title}>
-              <CardContent className="flex items-center p-6">
-                <div
-                  className={`mr-4 rounded-full p-2 text-white ${metric.className}`}
-                >
-                  <metric.icon className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {metric.title}
-                  </p>
-                  <h2 className="text-3xl font-bold">{metric.value}</h2>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <DashboardMetrics metrics={metrics || {
+          upcoming_deadlines: 0,
+          active_clients: 0,
+          documents_pending: 0,
+          compliance_alerts: 0
+        }} />
 
         <div className="grid gap-8 md:grid-cols-2">
           <TaskManagement />
