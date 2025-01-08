@@ -20,11 +20,13 @@ export const AuditReportingDashboard = () => {
   const { data: organization } = useQuery({
     queryKey: ["organization"],
     queryFn: async () => {
-      const { data: memberData } = await supabase
+      const { data: memberData, error } = await supabase
         .from("organization_members")
         .select("organizations(*)")
         .eq("user_id", user?.id)
-        .single();
+        .maybeSingle();
+
+      if (error) throw error;
       return memberData?.organizations;
     },
     enabled: !!user,
@@ -50,7 +52,7 @@ export const AuditReportingDashboard = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!organization,
+    enabled: !!organization?.id,
   });
 
   const handleExport = (format: "pdf" | "excel") => {

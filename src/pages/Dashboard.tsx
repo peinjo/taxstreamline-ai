@@ -1,12 +1,13 @@
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Users, FileText, AlertOctagon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
+import { OrganizationActivity } from "@/components/organization/OrganizationActivity";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ const Dashboard = () => {
         .from('user_profiles')
         .select('full_name')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
@@ -26,34 +27,82 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
+  const { data: organization } = useQuery({
+    queryKey: ['organization'],
+    queryFn: async () => {
+      const { data: memberData, error } = await supabase
+        .from('organization_members')
+        .select('organizations(*)')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return memberData?.organizations;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: metrics } = useQuery({
+    queryKey: ['dashboard-metrics', organization?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .eq('organization_id', organization?.id)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data || {
+        upcoming_deadlines: 0,
+        active_clients: 0,
+        documents_pending: 0,
+        compliance_alerts: 0
+      };
+    },
+    enabled: !!organization?.id,
+  });
+
   const firstName = profile?.full_name?.split(' ')[0] || "User";
 
-  const metrics = [
+  const metricCards = [
     {
       title: "Upcoming Deadlines",
-      value: "5",
+      value: metrics?.upcoming_deadlines || "0",
       icon: Calendar,
       className: "bg-blue-500",
     },
     {
       title: "Active Clients",
-      value: "24",
+      value: metrics?.active_clients || "0",
       icon: Users,
       className: "bg-green-500",
     },
     {
       title: "Documents Pending",
-      value: "12",
+      value: metrics?.documents_pending || "0",
       icon: FileText,
       className: "bg-yellow-500",
     },
     {
       title: "Compliance Alerts",
-      value: "3",
+      value: metrics?.compliance_alerts || "0",
       icon: AlertOctagon,
       className: "bg-red-500",
     },
   ];
+
+  if (!organization) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-8">
+          <h2 className="text-2xl font-semibold mb-2">No Organization Found</h2>
+          <p className="text-muted-foreground">
+            Please join or create an organization to access the dashboard.
+          </p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -61,12 +110,12 @@ const Dashboard = () => {
         <div>
           <h1 className="text-2xl font-semibold">Welcome back, {firstName}</h1>
           <p className="text-muted-foreground">
-            Here's what's happening with your clients today.
+            Here's what's happening at {organization.name}
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => (
+          {metricCards.map((metric) => (
             <Card key={metric.title}>
               <CardContent className="flex items-center p-6">
                 <div
@@ -87,7 +136,7 @@ const Dashboard = () => {
 
         <div className="grid gap-8 md:grid-cols-2">
           <TaskManagement />
-          <TeamWorkspace />
+          <OrganizationActivity organizationId={organization.id} />
         </div>
       </div>
     </DashboardLayout>
