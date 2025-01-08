@@ -16,10 +16,6 @@ interface Organization {
   created_by: string;
 }
 
-interface OrganizationMember {
-  organizations: Organization;
-}
-
 interface DashboardMetrics {
   upcoming_deadlines: number;
   active_clients: number;
@@ -45,29 +41,36 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
-  const { data: memberData } = useQuery({
-    queryKey: ['organization'],
+  // Split the queries to avoid recursion
+  const { data: organizationMember } = useQuery({
+    queryKey: ['organization-member', user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('organization_members')
-        .select(`
-          organizations (
-            id,
-            name,
-            created_at,
-            created_by
-          )
-        `)
+        .select('organization_id')
         .eq('user_id', user?.id)
         .maybeSingle();
       
       if (error) throw error;
-      return data as unknown as OrganizationMember;
+      return data;
     },
     enabled: !!user?.id,
   });
 
-  const organization = memberData?.organizations;
+  const { data: organization } = useQuery({
+    queryKey: ['organization', organizationMember?.organization_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', organizationMember?.organization_id)
+        .single();
+      
+      if (error) throw error;
+      return data as Organization;
+    },
+    enabled: !!organizationMember?.organization_id,
+  });
 
   const { data: metrics } = useQuery({
     queryKey: ['dashboard-metrics', organization?.id],
