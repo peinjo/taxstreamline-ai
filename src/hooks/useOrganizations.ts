@@ -24,20 +24,50 @@ interface Organization {
 export function useOrganizations() {
   const queryClient = useQueryClient();
 
-  const { data: organizations, isLoading } = useQuery({
+  // Separate query for organizations
+  const { data: organizations, isLoading: isLoadingOrgs, error: orgsError } = useQuery({
     queryKey: ['organizations'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('organizations')
-        .select('*, organization_members(*)');
+        .select('*');
       
       if (error) {
-        toast.error('Failed to load organizations');
+        console.error('Error fetching organizations:', error);
+        toast.error('Unable to load organizations. Please try again.');
         throw error;
       }
       return data as Organization[];
     },
   });
+
+  // Separate query for organization members
+  const { data: members, isLoading: isLoadingMembers } = useQuery({
+    queryKey: ['organization_members'],
+    queryFn: async () => {
+      if (!organizations) return [];
+      
+      const orgIds = organizations.map(org => org.id);
+      const { data, error } = await supabase
+        .from('organization_members')
+        .select('*')
+        .in('organization_id', orgIds);
+      
+      if (error) {
+        console.error('Error fetching members:', error);
+        toast.error('Unable to load organization members. Please try again.');
+        throw error;
+      }
+      return data as OrganizationMember[];
+    },
+    enabled: !!organizations && organizations.length > 0,
+  });
+
+  // Combine organizations and members
+  const enrichedOrganizations = organizations?.map(org => ({
+    ...org,
+    organization_members: members?.filter(member => member.organization_id === org.id) || []
+  }));
 
   const createOrganization = useMutation({
     mutationFn: async (name: string) => {
@@ -79,7 +109,7 @@ export function useOrganizations() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['organization_members'] });
       toast.success('Member invited successfully');
     },
     onError: () => {
@@ -101,7 +131,7 @@ export function useOrganizations() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['organization_members'] });
       toast.success('Member removed successfully');
     },
     onError: () => {
@@ -124,7 +154,7 @@ export function useOrganizations() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['organization_members'] });
       toast.success('Member role updated successfully');
     },
     onError: () => {
@@ -132,9 +162,13 @@ export function useOrganizations() {
     },
   });
 
+  const isLoading = isLoadingOrgs || isLoadingMembers;
+  const error = orgsError;
+
   return {
-    organizations,
+    organizations: enrichedOrganizations,
     isLoading,
+    error,
     createOrganization,
     inviteMember,
     removeMember,
