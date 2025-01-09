@@ -2,11 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
+interface OrganizationMember {
+  id: number;
+  organization_id: number;
+  user_id: string;
+  role: 'admin' | 'accountant' | 'taxpayer';
+  invited_email?: string;
+  invitation_token?: string;
+  joined_at?: string;
+  created_at: string;
+}
+
 interface Organization {
   id: number;
   name: string;
   created_at: string;
   created_by: string;
+  organization_members?: OrganizationMember[];
 }
 
 export function useOrganizations() {
