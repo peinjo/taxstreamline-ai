@@ -59,9 +59,85 @@ export function useOrganizations() {
     },
   });
 
+  const inviteMember = useMutation({
+    mutationFn: async ({ organizationId, email, role }: { 
+      organizationId: number; 
+      email: string; 
+      role: 'admin' | 'accountant' | 'taxpayer';
+    }) => {
+      const { data, error } = await supabase
+        .from('organization_members')
+        .insert([{
+          organization_id: organizationId,
+          invited_email: email,
+          role,
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      toast.success('Member invited successfully');
+    },
+    onError: () => {
+      toast.error('Failed to invite member');
+    },
+  });
+
+  const removeMember = useMutation({
+    mutationFn: async ({ organizationId, memberId }: { 
+      organizationId: number; 
+      memberId: number;
+    }) => {
+      const { error } = await supabase
+        .from('organization_members')
+        .delete()
+        .eq('id', memberId)
+        .eq('organization_id', organizationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      toast.success('Member removed successfully');
+    },
+    onError: () => {
+      toast.error('Failed to remove member');
+    },
+  });
+
+  const updateMemberRole = useMutation({
+    mutationFn: async ({ organizationId, memberId, role }: { 
+      organizationId: number; 
+      memberId: number;
+      role: 'admin' | 'accountant' | 'taxpayer';
+    }) => {
+      const { error } = await supabase
+        .from('organization_members')
+        .update({ role })
+        .eq('id', memberId)
+        .eq('organization_id', organizationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
+      toast.success('Member role updated successfully');
+    },
+    onError: () => {
+      toast.error('Failed to update member role');
+    },
+  });
+
   return {
     organizations,
     isLoading,
     createOrganization,
+    inviteMember,
+    removeMember,
+    updateMemberRole,
   };
 }

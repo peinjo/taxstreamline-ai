@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Plus, Users, Building } from 'lucide-react';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { CreateOrganizationDialog } from './CreateOrganizationDialog';
+import { MemberList } from './MemberList';
 
 export function OrganizationList() {
   const { organizations, isLoading } = useOrganizations();
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const [selectedOrgId, setSelectedOrgId] = React.useState<number | null>(null);
 
   if (isLoading) {
     return <div>Loading organizations...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Organizations</h2>
         <Button onClick={() => setIsCreateOpen(true)}>
@@ -25,7 +27,11 @@ export function OrganizationList() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {organizations?.map((org) => (
-          <Card key={org.id}>
+          <Card 
+            key={org.id} 
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => setSelectedOrgId(selectedOrgId === org.id ? null : org.id)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {org.name}
@@ -43,6 +49,10 @@ export function OrganizationList() {
           </Card>
         ))}
       </div>
+
+      {selectedOrgId && (
+        <MemberList organizationId={selectedOrgId} />
+      )}
 
       <CreateOrganizationDialog
         open={isCreateOpen}
