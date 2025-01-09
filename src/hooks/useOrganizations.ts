@@ -34,33 +34,32 @@ export function useOrganizations() {
       
       if (error) {
         console.error('Error fetching organizations:', error);
-        toast.error('Unable to load organizations. Please try again.');
+        toast.error('Unable to load organizations');
         throw error;
       }
       return data as Organization[];
     },
   });
 
-  // Separate query for organization members
+  // Separate query for members, only runs if we have organizations
   const { data: members, isLoading: isLoadingMembers } = useQuery({
-    queryKey: ['organization_members'],
+    queryKey: ['organization_members', organizations?.map(org => org.id)],
     queryFn: async () => {
-      if (!organizations) return [];
+      if (!organizations?.length) return [];
       
-      const orgIds = organizations.map(org => org.id);
       const { data, error } = await supabase
         .from('organization_members')
         .select('*')
-        .in('organization_id', orgIds);
+        .in('organization_id', organizations.map(org => org.id));
       
       if (error) {
         console.error('Error fetching members:', error);
-        toast.error('Unable to load organization members. Please try again.');
+        toast.error('Unable to load organization members');
         throw error;
       }
       return data as OrganizationMember[];
     },
-    enabled: !!organizations && organizations.length > 0,
+    enabled: !!organizations?.length,
   });
 
   // Combine organizations and members
