@@ -12,7 +12,47 @@ export function OrganizationList() {
   const [selectedOrgId, setSelectedOrgId] = React.useState<number | null>(null);
 
   if (isLoading) {
-    return <div>Loading organizations...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading organizations...</p>
+      </div>
+    );
+  }
+
+  if (!organizations || organizations.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Organizations</h2>
+        </div>
+        
+        <Card className="p-8">
+          <div className="text-center space-y-4">
+            <Building className="w-12 h-12 mx-auto text-muted-foreground" />
+            <h3 className="text-lg font-semibold">No Organizations Yet</h3>
+            <p className="text-muted-foreground">
+              Get started by creating a new organization or join an existing one
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button onClick={() => setIsCreateOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Organization
+              </Button>
+              {/* Note: Join functionality would be implemented separately */}
+              <Button variant="outline">
+                <Users className="w-4 h-4 mr-2" />
+                Join Organization
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <CreateOrganizationDialog
+          open={isCreateOpen}
+          onOpenChange={setIsCreateOpen}
+        />
+      </div>
+    );
   }
 
   return (
@@ -26,7 +66,7 @@ export function OrganizationList() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {organizations?.map((org) => (
+        {organizations.map((org) => (
           <Card 
             key={org.id} 
             className="cursor-pointer hover:shadow-lg transition-shadow"
