@@ -26,10 +26,14 @@ export function CreateOrganizationDialog() {
           name: data.name,
           created_by: user?.id
         })
-        .select()
+        .select('id')
         .single();
 
-      if (orgError) throw orgError;
+      if (orgError) {
+        console.error('Error creating organization:', orgError);
+        toast.error("Failed to create organization");
+        return;
+      }
 
       // Add creator as admin member
       const { error: memberError } = await supabase
@@ -40,7 +44,11 @@ export function CreateOrganizationDialog() {
           role: 'admin'
         });
 
-      if (memberError) throw memberError;
+      if (memberError) {
+        console.error('Error adding member:', memberError);
+        toast.error("Failed to add member to organization");
+        return;
+      }
 
       // Log activity
       await supabase.rpc('log_organization_activity', {
