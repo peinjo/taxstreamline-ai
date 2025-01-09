@@ -9,7 +9,7 @@ import {
 
 interface FiltersProps {
   filters: {
-    dateRange: string;
+    year: number;
     taxType: string;
     status: string;
   };
@@ -17,22 +17,26 @@ interface FiltersProps {
 }
 
 export const ReportFilters = ({ filters, onFilterChange }: FiltersProps) => {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
+
   return (
     <div className="flex gap-4">
       <Select
-        value={filters.dateRange}
+        value={filters.year.toString()}
         onValueChange={(value) =>
-          onFilterChange({ ...filters, dateRange: value })
+          onFilterChange({ ...filters, year: parseInt(value) })
         }
       >
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Date Range" />
+          <SelectValue placeholder="Select Year" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Time</SelectItem>
-          <SelectItem value="year">This Year</SelectItem>
-          <SelectItem value="quarter">This Quarter</SelectItem>
-          <SelectItem value="month">This Month</SelectItem>
+          {years.map((year) => (
+            <SelectItem key={year} value={year.toString()}>
+              {year}
+            </SelectItem>
+          ))}
         </SelectContent>
       </Select>
 

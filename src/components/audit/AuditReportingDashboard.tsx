@@ -1,111 +1,74 @@
 import React, { useState } from "react";
-import { ReportFilters } from "./ReportFilters";
 import { TaxSummaryTable } from "./TaxSummaryTable";
-import { ActivityLog } from "./ActivityLog";
-import { AnalyticsCharts } from "./AnalyticsCharts";
+import { TaxCharts } from "./TaxCharts";
+import { ReportFilters } from "./ReportFilters";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
-
-interface Organization {
-  id: number;
-  name: string;
-  created_at: string;
-  created_by: string;
-}
-
-interface OrganizationMember {
-  organizations: Organization;
-}
 
 export const AuditReportingDashboard = () => {
-  const { user } = useAuth();
   const [filters, setFilters] = useState({
-    dateRange: "all",
+    year: new Date().getFullYear(),
     taxType: "all",
     status: "all",
   });
 
-  const { data: memberData } = useQuery({
-    queryKey: ["organization"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("organization_members")
-        .select(`
-          organizations (
-            id,
-            name,
-            created_at,
-            created_by
-          )
-        `)
-        .eq("user_id", user?.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      return data as unknown as OrganizationMember;
-    },
-    enabled: !!user,
-  });
-
-  const organization = memberData?.organizations;
-
   const { data: reports, isLoading } = useQuery({
-    queryKey: ["tax-reports", filters, organization?.id],
+    queryKey: ["tax-reports", filters],
     queryFn: async () => {
       let query = supabase
         .from("tax_reports")
-        .select("*")
-        .eq("organization_id", organization?.id);
-
-      if (filters.dateRange !== "all") {
-        // Add date range filter logic
-      }
+        .select("*");
 
       if (filters.taxType !== "all") {
         query = query.eq("tax_type", filters.taxType);
       }
-
       if (filters.status !== "all") {
         query = query.eq("status", filters.status);
       }
+      query = query.eq("tax_year", filters.year);
 
       const { data, error } = await query;
       if (error) throw error;
       return data;
     },
-    enabled: !!organization?.id,
   });
 
-  if (!organization) {
-    return (
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-semibold mb-2">No Organization Found</h2>
-        <p className="text-muted-foreground">
-          Please join or create an organization to access the audit reports.
-        </p>
-      </div>
-    );
-  }
+  const handleExport = (format: "pdf" | "excel") => {
+    // Implementation for export functionality will be added later
+    console.log(`Exporting as ${format}...`);
+  };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold mb-2">
-          Audit Reports for {organization.name}
-        </h1>
-        <p className="text-muted-foreground">
-          View and analyze your organization's tax reports
-        </p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <ReportFilters filters={filters} onFilterChange={setFilters} />
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            onClick={() => handleExport("pdf")}
+            className="gap-2"
+          >
+            <FileDown className="h-4 w-4" />
+            Export PDF
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => handleExport("excel")}
+            className="gap-2"
+          >
+            <FileDown className="h-4 w-4" />
+            Export Excel
+          </Button>
+        </div>
       </div>
 
-      <ReportFilters filters={filters} onFilterChange={setFilters} />
-      
-      <AnalyticsCharts data={reports || []} />
-      
+      <div className="grid gap-6 md:grid-cols-2">
+        <TaxCharts data={reports || []} />
+      </div>
+
       <TaxSummaryTable data={reports || []} isLoading={isLoading} />
-      
-      {organization && <ActivityLog organizationId={organization.id} />}
     </div>
   );
 };

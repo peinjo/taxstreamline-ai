@@ -1,32 +1,48 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import type { TaxReport } from "@/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-interface AnalyticsChartsProps {
-  data: TaxReport[];
+interface ChartData {
+  name: string;
+  value: number;
 }
 
-export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({ data }) => {
-  const chartData = data.map(report => ({
-    name: report.tax_type,
-    amount: report.amount
-  }));
+interface AnalyticsChartsProps {
+  taxData: ChartData[];
+  title: string;
+  description: string;
+}
 
+export const AnalyticsCharts = ({ taxData, title, description }: AnalyticsChartsProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Tax Distribution</CardTitle>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
+            <BarChart data={taxData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="amount" fill="#3b82f6" />
+              <Bar dataKey="value" fill="#1e40af" />
             </BarChart>
           </ResponsiveContainer>
         </div>
