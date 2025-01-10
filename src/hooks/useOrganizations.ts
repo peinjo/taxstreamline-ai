@@ -24,8 +24,7 @@ interface Organization {
 export function useOrganizations() {
   const queryClient = useQueryClient();
 
-  // Separate query for organizations
-  const { data: organizations, isLoading: isLoadingOrgs, error: orgsError } = useQuery({
+  const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
     queryKey: ['organizations'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -34,10 +33,11 @@ export function useOrganizations() {
       
       if (error) {
         console.error('Error fetching organizations:', error);
-        toast.error('Unable to load organizations');
         throw error;
       }
-      return data as Organization[];
+      
+      // Return empty array if no organizations exist
+      return (data || []) as Organization[];
     },
   });
 
@@ -54,10 +54,9 @@ export function useOrganizations() {
       
       if (error) {
         console.error('Error fetching members:', error);
-        toast.error('Unable to load organization members');
         throw error;
       }
-      return data as OrganizationMember[];
+      return (data || []) as OrganizationMember[];
     },
     enabled: !!organizations?.length,
   });
@@ -162,12 +161,10 @@ export function useOrganizations() {
   });
 
   const isLoading = isLoadingOrgs || isLoadingMembers;
-  const error = orgsError;
 
   return {
-    organizations: enrichedOrganizations,
+    organizations: enrichedOrganizations || [],
     isLoading,
-    error,
     createOrganization,
     inviteMember,
     removeMember,
