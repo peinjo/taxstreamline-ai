@@ -1,10 +1,10 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, Users, Building } from 'lucide-react';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { CreateOrganizationDialog } from './CreateOrganizationDialog';
 import { MemberList } from './MemberList';
+import { EmptyState } from './EmptyState';
+import { OrganizationCard } from './OrganizationCard';
+import { OrganizationHeader } from './OrganizationHeader';
 
 export function OrganizationList() {
   const { organizations, isLoading } = useOrganizations();
@@ -22,31 +22,8 @@ export function OrganizationList() {
   if (!organizations || organizations.length === 0) {
     return (
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Organizations</h2>
-        </div>
-        
-        <Card className="p-8">
-          <div className="text-center space-y-4">
-            <Building className="w-12 h-12 mx-auto text-muted-foreground" />
-            <h3 className="text-lg font-semibold">No Organizations Yet</h3>
-            <p className="text-muted-foreground">
-              Get started by creating a new organization or join an existing one
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button onClick={() => setIsCreateOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Organization
-              </Button>
-              {/* Note: Join functionality would be implemented separately */}
-              <Button variant="outline">
-                <Users className="w-4 h-4 mr-2" />
-                Join Organization
-              </Button>
-            </div>
-          </div>
-        </Card>
-
+        <OrganizationHeader onCreateClick={() => setIsCreateOpen(true)} />
+        <EmptyState onCreateClick={() => setIsCreateOpen(true)} />
         <CreateOrganizationDialog
           open={isCreateOpen}
           onOpenChange={setIsCreateOpen}
@@ -57,36 +34,18 @@ export function OrganizationList() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Organizations</h2>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Organization
-        </Button>
-      </div>
+      <OrganizationHeader onCreateClick={() => setIsCreateOpen(true)} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {organizations.map((org) => (
-          <Card 
-            key={org.id} 
-            className="cursor-pointer hover:shadow-lg transition-shadow"
+          <OrganizationCard
+            key={org.id}
+            id={org.id}
+            name={org.name}
+            memberCount={org.organization_members?.length || 0}
+            isSelected={selectedOrgId === org.id}
             onClick={() => setSelectedOrgId(selectedOrgId === org.id ? null : org.id)}
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {org.name}
-              </CardTitle>
-              <Building className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center mt-2">
-                <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {org.organization_members?.length || 0} members
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+          />
         ))}
       </div>
 
