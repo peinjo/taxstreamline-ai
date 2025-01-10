@@ -326,144 +326,6 @@ export type Database = {
         }
         Relationships: []
       }
-      organization_activities: {
-        Row: {
-          action: string
-          created_at: string
-          details: Json | null
-          id: number
-          organization_id: number | null
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          details?: Json | null
-          id?: never
-          organization_id?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          details?: Json | null
-          id?: never
-          organization_id?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_activities_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organization_invitations: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          email: string
-          expires_at: string
-          id: number
-          organization_id: number | null
-          role: Database["public"]["Enums"]["org_role"]
-          token: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          email: string
-          expires_at: string
-          id?: never
-          organization_id?: number | null
-          role?: Database["public"]["Enums"]["org_role"]
-          token: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          email?: string
-          expires_at?: string
-          id?: never
-          organization_id?: number | null
-          role?: Database["public"]["Enums"]["org_role"]
-          token?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_invitations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organization_members: {
-        Row: {
-          created_at: string
-          id: number
-          invitation_token: string | null
-          invited_email: string | null
-          joined_at: string | null
-          organization_id: number | null
-          role: Database["public"]["Enums"]["org_role"]
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: never
-          invitation_token?: string | null
-          invited_email?: string | null
-          joined_at?: string | null
-          organization_id?: number | null
-          role?: Database["public"]["Enums"]["org_role"]
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: never
-          invitation_token?: string | null
-          invited_email?: string | null
-          joined_at?: string | null
-          organization_id?: number | null
-          role?: Database["public"]["Enums"]["org_role"]
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_members_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organizations: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: number
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: never
-          name: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: never
-          name?: string
-        }
-        Relationships: []
-      }
       payment_transactions: {
         Row: {
           amount: number
@@ -560,7 +422,6 @@ export type Database = {
           id: number
           income: number
           input_data: Json | null
-          organization_id: number | null
           tax_amount: number
           tax_type: string
           user_id: string | null
@@ -571,7 +432,6 @@ export type Database = {
           id?: number
           income: number
           input_data?: Json | null
-          organization_id?: number | null
           tax_amount: number
           tax_type: string
           user_id?: string | null
@@ -582,20 +442,11 @@ export type Database = {
           id?: number
           income?: number
           input_data?: Json | null
-          organization_id?: number | null
           tax_amount?: number
           tax_type?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "tax_calculations_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tax_documents: {
         Row: {
@@ -604,7 +455,6 @@ export type Database = {
           file_path: string
           filename: string
           id: number
-          organization_id: number | null
           size: number
           user_id: string | null
         }
@@ -614,7 +464,6 @@ export type Database = {
           file_path: string
           filename: string
           id?: number
-          organization_id?: number | null
           size: number
           user_id?: string | null
         }
@@ -624,19 +473,10 @@ export type Database = {
           file_path?: string
           filename?: string
           id?: number
-          organization_id?: number | null
           size?: number
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "tax_documents_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tax_filings: {
         Row: {
@@ -645,7 +485,6 @@ export type Database = {
           filing_type: string
           firs_reference: string | null
           id: number
-          organization_id: number | null
           status: string
           updated_at: string
           user_id: string | null
@@ -656,7 +495,6 @@ export type Database = {
           filing_type: string
           firs_reference?: string | null
           id?: never
-          organization_id?: number | null
           status?: string
           updated_at?: string
           user_id?: string | null
@@ -667,20 +505,11 @@ export type Database = {
           filing_type?: string
           firs_reference?: string | null
           id?: never
-          organization_id?: number | null
           status?: string
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "tax_filings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tax_guides: {
         Row: {
@@ -741,7 +570,6 @@ export type Database = {
           amount: number
           created_at: string
           id: number
-          organization_id: number | null
           status: string
           tax_type: string
           tax_year: number
@@ -752,7 +580,6 @@ export type Database = {
           amount: number
           created_at?: string
           id?: never
-          organization_id?: number | null
           status: string
           tax_type: string
           tax_year: number
@@ -763,22 +590,13 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: never
-          organization_id?: number | null
           status?: string
           tax_type?: string
           tax_year?: number
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "tax_reports_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tax_templates: {
         Row: {
@@ -934,19 +752,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      log_organization_activity: {
-        Args: {
-          org_id: number
-          action: string
-          details?: Json
-        }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "user"
       document_type: "receipt" | "filing" | "statement" | "report" | "other"
-      org_role: "admin" | "accountant" | "taxpayer"
     }
     CompositeTypes: {
       [_ in never]: never

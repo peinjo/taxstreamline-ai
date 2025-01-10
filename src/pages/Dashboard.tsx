@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
-import { OrganizationList } from "@/components/organizations/OrganizationList";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -85,8 +84,6 @@ const Dashboard = () => {
             </Card>
           ))}
         </div>
-
-        <OrganizationList />
 
         <div className="grid gap-8 md:grid-cols-2">
           <TaskManagement />
