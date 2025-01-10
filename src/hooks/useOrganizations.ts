@@ -24,48 +24,25 @@ interface Organization {
 export function useOrganizations() {
   const queryClient = useQueryClient();
 
-  const { data: organizations, isLoading: isLoadingOrgs } = useQuery({
+  const { data: organizations, isLoading } = useQuery({
     queryKey: ['organizations'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: orgs, error } = await supabase
         .from('organizations')
-        .select('*');
+        .select(`
+          *,
+          organization_members (*)
+        `);
       
       if (error) {
         console.error('Error fetching organizations:', error);
-        throw error;
+        toast.error('Failed to load organizations');
+        return [];
       }
       
-      // Return empty array if no organizations exist
-      return (data || []) as Organization[];
+      return (orgs || []) as Organization[];
     },
   });
-
-  // Separate query for members, only runs if we have organizations
-  const { data: members, isLoading: isLoadingMembers } = useQuery({
-    queryKey: ['organization_members', organizations?.map(org => org.id)],
-    queryFn: async () => {
-      if (!organizations?.length) return [];
-      
-      const { data, error } = await supabase
-        .from('organization_members')
-        .select('*')
-        .in('organization_id', organizations.map(org => org.id));
-      
-      if (error) {
-        console.error('Error fetching members:', error);
-        throw error;
-      }
-      return (data || []) as OrganizationMember[];
-    },
-    enabled: !!organizations?.length,
-  });
-
-  // Combine organizations and members
-  const enrichedOrganizations = organizations?.map(org => ({
-    ...org,
-    organization_members: members?.filter(member => member.organization_id === org.id) || []
-  }));
 
   const createOrganization = useMutation({
     mutationFn: async (name: string) => {
@@ -75,15 +52,15 @@ export function useOrganizations() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        toast.error('Failed to create organization');
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
       toast.success('Organization created successfully');
-    },
-    onError: () => {
-      toast.error('Failed to create organization');
     },
   });
 
@@ -103,15 +80,15 @@ export function useOrganizations() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        toast.error('Failed to invite member');
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization_members'] });
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
       toast.success('Member invited successfully');
-    },
-    onError: () => {
-      toast.error('Failed to invite member');
     },
   });
 
@@ -126,14 +103,14 @@ export function useOrganizations() {
         .eq('id', memberId)
         .eq('organization_id', organizationId);
 
-      if (error) throw error;
+      if (error) {
+        toast.error('Failed to remove member');
+        throw error;
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization_members'] });
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
       toast.success('Member removed successfully');
-    },
-    onError: () => {
-      toast.error('Failed to remove member');
     },
   });
 
@@ -149,21 +126,19 @@ export function useOrganizations() {
         .eq('id', memberId)
         .eq('organization_id', organizationId);
 
-      if (error) throw error;
+      if (error) {
+        toast.error('Failed to update member role');
+        throw error;
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['organization_members'] });
+      queryClient.invalidateQueries({ queryKey: ['organizations'] });
       toast.success('Member role updated successfully');
-    },
-    onError: () => {
-      toast.error('Failed to update member role');
     },
   });
 
-  const isLoading = isLoadingOrgs || isLoadingMembers;
-
   return {
-    organizations: enrichedOrganizations || [],
+    organizations: organizations || [],
     isLoading,
     createOrganization,
     inviteMember,
