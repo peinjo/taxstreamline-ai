@@ -5,6 +5,14 @@ export interface DashboardMetrics {
   compliance_alerts: number;
 }
 
+export interface Activity {
+  id: number;
+  action: string;
+  document_title: string;
+  document_type: string;
+  created_at: string;
+}
+
 export interface Deadline {
   id: number;
   text: string;

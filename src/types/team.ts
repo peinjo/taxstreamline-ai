@@ -34,12 +34,3 @@ export interface Message {
   sender_id?: string;
   created_at: string;
 }
-
-export interface DocumentComment {
-  id: number;
-  content: string;
-  document_id: string;
-  user_id?: string;
-  created_at: string;
-  updated_at: string;
-}
