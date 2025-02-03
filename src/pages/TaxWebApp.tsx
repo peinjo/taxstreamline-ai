@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
-import TaxCalculator from "@/components/tax/TaxCalculator";
+import { TaxCalculator } from "@/components/tax/TaxCalculator";
 import { TemplatesAndGuides } from "@/components/tax/TemplatesAndGuides";
 import { DocumentManager } from "@/components/tax/DocumentManager";
 import { FilingForm } from "@/components/tax/FilingForm";
