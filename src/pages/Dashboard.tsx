@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
 import { DocumentUpload } from "@/components/tax/DocumentUpload";
-import { TaxCalculator } from "@/components/tax/TaxCalculator";
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
@@ -99,7 +98,6 @@ const Dashboard = () => {
               <DocumentUpload />
             </CardContent>
           </Card>
-          <TaxCalculator />
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
