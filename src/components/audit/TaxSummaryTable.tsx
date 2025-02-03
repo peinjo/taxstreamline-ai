@@ -16,7 +16,7 @@ import * as XLSX from "xlsx";
 interface TaxReport {
   id: number;
   tax_type: string;
-  amount: number;
+  amount: number | null;
   status: string;
   tax_year: number;
 }
@@ -34,12 +34,12 @@ export const TaxSummaryTable = ({ data, isLoading }: Props) => {
     doc.setFontSize(16);
     doc.text("Tax Report Summary", 14, 15);
     
-    // Create table data
+    // Create table data with null checks
     const tableData = data.map((report) => [
-      report.tax_type,
-      report.tax_year.toString(),
-      `₦${report.amount.toLocaleString()}`,
-      report.status,
+      report.tax_type || '',
+      report.tax_year?.toString() || '',
+      report.amount ? `₦${report.amount.toLocaleString()}` : '₦0',
+      report.status || '',
     ]);
 
     // Add table
@@ -54,12 +54,12 @@ export const TaxSummaryTable = ({ data, isLoading }: Props) => {
   };
 
   const exportToExcel = () => {
-    // Prepare data for Excel
+    // Prepare data for Excel with null checks
     const excelData = data.map((report) => ({
-      "Tax Type": report.tax_type,
-      "Year": report.tax_year,
-      "Amount": report.amount,
-      "Status": report.status,
+      "Tax Type": report.tax_type || '',
+      "Year": report.tax_year || '',
+      "Amount": report.amount || 0,
+      "Status": report.status || '',
     }));
 
     // Create worksheet
@@ -112,7 +112,9 @@ export const TaxSummaryTable = ({ data, isLoading }: Props) => {
             <TableRow key={report.id}>
               <TableCell className="font-medium">{report.tax_type}</TableCell>
               <TableCell>{report.tax_year}</TableCell>
-              <TableCell>₦{report.amount.toLocaleString()}</TableCell>
+              <TableCell>
+                ₦{(report.amount || 0).toLocaleString()}
+              </TableCell>
               <TableCell>
                 <span
                   className={`px-2 py-1 rounded-full text-xs ${
