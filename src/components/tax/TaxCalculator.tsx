@@ -1,95 +1,82 @@
-import React, { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CorporateIncomeTaxCalculator } from "./CorporateIncomeTaxCalculator";
-import { VATCalculator } from "./VATCalculator";
 import { PAYECalculator } from "./PAYECalculator";
-import { CapitalGainsTaxCalculator } from "./CapitalGainsTaxCalculator";
+import { VATCalculator } from "./VATCalculator";
 import { WithholdingTaxCalculator } from "./WithholdingTaxCalculator";
-import { IndustryTaxForm } from "./IndustryTaxForm";
+import { TaxSummaryTable } from "../audit/TaxSummaryTable";
 
-const TAX_TYPES = [
-  { id: "corporate", name: "Corporate Income Tax" },
-  { id: "vat", name: "VAT" },
-  { id: "paye", name: "PAYE" },
-  { id: "capital_gains", name: "Capital Gains Tax" },
-  { id: "withholding", name: "Withholding Tax" },
-];
+export const TaxCalculator = () => {
+  const { user, userRole } = useAuth();
+  const { toast } = useToast();
+  const [realtimeData, setRealtimeData] = useState<any[]>([]);
 
-const TaxCalculator = () => {
-  const [selectedTaxType, setSelectedTaxType] = useState<string>("");
+  const { data: calculations, refetch } = useQuery({
+    queryKey: ["tax-calculations"],
+    queryFn: async () => {
+      const query = supabase
+        .from("tax_calculations")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  const renderCalculator = () => {
-    switch (selectedTaxType) {
-      case "corporate":
-        return <CorporateIncomeTaxCalculator />;
-      case "vat":
-        return <VATCalculator />;
-      case "paye":
-        return <PAYECalculator />;
-      case "capital_gains":
-        return <CapitalGainsTaxCalculator />;
-      case "withholding":
-        return <WithholdingTaxCalculator />;
-      default:
-        return null;
-    }
-  };
+      if (userRole !== "admin") {
+        query.eq("user_id", user?.id);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("tax-calculations-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "tax_calculations",
+        },
+        (payload) => {
+          console.log("Real-time update:", payload);
+          toast({
+            title: "Tax Calculation Updated",
+            description: "A new tax calculation has been processed.",
+          });
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, toast]);
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">
-          Tax Calculator
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Tabs defaultValue="general" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="general" className="flex-1">General Tax</TabsTrigger>
-            <TabsTrigger value="manufacturing" className="flex-1">Manufacturing</TabsTrigger>
-            <TabsTrigger value="oil-and-gas" className="flex-1">Oil & Gas</TabsTrigger>
-          </TabsList>
+    <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-3">
+        <PAYECalculator />
+        <VATCalculator />
+        <WithholdingTaxCalculator />
+      </div>
 
-          <TabsContent value="general">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tax Type</label>
-                <Select value={selectedTaxType} onValueChange={setSelectedTaxType}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select tax type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TAX_TYPES.map((tax) => (
-                      <SelectItem key={tax.id} value={tax.id}>
-                        {tax.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {renderCalculator()}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="manufacturing">
-            <IndustryTaxForm industry="manufacturing" />
-          </TabsContent>
-
-          <TabsContent value="oil-and-gas">
-            <IndustryTaxForm industry="oil_and_gas" />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+      {calculations && calculations.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Calculations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TaxSummaryTable data={calculations} isLoading={false} />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
-
-export default TaxCalculator;

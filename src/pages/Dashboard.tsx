@@ -7,17 +7,19 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
+import { DocumentUpload } from "@/components/tax/DocumentUpload";
+import { TaxCalculator } from "@/components/tax/TaxCalculator";
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
 
   const { data: profile } = useQuery({
-    queryKey: ['user-profile', user?.id],
+    queryKey: ["user-profile", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('user_profiles')
-        .select('full_name')
-        .eq('user_id', user?.id)
+        .from("user_profiles")
+        .select("full_name")
+        .eq("user_id", user?.id)
         .single();
       
       if (error) throw error;
@@ -26,7 +28,7 @@ const Dashboard = () => {
     enabled: !!user?.id,
   });
 
-  const firstName = profile?.full_name?.split(' ')[0] || "User";
+  const firstName = profile?.full_name?.split(" ")[0] || "User";
 
   const metrics = [
     {
@@ -59,7 +61,12 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold">Welcome back, {firstName}</h1>
+          <h1 className="text-2xl font-semibold">
+            Welcome back, {firstName}
+            {userRole === "admin" && (
+              <span className="ml-2 text-sm text-muted-foreground">(Admin)</span>
+            )}
+          </h1>
           <p className="text-muted-foreground">
             Here's what's happening with your clients today.
           </p>
@@ -83,6 +90,16 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2">
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Tax Documents</h3>
+              <DocumentUpload />
+            </CardContent>
+          </Card>
+          <TaxCalculator />
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
