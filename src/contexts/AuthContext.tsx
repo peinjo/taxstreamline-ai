@@ -62,13 +62,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error("Error fetching user role:", error);
-        setUserRole(null);
+        setUserRole('user');
       } else {
         setUserRole(data?.role || 'user');
       }
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
-      setUserRole(null);
+      setUserRole('user');
     } finally {
       setLoading(false);
     }
