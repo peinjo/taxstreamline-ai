@@ -1,1 +1,24 @@
 project_id = "ukuhdrsywxbuhcytjfog"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+port = 54325
+
+[functions.send-tax-notification]
+verify_jwt = true
