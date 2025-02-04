@@ -36,7 +36,7 @@ const TaxWebApp = () => {
 
         <Tabs defaultValue="calculator" className="space-y-6">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            <TabsTrigger value="calculator">General</TabsTrigger>
+            <TabsTrigger value="calculator">Income Tax</TabsTrigger>
             <TabsTrigger value="corporate">Corporate</TabsTrigger>
             <TabsTrigger value="vat">VAT</TabsTrigger>
             <TabsTrigger value="paye">PAYE</TabsTrigger>
@@ -47,7 +47,7 @@ const TaxWebApp = () => {
             <TabsTrigger value="industry">Industry</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="calculator">
+          <TabsContent value="calculator" className="mt-6">
             <TaxCalculator />
           </TabsContent>
 

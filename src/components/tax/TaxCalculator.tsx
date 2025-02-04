@@ -4,20 +4,12 @@ import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { TaxCalculation } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const TaxCalculator = () => {
   const { user } = useAuth();
   const [income, setIncome] = useState("");
-  const [taxType, setTaxType] = useState("income");
 
   const { data: calculations } = useQuery({
     queryKey: ["tax-calculations", user?.id],
@@ -26,6 +18,7 @@ export const TaxCalculator = () => {
         .from("tax_calculations")
         .select("*")
         .eq("user_id", user?.id)
+        .eq("tax_type", "income")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -40,12 +33,12 @@ export const TaxCalculator = () => {
     const incomeAmount = parseFloat(income);
     if (isNaN(incomeAmount)) return;
 
-    const taxAmount = calculateTaxAmount(incomeAmount, taxType);
+    const taxAmount = calculateTaxAmount(incomeAmount);
 
     const { error } = await supabase.from("tax_calculations").insert([
       {
         user_id: user.id,
-        tax_type: taxType,
+        tax_type: "income",
         income: incomeAmount,
         tax_amount: taxAmount,
         input_data: { income: incomeAmount },
@@ -58,35 +51,15 @@ export const TaxCalculator = () => {
     }
   };
 
-  const calculateTaxAmount = (income: number, type: string): number => {
-    // Simplified tax calculation logic
-    const rates: Record<string, number> = {
-      income: 0.3,
-      corporate: 0.25,
-      capital_gains: 0.15,
-    };
-
-    return income * (rates[type] || 0.3);
+  const calculateTaxAmount = (income: number): number => {
+    // Fetch rate from tax_rates table for income tax
+    return income * 0.24; // Using 24% as default income tax rate
   };
 
   return (
     <Card className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Tax Calculator</h2>
+      <h2 className="text-2xl font-bold mb-4">Income Tax Calculator</h2>
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Tax Type</label>
-          <Select value={taxType} onValueChange={setTaxType}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="income">Income Tax</SelectItem>
-              <SelectItem value="corporate">Corporate Tax</SelectItem>
-              <SelectItem value="capital_gains">Capital Gains Tax</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         <div>
           <label className="block text-sm font-medium mb-1">Income Amount</label>
           <Input
@@ -109,11 +82,7 @@ export const TaxCalculator = () => {
                   className="p-3 bg-gray-50 rounded-lg flex justify-between"
                 >
                   <div>
-                    <span className="font-medium">
-                      {calc.tax_type.charAt(0).toUpperCase() +
-                        calc.tax_type.slice(1)}{" "}
-                      Tax
-                    </span>
+                    <span className="font-medium">Income Tax</span>
                     <span className="text-gray-500 ml-2">
                       Income: ₦{calc.income.toLocaleString()}
                     </span>
