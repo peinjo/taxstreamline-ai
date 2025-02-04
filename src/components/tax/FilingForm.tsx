@@ -1,45 +1,24 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSubmitFiling } from "@/hooks/useTaxFiling";
 import { toast } from "sonner";
-import { sendTaxNotification } from "@/utils/notifications";
 
 export function FilingForm() {
-  const { user } = useAuth();
   const { mutate: submitFiling, isPending } = useSubmitFiling();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     
-    try {
-      const filingData = {
-        type: formData.get("filingType") as string,
-        data: {
-          year: formData.get("taxYear"),
-          description: formData.get("description"),
-        }
-      };
-
-      await submitFiling(filingData);
-      
-      // Send email notification
-      await sendTaxNotification({
-        type: 'filing_confirmation',
-        userEmail: user?.email || '',
-        userName: user?.user_metadata?.full_name || 'Valued Customer',
-        data: {
-          filingType: filingData.type,
-          filingDate: new Date().toLocaleDateString(),
-          reference: `FILING-${Date.now()}`
-        }
-      });
-
-      toast.success("Filing submitted successfully");
-    } catch (error) {
-      toast.error("Failed to submit filing");
-    }
+    submitFiling({
+      type: formData.get("filingType") as string,
+      data: {
+        year: formData.get("taxYear"),
+        description: formData.get("description"),
+      }
+    });
   };
 
   return (
@@ -49,25 +28,29 @@ export function FilingForm() {
           <label htmlFor="filingType" className="block text-sm font-medium mb-1">
             Filing Type
           </label>
-          <select name="filingType" required className="block w-full">
-            <option value="corporate">Corporate Tax</option>
-            <option value="personal">Personal Income Tax</option>
-            <option value="vat">VAT</option>
-          </select>
+          <Select name="filingType" required>
+            <SelectTrigger>
+              <SelectValue placeholder="Select filing type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="corporate">Corporate Tax</SelectItem>
+              <SelectItem value="personal">Personal Income Tax</SelectItem>
+              <SelectItem value="vat">VAT</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
           <label htmlFor="taxYear" className="block text-sm font-medium mb-1">
             Tax Year
           </label>
-          <input
+          <Input
             type="number"
             name="taxYear"
             min={2000}
             max={new Date().getFullYear()}
             defaultValue={new Date().getFullYear()}
             required
-            className="block w-full"
           />
         </div>
 
@@ -75,11 +58,10 @@ export function FilingForm() {
           <label htmlFor="description" className="block text-sm font-medium mb-1">
             Description
           </label>
-          <input
+          <Input
             type="text"
             name="description"
             placeholder="Additional details about this filing"
-            className="block w-full"
           />
         </div>
 
@@ -87,7 +69,7 @@ export function FilingForm() {
           <label htmlFor="documents" className="block text-sm font-medium mb-1">
             Supporting Documents
           </label>
-          <input
+          <Input
             type="file"
             name="documents"
             accept=".pdf,.doc,.docx"

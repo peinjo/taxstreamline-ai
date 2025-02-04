@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { addDays, isBefore, differenceInDays } from "date-fns";
-import { sendTaxNotification } from "@/utils/notifications";
+import { addDays, isBefore } from "date-fns";
 
 export const useDeadlineChecker = () => {
   const { user } = useAuth();
@@ -38,18 +37,6 @@ export const useDeadlineChecker = () => {
                 due_date: event.date,
               },
             ]);
-
-            // Send email notification
-            await sendTaxNotification({
-              type: 'deadline_reminder',
-              userEmail: user.email,
-              userName: user.user_metadata?.full_name || 'Valued Customer',
-              data: {
-                deadlineDate: event.date,
-                taskName: event.title,
-                daysRemaining: differenceInDays(new Date(event.date), new Date())
-              }
-            });
           }
         }
       }

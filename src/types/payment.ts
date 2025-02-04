@@ -1,24 +1,12 @@
 export interface PaymentTransaction {
   id: number;
-  user_id?: string | null;
+  user_id?: string;
   amount: number;
   currency: string;
   payment_reference: string;
   provider: string;
   status: string;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
-}
-
-export interface PaymentResponse {
-  transaction: PaymentTransaction;
-  authorizationUrl: string;
-}
-
-export interface PaymentInitiationData {
-  amount: number;
-  currency: string;
-  email?: string;
-  metadata?: Record<string, any>;
 }

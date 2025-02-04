@@ -2,14 +2,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { initiatePayment, verifyPayment } from "@/integrations/paymentGateway";
 import { useError } from "@/contexts/ErrorContext";
 import { toast } from "sonner";
-import { PaymentResponse, PaymentInitiationData } from "@/types/payment";
 
 export const useInitiatePayment = () => {
   const { handleError } = useError();
 
   return useMutation({
-    mutationFn: (data: PaymentInitiationData) => initiatePayment(data),
-    onSuccess: (data: PaymentResponse) => {
+    mutationFn: initiatePayment,
+    onSuccess: (data) => {
       toast.success("Payment initiated successfully");
       return data;
     },

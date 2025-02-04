@@ -1,7 +1,22 @@
 import { supabase } from "./supabase/client";
-import { PaymentInitiationData, PaymentResponse, PaymentTransaction } from "@/types/payment";
 
-export const initiatePayment = async (data: PaymentInitiationData): Promise<PaymentResponse> => {
+interface PaymentInitiationData {
+  amount: number;
+  currency: string;
+  email: string;
+  metadata?: Record<string, any>;
+}
+
+interface PaymentTransaction {
+  id: number;
+  amount: number;
+  currency: string;
+  payment_reference: string;
+  status: string;
+  provider: string;
+}
+
+export const initiatePayment = async (data: PaymentInitiationData) => {
   try {
     // Initialize payment with Paystack
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
@@ -35,10 +50,7 @@ export const initiatePayment = async (data: PaymentInitiationData): Promise<Paym
       .single();
 
     if (error) throw error;
-    return { 
-      transaction: transaction as PaymentTransaction,
-      authorizationUrl: paymentData.data.authorization_url 
-    };
+    return { transaction, authorizationUrl: paymentData.data.authorization_url };
   } catch (error) {
     console.error("Error initiating payment:", error);
     throw error;
@@ -72,7 +84,7 @@ export const verifyPayment = async (reference: string): Promise<PaymentTransacti
       .single();
 
     if (error) throw error;
-    return transaction as PaymentTransaction;
+    return transaction;
   } catch (error) {
     console.error("Error verifying payment:", error);
     throw error;

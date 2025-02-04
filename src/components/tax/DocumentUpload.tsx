@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, File } from "lucide-react";
-import { sendTaxNotification } from "@/utils/notifications";
 
 export const DocumentUpload = () => {
   const { user } = useAuth();
@@ -27,32 +26,15 @@ export const DocumentUpload = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: document, error: dbError } = await supabase
-        .from("tax_documents")
-        .insert({
-          filename: file.name,
-          file_path: filePath,
-          content_type: file.type,
-          size: file.size,
-          user_id: user?.id,
-        })
-        .select()
-        .single();
+      const { error: dbError } = await supabase.from("tax_documents").insert({
+        filename: file.name,
+        file_path: filePath,
+        content_type: file.type,
+        size: file.size,
+        user_id: user?.id,
+      });
 
       if (dbError) throw dbError;
-
-      // Send email notification
-      await sendTaxNotification({
-        type: 'document_upload',
-        userEmail: user?.email || '',
-        userName: user?.user_metadata?.full_name || 'Valued Customer',
-        data: {
-          fileName: file.name,
-          uploadDate: new Date().toLocaleDateString(),
-          fileType: file.type,
-          documentId: document.id
-        }
-      });
 
       toast({
         title: "Success",
