@@ -5,15 +5,27 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+interface User {
+  id: string;
+  email: string;
+}
+
+interface Comment {
+  id: number;
+  content: string;
+  created_at: string;
+  user: User | null;
+}
+
 export const CommentList = ({ documentId }: { documentId: string }) => {
-  const { data: comments } = useQuery({
+  const { data: comments } = useQuery<Comment[]>({
     queryKey: ["document-comments", documentId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("document_comments")
         .select(`
           *,
-          user:user_id (
+          user:profiles!document_comments_user_id_fkey(
             id,
             email
           )

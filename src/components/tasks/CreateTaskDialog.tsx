@@ -48,12 +48,11 @@ export const CreateTaskDialog = ({
 
   const handleCreateTask = async () => {
     try {
-      const { error } = await supabase.from("tasks").insert([
-        {
-          ...newTask,
-          created_by: user?.id,
-        },
-      ]);
+      const { error } = await supabase.from("tasks").insert({
+        ...newTask,
+        due_date: newTask.due_date.toISOString(),
+        created_by: user?.id,
+      });
 
       if (error) throw error;
 

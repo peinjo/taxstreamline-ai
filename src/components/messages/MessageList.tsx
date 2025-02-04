@@ -5,15 +5,27 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+interface User {
+  id: string;
+  email: string;
+}
+
+interface Message {
+  id: number;
+  content: string;
+  created_at: string;
+  sender: User | null;
+}
+
 export const MessageList = ({ teamId }: { teamId: number }) => {
-  const { data: messages } = useQuery({
+  const { data: messages } = useQuery<Message[]>({
     queryKey: ["messages", teamId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("messages")
         .select(`
           *,
-          sender:sender_id (
+          sender:profiles!messages_sender_id_fkey(
             id,
             email
           )

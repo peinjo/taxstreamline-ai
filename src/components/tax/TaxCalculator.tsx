@@ -9,12 +9,23 @@ import { VATCalculator } from "./VATCalculator";
 import { WithholdingTaxCalculator } from "./WithholdingTaxCalculator";
 import { TaxSummaryTable } from "../audit/TaxSummaryTable";
 
+interface TaxCalculation {
+  id: number;
+  tax_type: string;
+  income: number;
+  tax_amount: number;
+  created_at: string;
+  input_data: Record<string, any> | null;
+  calculation_details: Record<string, any> | null;
+  user_id: string | null;
+}
+
 export const TaxCalculator = () => {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
-  const [realtimeData, setRealtimeData] = useState<any[]>([]);
+  const [realtimeData, setRealtimeData] = useState<TaxCalculation[]>([]);
 
-  const { data: calculations, refetch } = useQuery({
+  const { data: calculations, refetch } = useQuery<TaxCalculation[]>({
     queryKey: ["tax-calculations"],
     queryFn: async () => {
       const query = supabase
