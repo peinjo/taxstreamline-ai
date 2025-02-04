@@ -19,11 +19,12 @@ export interface TaxReport {
 }
 
 export interface TaxRate {
-  id: string;
+  id: number;  // Changed from string to number to match database
   category: string;
   subcategory?: string;
   rate: number;
   description?: string;
+  created_at?: string;  // Added to match database schema
 }
 
 export interface TaxCalculationResult {
