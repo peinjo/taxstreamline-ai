@@ -8,7 +8,7 @@ import { sendTaxNotification } from "@/utils/notifications";
 
 export function PaymentForm() {
   const { user } = useAuth();
-  const { mutate: initiatePayment, isPending } = useInitiatePayment();
+  const { mutateAsync: initiatePayment, isPending } = useInitiatePayment();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
