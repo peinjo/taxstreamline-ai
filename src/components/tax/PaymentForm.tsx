@@ -26,20 +26,22 @@ export function PaymentForm() {
 
       const result = await initiatePayment(paymentData);
       
-      // Send email notification
-      await sendTaxNotification({
-        type: 'payment_receipt',
-        userEmail: user?.email || '',
-        userName: user?.user_metadata?.full_name || 'Valued Customer',
-        data: {
-          amount: paymentData.amount,
-          reference: result.reference,
-          date: new Date().toLocaleDateString(),
-          description: paymentData.metadata.purpose
-        }
-      });
+      if (result?.transaction) {
+        // Send email notification
+        await sendTaxNotification({
+          type: 'payment_receipt',
+          userEmail: user?.email || '',
+          userName: user?.user_metadata?.full_name || 'Valued Customer',
+          data: {
+            amount: paymentData.amount,
+            reference: result.transaction.payment_reference,
+            date: new Date().toLocaleDateString(),
+            description: paymentData.metadata.purpose
+          }
+        });
 
-      toast.success("Payment initiated successfully");
+        toast.success("Payment initiated successfully");
+      }
     } catch (error) {
       toast.error("Failed to initiate payment");
     }
