@@ -59,3 +59,12 @@ export interface WithholdingTaxInput {
   paymentAmount: number;
   category: string;
 }
+
+export interface StampDutyInput {
+  amount: number;
+  type: string;
+}
+
+export interface EducationTaxInput {
+  assessableProfits: number;
+}
