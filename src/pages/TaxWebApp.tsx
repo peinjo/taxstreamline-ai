@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -26,15 +27,15 @@ const TaxWebApp = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-6 space-y-8">
-        <div>
+      <div className="container mx-auto p-6 space-y-8 mt-8">
+        <div className="mb-8">
           <h1 className="text-2xl font-semibold">Tax Web Application</h1>
           <p className="text-muted-foreground">
             Manage your tax calculations, filings, and payments
           </p>
         </div>
 
-        <Tabs defaultValue="calculator" className="space-y-6">
+        <Tabs defaultValue="calculator" className="space-y-8">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
             <TabsTrigger value="calculator">Income Tax</TabsTrigger>
             <TabsTrigger value="corporate">Corporate</TabsTrigger>
@@ -47,7 +48,7 @@ const TaxWebApp = () => {
             <TabsTrigger value="industry">Industry</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="calculator" className="mt-6">
+          <TabsContent value="calculator" className="mt-8">
             <TaxCalculator />
           </TabsContent>
 
