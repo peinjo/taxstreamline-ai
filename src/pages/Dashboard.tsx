@@ -1,9 +1,10 @@
+```typescript
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Users, FileText, AlertOctagon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
@@ -110,3 +111,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+```

@@ -1,6 +1,7 @@
+```typescript
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
@@ -54,3 +55,4 @@ export const CommentInput = ({ documentId }: { documentId: string }) => {
     </div>
   );
 };
+```

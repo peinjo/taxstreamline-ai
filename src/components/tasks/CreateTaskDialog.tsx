@@ -1,3 +1,4 @@
+```typescript
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreateTaskDialogProps {
   isOpen: boolean;
@@ -150,3 +151,4 @@ export const CreateTaskDialog = ({
     </Dialog>
   );
 };
+```

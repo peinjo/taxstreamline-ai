@@ -1,6 +1,7 @@
+```typescript
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import type { Comment } from "@/types";
@@ -60,3 +61,4 @@ export const CommentList: React.FC<CommentListProps> = ({ documentId }) => {
 };
 
 export default CommentList;
+```

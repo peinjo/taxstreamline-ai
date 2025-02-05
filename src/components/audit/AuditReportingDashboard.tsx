@@ -1,3 +1,4 @@
+```typescript
 import React, { useState } from "react";
 import { TaxSummaryTable } from "./TaxSummaryTable";
 import { TaxCharts } from "./TaxCharts";
@@ -5,7 +6,7 @@ import { ReportFilters } from "./ReportFilters";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AuditReportingDashboard = () => {
   const [filters, setFilters] = useState({
@@ -72,3 +73,4 @@ export const AuditReportingDashboard = () => {
     </div>
   );
 };
+```

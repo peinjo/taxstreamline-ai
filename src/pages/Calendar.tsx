@@ -1,3 +1,4 @@
+```typescript
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
@@ -8,7 +9,7 @@ import { useState } from "react";
 import { format, isTomorrow } from "date-fns";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
   id: string;
@@ -162,3 +163,4 @@ const Calendar = () => {
 };
 
 export default Calendar;
+```
