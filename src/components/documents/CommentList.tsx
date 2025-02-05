@@ -1,4 +1,4 @@
-```typescript
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,16 +16,13 @@ export const CommentList: React.FC<CommentListProps> = ({ documentId }) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("document_comments")
-        .select(`
-          *,
-          user:user_profiles(full_name)
-        `)
+        .select("*, user:user_profiles(full_name)")
         .eq("document_id", documentId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Comment[];
-    },
+    }
   });
 
   if (isLoading) {
@@ -61,4 +58,3 @@ export const CommentList: React.FC<CommentListProps> = ({ documentId }) => {
 };
 
 export default CommentList;
-```

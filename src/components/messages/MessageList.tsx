@@ -1,4 +1,4 @@
-```typescript
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,16 +16,13 @@ export const MessageList: React.FC<MessageListProps> = ({ teamId }) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("messages")
-        .select(`
-          *,
-          sender:user_profiles(full_name)
-        `)
+        .select("*, sender:user_profiles(full_name)")
         .eq("team_id", teamId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Message[];
-    },
+    }
   });
 
   if (isLoading) {
@@ -61,4 +58,3 @@ export const MessageList: React.FC<MessageListProps> = ({ teamId }) => {
 };
 
 export default MessageList;
-```

@@ -1,4 +1,4 @@
-```typescript
+
 import React, { useState } from "react";
 import { TaxSummaryTable } from "./TaxSummaryTable";
 import { TaxCharts } from "./TaxCharts";
@@ -33,11 +33,10 @@ export const AuditReportingDashboard = () => {
       const { data, error } = await query;
       if (error) throw error;
       return data;
-    },
+    }
   });
 
   const handleExport = (format: "pdf" | "excel") => {
-    // Implementation for export functionality will be added later
     console.log(`Exporting as ${format}...`);
   };
 
@@ -73,4 +72,3 @@ export const AuditReportingDashboard = () => {
     </div>
   );
 };
-```
