@@ -1,82 +1,71 @@
-import React, { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import React from "react";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PAYECalculator } from "./PAYECalculator";
 import { VATCalculator } from "./VATCalculator";
+import { CorporateIncomeTaxCalculator } from "./CorporateIncomeTaxCalculator";
+import { CapitalGainsTaxCalculator } from "./CapitalGainsTaxCalculator";
 import { WithholdingTaxCalculator } from "./WithholdingTaxCalculator";
-import { TaxSummaryTable } from "../audit/TaxSummaryTable";
+import { StampDutyCalculator } from "./StampDutyCalculator";
+import { EducationTaxCalculator } from "./EducationTaxCalculator";
+import { PetroleumProfitTaxCalculator } from "./PetroleumProfitTaxCalculator";
+import { IndustryTaxForm } from "./IndustryTaxForm";
 
 export const TaxCalculator = () => {
-  const { user, userRole } = useAuth();
-  const { toast } = useToast();
-  const [realtimeData, setRealtimeData] = useState<any[]>([]);
-
-  const { data: calculations, refetch } = useQuery({
-    queryKey: ["tax-calculations"],
-    queryFn: async () => {
-      const query = supabase
-        .from("tax_calculations")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (userRole !== "admin") {
-        query.eq("user_id", user?.id);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user,
-  });
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("tax-calculations-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "tax_calculations",
-        },
-        (payload) => {
-          console.log("Real-time update:", payload);
-          toast({
-            title: "Tax Calculation Updated",
-            description: "A new tax calculation has been processed.",
-          });
-          refetch();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [refetch, toast]);
-
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-3">
-        <PAYECalculator />
-        <VATCalculator />
-        <WithholdingTaxCalculator />
-      </div>
+    <Card className="p-6">
+      <Tabs defaultValue="corporate" className="space-y-4">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          <TabsTrigger value="corporate">Corporate Income</TabsTrigger>
+          <TabsTrigger value="vat">VAT</TabsTrigger>
+          <TabsTrigger value="paye">PAYE</TabsTrigger>
+          <TabsTrigger value="capital-gains">Capital Gains</TabsTrigger>
+          <TabsTrigger value="withholding">Withholding</TabsTrigger>
+          <TabsTrigger value="stamp-duty">Stamp Duty</TabsTrigger>
+          <TabsTrigger value="education">Education</TabsTrigger>
+          <TabsTrigger value="petroleum">Petroleum Profit</TabsTrigger>
+          <TabsTrigger value="industry">Industry Specific</TabsTrigger>
+        </TabsList>
 
-      {calculations && calculations.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Calculations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <TaxSummaryTable data={calculations} isLoading={false} />
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        <div className="grid gap-6">
+          <TabsContent value="corporate">
+            <CorporateIncomeTaxCalculator />
+          </TabsContent>
+          
+          <TabsContent value="vat">
+            <VATCalculator />
+          </TabsContent>
+
+          <TabsContent value="paye">
+            <PAYECalculator />
+          </TabsContent>
+
+          <TabsContent value="capital-gains">
+            <CapitalGainsTaxCalculator />
+          </TabsContent>
+
+          <TabsContent value="withholding">
+            <WithholdingTaxCalculator />
+          </TabsContent>
+
+          <TabsContent value="stamp-duty">
+            <StampDutyCalculator />
+          </TabsContent>
+
+          <TabsContent value="education">
+            <EducationTaxCalculator />
+          </TabsContent>
+
+          <TabsContent value="petroleum">
+            <PetroleumProfitTaxCalculator />
+          </TabsContent>
+
+          <TabsContent value="industry">
+            <IndustryTaxForm />
+          </TabsContent>
+        </div>
+      </Tabs>
+    </Card>
   );
 };
