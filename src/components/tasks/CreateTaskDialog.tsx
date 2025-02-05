@@ -1,4 +1,3 @@
-```typescript
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,11 +31,11 @@ interface CreateTaskDialogProps {
   onTaskCreated: () => void;
 }
 
-export const CreateTaskDialog = ({
+export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   isOpen,
   onOpenChange,
   onTaskCreated,
-}: CreateTaskDialogProps) => {
+}) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [newTask, setNewTask] = React.useState({
@@ -151,4 +150,3 @@ export const CreateTaskDialog = ({
     </Dialog>
   );
 };
-```

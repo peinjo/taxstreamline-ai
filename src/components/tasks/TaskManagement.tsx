@@ -1,4 +1,3 @@
-```typescript
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,7 @@ import { Task } from "@/types/team";
 import { TaskList } from "./TaskList";
 import { CreateTaskDialog } from "./CreateTaskDialog";
 
-export const TaskManagement = () => {
+export const TaskManagement: React.FC = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: tasks, refetch } = useQuery({
@@ -36,4 +35,3 @@ export const TaskManagement = () => {
     </div>
   );
 };
-```

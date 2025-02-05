@@ -1,4 +1,3 @@
-```typescript
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { MessageSquarePlus } from "lucide-react";
 
-export const CommentInput = ({ documentId }: { documentId: string }) => {
+export const CommentInput: React.FC<{ documentId: string }> = ({ documentId }) => {
   const [content, setContent] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
@@ -55,4 +54,3 @@ export const CommentInput = ({ documentId }: { documentId: string }) => {
     </div>
   );
 };
-```

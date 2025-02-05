@@ -1,4 +1,4 @@
-```typescript
+import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-export function FilingHistory() {
+export const FilingHistory: React.FC = () => {
   const { data: filings, isLoading } = useQuery({
     queryKey: ["tax-filings"],
     queryFn: async () => {
@@ -67,5 +67,4 @@ export function FilingHistory() {
       </Table>
     </div>
   );
-}
-```
+};

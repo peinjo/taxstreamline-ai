@@ -1,11 +1,10 @@
-
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { EventDialog } from "@/components/calendar/EventDialog";
-import { useState } from "react";
 import { format, isTomorrow } from "date-fns";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -80,7 +79,7 @@ const Calendar = () => {
     addEventMutation.mutate(eventData);
   };
 
-  const handleRemoveEvent = (id: string) => {
+  const handleRemoveEvent = (id: number) => {
     removeEventMutation.mutate(id);
   };
 
