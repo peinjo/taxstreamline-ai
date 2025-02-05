@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,19 +42,18 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   const [newTask, setNewTask] = React.useState({
     title: "",
     description: "",
-    priority: "medium",
-    status: "pending",
+    priority: "medium" as const,
+    status: "pending" as const,
     due_date: new Date(),
   });
 
   const handleCreateTask = async () => {
     try {
-      const { error } = await supabase.from("tasks").insert([
-        {
-          ...newTask,
-          created_by: user?.id,
-        },
-      ]);
+      const { error } = await supabase.from("tasks").insert({
+        ...newTask,
+        due_date: newTask.due_date.toISOString(),
+        created_by: user?.id,
+      });
 
       if (error) throw error;
 

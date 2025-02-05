@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
-  id: string;
+  id: number;
   title: string;
   date: string;
   company: string;
@@ -32,7 +33,7 @@ const Calendar = () => {
         .order("date", { ascending: true });
       
       if (error) throw error;
-      return data;
+      return data as Event[];
     },
   });
 
@@ -52,7 +53,6 @@ const Calendar = () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
       toast.success("Event added successfully");
       
-      // Check if the event is tomorrow to show notification
       if (isTomorrow(new Date(date))) {
         toast.info("Reminder: Event is tomorrow!");
       }
@@ -61,7 +61,7 @@ const Calendar = () => {
 
   // Remove event mutation
   const removeEventMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {
       const { error } = await supabase
         .from("calendar_events")
         .delete()
