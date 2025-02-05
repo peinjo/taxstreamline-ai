@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -11,10 +10,6 @@ import { WithholdingTaxCalculator } from "@/components/tax/WithholdingTaxCalcula
 import { IndustryTaxForm } from "@/components/tax/IndustryTaxForm";
 import { StampDutyCalculator } from "@/components/tax/StampDutyCalculator";
 import { EducationTaxCalculator } from "@/components/tax/EducationTaxCalculator";
-import { FilingHistory } from "@/components/tax/FilingHistory";
-import { PaymentForm } from "@/components/tax/PaymentForm";
-import { DocumentManager } from "@/components/tax/DocumentManager";
-import { TemplatesAndGuides } from "@/components/tax/TemplatesAndGuides";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -31,15 +26,15 @@ const TaxWebApp = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-6 space-y-12 mt-16">
-        <div className="mb-12">
+      <div className="container mx-auto p-6 space-y-8">
+        <div>
           <h1 className="text-2xl font-semibold">Tax Web Application</h1>
           <p className="text-muted-foreground">
             Manage your tax calculations, filings, and payments
           </p>
         </div>
 
-        <Tabs defaultValue="calculator" className="space-y-12">
+        <Tabs defaultValue="calculator" className="space-y-6">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
             <TabsTrigger value="calculator">Income Tax</TabsTrigger>
             <TabsTrigger value="corporate">Corporate</TabsTrigger>
@@ -50,13 +45,9 @@ const TaxWebApp = () => {
             <TabsTrigger value="stamp-duty">Stamp Duty</TabsTrigger>
             <TabsTrigger value="education">Education</TabsTrigger>
             <TabsTrigger value="industry">Industry</TabsTrigger>
-            <TabsTrigger value="filings">Filings</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="calculator" className="mt-12">
+          <TabsContent value="calculator" className="mt-6">
             <TaxCalculator />
           </TabsContent>
 
@@ -93,22 +84,6 @@ const TaxWebApp = () => {
               <IndustryTaxForm industry="manufacturing" />
               <IndustryTaxForm industry="oil_and_gas" />
             </div>
-          </TabsContent>
-
-          <TabsContent value="filings">
-            <FilingHistory />
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <PaymentForm />
-          </TabsContent>
-
-          <TabsContent value="documents">
-            <DocumentManager />
-          </TabsContent>
-
-          <TabsContent value="templates">
-            <TemplatesAndGuides />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,6 +1,5 @@
-
 import { QueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { defaultTemplate } from "@/components/transfer-pricing/constants";
 import { Document } from "@/components/transfer-pricing/types";
 

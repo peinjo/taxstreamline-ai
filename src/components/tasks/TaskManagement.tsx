@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { Task } from "@/types/team";
 import { TaskList } from "./TaskList";
 import { CreateTaskDialog } from "./CreateTaskDialog";
 
-export const TaskManagement: React.FC = () => {
+export const TaskManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: tasks, refetch } = useQuery({

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { TaxSummaryTable } from "./TaxSummaryTable";
 import { TaxCharts } from "./TaxCharts";
@@ -6,7 +5,7 @@ import { ReportFilters } from "./ReportFilters";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 export const AuditReportingDashboard = () => {
   const [filters, setFilters] = useState({
@@ -33,10 +32,11 @@ export const AuditReportingDashboard = () => {
       const { data, error } = await query;
       if (error) throw error;
       return data;
-    }
+    },
   });
 
   const handleExport = (format: "pdf" | "excel") => {
+    // Implementation for export functionality will be added later
     console.log(`Exporting as ${format}...`);
   };
 

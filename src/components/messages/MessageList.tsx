@@ -1,7 +1,6 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import type { Message } from "@/types";
@@ -16,13 +15,16 @@ export const MessageList: React.FC<MessageListProps> = ({ teamId }) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("messages")
-        .select("*, sender:user_profiles(full_name)")
+        .select(`
+          *,
+          sender:user_profiles(full_name)
+        `)
         .eq("team_id", teamId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Message[];
-    }
+    },
   });
 
   if (isLoading) {

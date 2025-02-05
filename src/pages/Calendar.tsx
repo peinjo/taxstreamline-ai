@@ -1,18 +1,17 @@
-
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { EventDialog } from "@/components/calendar/EventDialog";
+import { useState } from "react";
 import { format, isTomorrow } from "date-fns";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 interface Event {
-  id: number;
+  id: string;
   title: string;
   date: string;
   company: string;
@@ -33,7 +32,7 @@ const Calendar = () => {
         .order("date", { ascending: true });
       
       if (error) throw error;
-      return data as Event[];
+      return data;
     },
   });
 
@@ -53,15 +52,16 @@ const Calendar = () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
       toast.success("Event added successfully");
       
+      // Check if the event is tomorrow to show notification
       if (isTomorrow(new Date(date))) {
-        toast.info("Reminder: Event is tomorrow!");
+        toast.info(`Reminder: Event is tomorrow!`);
       }
     },
   });
 
   // Remove event mutation
   const removeEventMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("calendar_events")
         .delete()
@@ -79,7 +79,7 @@ const Calendar = () => {
     addEventMutation.mutate(eventData);
   };
 
-  const handleRemoveEvent = (id: number) => {
+  const handleRemoveEvent = (id: string) => {
     removeEventMutation.mutate(id);
   };
 

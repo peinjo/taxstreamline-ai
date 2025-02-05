@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { addDays, isBefore } from "date-fns";
 
 export const checkDeadlines = async (userId: string) => {

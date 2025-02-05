@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 interface CreateTaskDialogProps {
   isOpen: boolean;
@@ -32,25 +31,14 @@ interface CreateTaskDialogProps {
   onTaskCreated: () => void;
 }
 
-type TaskPriority = "low" | "medium" | "high";
-type TaskStatus = "pending" | "in_progress" | "completed";
-
-interface NewTask {
-  title: string;
-  description: string;
-  priority: TaskPriority;
-  status: TaskStatus;
-  due_date: Date;
-}
-
-export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
+export const CreateTaskDialog = ({
   isOpen,
   onOpenChange,
   onTaskCreated,
-}) => {
+}: CreateTaskDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [newTask, setNewTask] = React.useState<NewTask>({
+  const [newTask, setNewTask] = React.useState({
     title: "",
     description: "",
     priority: "medium",
@@ -60,11 +48,12 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 
   const handleCreateTask = async () => {
     try {
-      const { error } = await supabase.from("tasks").insert({
-        ...newTask,
-        due_date: newTask.due_date.toISOString(),
-        created_by: user?.id,
-      });
+      const { error } = await supabase.from("tasks").insert([
+        {
+          ...newTask,
+          created_by: user?.id,
+        },
+      ]);
 
       if (error) throw error;
 
@@ -114,7 +103,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
           />
           <Select
             value={newTask.priority}
-            onValueChange={(value: TaskPriority) =>
+            onValueChange={(value) =>
               setNewTask({ ...newTask, priority: value })
             }
           >

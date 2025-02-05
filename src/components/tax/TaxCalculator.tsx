@@ -1,15 +1,15 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { TaxCalculation } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
-import { CalculationForm } from "./CalculationForm";
-import { CalculationHistory } from "./CalculationHistory";
 
 export const TaxCalculator = () => {
   const { user } = useAuth();
+  const [income, setIncome] = useState("");
 
   const { data: calculations } = useQuery({
     queryKey: ["tax-calculations", user?.id],
@@ -27,18 +27,21 @@ export const TaxCalculator = () => {
     enabled: !!user?.id,
   });
 
-  const handleCalculate = async (income: number) => {
+  const handleCalculate = async () => {
     if (!user) return;
 
-    const taxAmount = calculateTaxAmount(income);
+    const incomeAmount = parseFloat(income);
+    if (isNaN(incomeAmount)) return;
+
+    const taxAmount = calculateTaxAmount(incomeAmount);
 
     const { error } = await supabase.from("tax_calculations").insert([
       {
         user_id: user.id,
         tax_type: "income",
-        income: income,
+        income: incomeAmount,
         tax_amount: taxAmount,
-        input_data: { income },
+        input_data: { income: incomeAmount },
         calculation_details: { method: "standard" },
       },
     ]);
@@ -57,8 +60,41 @@ export const TaxCalculator = () => {
     <Card className="p-6">
       <h2 className="text-2xl font-bold mb-4">Income Tax Calculator</h2>
       <div className="space-y-4">
-        <CalculationForm onCalculate={handleCalculate} />
-        {calculations && <CalculationHistory calculations={calculations} />}
+        <div>
+          <label className="block text-sm font-medium mb-1">Income Amount</label>
+          <Input
+            type="number"
+            value={income}
+            onChange={(e) => setIncome(e.target.value)}
+            placeholder="Enter income amount"
+          />
+        </div>
+
+        <Button onClick={handleCalculate}>Calculate Tax</Button>
+
+        {calculations && calculations.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Recent Calculations</h3>
+            <div className="space-y-2">
+              {calculations.map((calc) => (
+                <div
+                  key={calc.id}
+                  className="p-3 bg-gray-50 rounded-lg flex justify-between"
+                >
+                  <div>
+                    <span className="font-medium">Income Tax</span>
+                    <span className="text-gray-500 ml-2">
+                      Income: ₦{calc.income.toLocaleString()}
+                    </span>
+                  </div>
+                  <span className="font-medium">
+                    Tax: ₦{calc.tax_amount.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   );

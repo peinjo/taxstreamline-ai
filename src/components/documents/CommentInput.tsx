@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { MessageSquarePlus } from "lucide-react";
 
-export const CommentInput: React.FC<{ documentId: string }> = ({ documentId }) => {
+export const CommentInput = ({ documentId }: { documentId: string }) => {
   const [content, setContent] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
