@@ -1,4 +1,4 @@
-```typescript
+
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Loader2 } from "lucide-react";
@@ -60,8 +60,7 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({
       </Avatar>
       <label 
         htmlFor="avatar-upload" 
-        className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer shadow-lg
-                 hover:bg-primary/90 transition-colors"
+        className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer shadow-lg hover:bg-primary/90 transition-colors"
       >
         {uploadingImage ? (
           <Loader2 className="w-5 h-5 animate-spin" />
@@ -79,4 +78,3 @@ export const AvatarUpload: React.FC<AvatarUploadProps> = ({
     </div>
   );
 };
-```

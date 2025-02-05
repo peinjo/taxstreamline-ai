@@ -1,4 +1,4 @@
-```typescript
+
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -111,4 +111,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-```

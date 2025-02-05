@@ -1,4 +1,4 @@
-```typescript
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
@@ -55,7 +55,7 @@ const Calendar = () => {
       
       // Check if the event is tomorrow to show notification
       if (isTomorrow(new Date(date))) {
-        toast.info(`Reminder: Event is tomorrow!`);
+        toast.info("Reminder: Event is tomorrow!");
       }
     },
   });
@@ -163,4 +163,3 @@ const Calendar = () => {
 };
 
 export default Calendar;
-```
