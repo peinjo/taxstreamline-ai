@@ -32,6 +32,17 @@ interface CreateTaskDialogProps {
   onTaskCreated: () => void;
 }
 
+type TaskPriority = "low" | "medium" | "high";
+type TaskStatus = "pending" | "in_progress" | "completed";
+
+interface NewTask {
+  title: string;
+  description: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  due_date: Date;
+}
+
 export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
   isOpen,
   onOpenChange,
@@ -39,11 +50,11 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [newTask, setNewTask] = React.useState({
+  const [newTask, setNewTask] = React.useState<NewTask>({
     title: "",
     description: "",
-    priority: "medium" as const,
-    status: "pending" as const,
+    priority: "medium",
+    status: "pending",
     due_date: new Date(),
   });
 
@@ -103,7 +114,7 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
           />
           <Select
             value={newTask.priority}
-            onValueChange={(value) =>
+            onValueChange={(value: TaskPriority) =>
               setNewTask({ ...newTask, priority: value })
             }
           >
