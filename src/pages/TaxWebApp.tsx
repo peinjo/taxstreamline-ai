@@ -2,14 +2,11 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
 import { TaxCalculator } from "@/components/tax/TaxCalculator";
-import { CorporateIncomeTaxCalculator } from "@/components/tax/CorporateIncomeTaxCalculator";
-import { VATCalculator } from "@/components/tax/VATCalculator";
-import { PAYECalculator } from "@/components/tax/PAYECalculator";
-import { CapitalGainsTaxCalculator } from "@/components/tax/CapitalGainsTaxCalculator";
-import { WithholdingTaxCalculator } from "@/components/tax/WithholdingTaxCalculator";
-import { IndustryTaxForm } from "@/components/tax/IndustryTaxForm";
-import { StampDutyCalculator } from "@/components/tax/StampDutyCalculator";
-import { EducationTaxCalculator } from "@/components/tax/EducationTaxCalculator";
+import { TemplatesAndGuides } from "@/components/tax/TemplatesAndGuides";
+import { DocumentManager } from "@/components/tax/DocumentManager";
+import { FilingForm } from "@/components/tax/FilingForm";
+import { FilingHistory } from "@/components/tax/FilingHistory";
+import { PaymentForm } from "@/components/tax/PaymentForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -35,55 +32,50 @@ const TaxWebApp = () => {
         </div>
 
         <Tabs defaultValue="calculator" className="space-y-6">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            <TabsTrigger value="calculator">Income Tax</TabsTrigger>
-            <TabsTrigger value="corporate">Corporate</TabsTrigger>
-            <TabsTrigger value="vat">VAT</TabsTrigger>
-            <TabsTrigger value="paye">PAYE</TabsTrigger>
-            <TabsTrigger value="capital-gains">Capital Gains</TabsTrigger>
-            <TabsTrigger value="withholding">Withholding</TabsTrigger>
-            <TabsTrigger value="stamp-duty">Stamp Duty</TabsTrigger>
-            <TabsTrigger value="education">Education</TabsTrigger>
-            <TabsTrigger value="industry">Industry</TabsTrigger>
+          <TabsList>
+            <TabsTrigger value="calculator">Calculator</TabsTrigger>
+            <TabsTrigger value="filings">Filings</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="calculator" className="mt-6">
+          <TabsContent value="calculator">
             <TaxCalculator />
           </TabsContent>
 
-          <TabsContent value="corporate">
-            <CorporateIncomeTaxCalculator />
-          </TabsContent>
-
-          <TabsContent value="vat">
-            <VATCalculator />
-          </TabsContent>
-
-          <TabsContent value="paye">
-            <PAYECalculator />
-          </TabsContent>
-
-          <TabsContent value="capital-gains">
-            <CapitalGainsTaxCalculator />
-          </TabsContent>
-
-          <TabsContent value="withholding">
-            <WithholdingTaxCalculator />
-          </TabsContent>
-
-          <TabsContent value="stamp-duty">
-            <StampDutyCalculator />
-          </TabsContent>
-
-          <TabsContent value="education">
-            <EducationTaxCalculator />
-          </TabsContent>
-
-          <TabsContent value="industry" className="space-y-6">
+          <TabsContent value="filings" className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
-              <IndustryTaxForm industry="manufacturing" />
-              <IndustryTaxForm industry="oil_and_gas" />
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Submit New Filing</h2>
+                <FilingForm />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Filing History</h2>
+                <FilingHistory />
+              </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Make Payment</h2>
+                <PaymentForm />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold mb-4">Recent Payments</h2>
+                {/* Add payment history component here */}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <DocumentManager />
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <TemplatesAndGuides />
           </TabsContent>
         </Tabs>
       </div>

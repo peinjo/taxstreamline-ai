@@ -170,35 +170,3 @@ export const calculateWithholdingTax = (
     },
   };
 };
-
-export const calculateStampDuty = (
-  amount: number,
-  rate: number
-): TaxCalculationResult => {
-  const taxAmount = amount * (rate / 100);
-
-  return {
-    taxAmount,
-    effectiveRate: rate,
-    details: {
-      amount,
-      rateApplied: rate,
-    },
-  };
-};
-
-export const calculateEducationTax = (
-  assessableProfits: number,
-  rate: number
-): TaxCalculationResult => {
-  const taxAmount = assessableProfits * (rate / 100);
-
-  return {
-    taxAmount,
-    effectiveRate: rate,
-    details: {
-      assessableProfits,
-      rateApplied: rate,
-    },
-  };
-};

@@ -1,62 +1,54 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
-import type { Comment } from "@/types";
+import { format } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface CommentListProps {
-  documentId: string;
-}
-
-export const CommentList: React.FC<CommentListProps> = ({ documentId }) => {
-  const { data: comments, isLoading } = useQuery({
-    queryKey: ["comments", documentId],
+export const CommentList = ({ documentId }: { documentId: string }) => {
+  const { data: comments } = useQuery({
+    queryKey: ["document-comments", documentId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("document_comments")
         .select(`
           *,
-          user:user_profiles(full_name)
+          user:user_id (
+            id,
+            email
+          )
         `)
         .eq("document_id", documentId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data as Comment[];
+      return data;
     },
   });
 
-  if (isLoading) {
-    return <div>Loading comments...</div>;
-  }
-
   return (
-    <div className="space-y-4">
-      {comments?.map((comment) => (
-        <div key={comment.id} className="flex items-start space-x-4">
-          <Avatar>
-            <AvatarFallback>
-              {comment.user?.full_name?.[0] || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">
-                {comment.user?.full_name || "Unknown User"}
-              </span>
-              <span className="text-sm text-gray-500">
-                {formatDistanceToNow(new Date(comment.created_at), {
-                  addSuffix: true,
-                })}
-              </span>
+    <ScrollArea className="h-[300px] w-full rounded-md border p-4">
+      <div className="space-y-4">
+        {comments?.map((comment) => (
+          <div key={comment.id} className="flex items-start gap-4">
+            <Avatar>
+              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.user?.email}`} />
+              <AvatarFallback>
+                {comment.user?.email?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">
+                {comment.user?.email}
+              </p>
+              <p className="text-sm text-gray-500">
+                {format(new Date(comment.created_at), "PPp")}
+              </p>
+              <p className="text-sm text-gray-700">{comment.content}</p>
             </div>
-            <p className="mt-1 text-gray-700">{comment.content}</p>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 };
-
-export default CommentList;
