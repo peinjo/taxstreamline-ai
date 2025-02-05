@@ -1,6 +1,7 @@
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import type { TaxCalculation } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
