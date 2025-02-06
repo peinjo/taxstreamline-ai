@@ -29,13 +29,27 @@ export const calculateIndustryTax = (
 };
 
 export const fetchTaxRates = async (category: string): Promise<TaxRate[]> => {
-  const { data, error } = await supabase
-    .from("tax_rates")
-    .select("*")
-    .eq("category", category);
+  try {
+    const { data, error } = await supabase
+      .from("tax_rates")
+      .select("*")
+      .eq("category", category);
 
-  if (error) throw error;
-  return data;
+    if (error) {
+      console.error("Error fetching tax rates:", error);
+      throw error;
+    }
+
+    if (!data) {
+      console.warn(`No tax rates found for category: ${category}`);
+      return [];
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch tax rates:", error);
+    throw error;
+  }
 };
 
 export const saveTaxCalculation = async (

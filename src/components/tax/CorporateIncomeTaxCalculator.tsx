@@ -20,20 +20,39 @@ export const CorporateIncomeTaxCalculator = () => {
   });
   const [result, setResult] = useState<number | null>(null);
 
-  const { data: taxRates } = useQuery({
+  const { data: taxRates, error: taxRatesError } = useQuery({
     queryKey: ["taxRates", "corporate_income"],
     queryFn: () => fetchTaxRates("corporate_income"),
+    retry: 2,
+    onError: (error) => {
+      console.error("Error fetching tax rates:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch tax rates. Please try again later.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleCalculate = async () => {
     try {
-      if (!taxRates?.[0]) return;
+      if (taxRatesError) {
+        toast({
+          title: "Error",
+          description: "Unable to calculate tax due to missing tax rates.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const defaultRate = 30; // Default corporate tax rate if none found
+      const rate = taxRates?.[0]?.rate ?? defaultRate;
 
       const calculation = calculateCorporateIncomeTax(
         inputs.annualIncome,
         inputs.deductibleExpenses,
         inputs.exemptions,
-        taxRates[0].rate
+        rate
       );
 
       setResult(calculation.taxAmount);
@@ -51,6 +70,7 @@ export const CorporateIncomeTaxCalculator = () => {
         description: `Corporate Income Tax: $${calculation.taxAmount.toFixed(2)}`,
       });
     } catch (error) {
+      console.error("Calculation error:", error);
       toast({
         title: "Error",
         description: "Failed to calculate tax",
