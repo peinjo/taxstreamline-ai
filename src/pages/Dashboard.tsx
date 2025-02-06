@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
-import { DocumentUpload } from "@/components/tax/DocumentUpload";
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
@@ -89,15 +88,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        <div className="grid gap-8 md:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Tax Documents</h3>
-              <DocumentUpload />
-            </CardContent>
-          </Card>
         </div>
 
         <div className="grid gap-8 md:grid-cols-2">
