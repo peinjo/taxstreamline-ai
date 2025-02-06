@@ -24,13 +24,15 @@ export const CorporateIncomeTaxCalculator = () => {
     queryKey: ["taxRates", "corporate_income"],
     queryFn: () => fetchTaxRates("corporate_income"),
     retry: 2,
-    onError: (error) => {
-      console.error("Error fetching tax rates:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch tax rates. Please try again later.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error("Error fetching tax rates:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch tax rates. Please try again later.",
+          variant: "destructive",
+        });
+      },
     },
   });
 
