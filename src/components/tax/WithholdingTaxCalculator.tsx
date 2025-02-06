@@ -71,6 +71,7 @@ export const WithholdingTaxCalculator = () => {
   return (
     <div className="mt-6">
       <Card className="p-6">
+        <h2 className="text-2xl font-semibold mb-6">Withholding Tax Calculator</h2>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Income Type</Label>
