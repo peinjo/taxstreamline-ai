@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +33,7 @@ export const TaxCalculator = () => {
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <Tabs defaultValue="income" className="space-y-4">
+        <Tabs defaultValue="income" className="space-y-8">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
             <TabsTrigger value="income">Income</TabsTrigger>
             <TabsTrigger value="corporate">Corporate Income</TabsTrigger>
@@ -48,7 +47,7 @@ export const TaxCalculator = () => {
             <TabsTrigger value="industry">Industry Specific</TabsTrigger>
           </TabsList>
 
-          <div className="grid gap-6">
+          <div className="pt-4">
             <TabsContent value="income">
               <IncomeTaxCalculator />
             </TabsContent>
