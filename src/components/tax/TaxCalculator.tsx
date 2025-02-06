@@ -15,7 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 
-export const TaxCalculator = () => {
+const RecentCalculations = () => {
   const { data: recentCalculations } = useQuery({
     queryKey: ["recentCalculations"],
     queryFn: async () => {
@@ -30,6 +30,36 @@ export const TaxCalculator = () => {
     },
   });
 
+  if (!recentCalculations?.length) return null;
+
+  return (
+    <Card className="p-6">
+      <h2 className="text-lg font-semibold mb-4">Recent Calculations</h2>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Type</TableHead>
+            <TableHead>Amount</TableHead>
+            <TableHead>Tax</TableHead>
+            <TableHead>Date</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {recentCalculations.map((calc) => (
+            <TableRow key={calc.id}>
+              <TableCell className="capitalize">{calc.tax_type.replace(/_/g, ' ')}</TableCell>
+              <TableCell>₦{calc.income.toFixed(2)}</TableCell>
+              <TableCell>₦{calc.tax_amount.toFixed(2)}</TableCell>
+              <TableCell>{new Date(calc.created_at).toLocaleDateString()}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+};
+
+export const TaxCalculator = () => {
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -51,39 +81,30 @@ export const TaxCalculator = () => {
             <TabsContent value="income">
               <IncomeTaxCalculator />
             </TabsContent>
-
             <TabsContent value="corporate">
               <CorporateIncomeTaxCalculator />
             </TabsContent>
-            
             <TabsContent value="vat">
               <VATCalculator />
             </TabsContent>
-
             <TabsContent value="paye">
               <PAYECalculator />
             </TabsContent>
-
             <TabsContent value="capital-gains">
               <CapitalGainsTaxCalculator />
             </TabsContent>
-
             <TabsContent value="withholding">
               <WithholdingTaxCalculator />
             </TabsContent>
-
             <TabsContent value="stamp-duty">
               <StampDutyCalculator />
             </TabsContent>
-
             <TabsContent value="education">
               <EducationTaxCalculator />
             </TabsContent>
-
             <TabsContent value="petroleum">
               <PetroleumProfitTaxCalculator />
             </TabsContent>
-
             <TabsContent value="industry">
               <IndustryTaxForm />
             </TabsContent>
@@ -91,31 +112,7 @@ export const TaxCalculator = () => {
         </Tabs>
       </Card>
 
-      {recentCalculations && recentCalculations.length > 0 && (
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Recent Calculations</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Tax</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentCalculations.map((calc) => (
-                <TableRow key={calc.id}>
-                  <TableCell className="capitalize">{calc.tax_type.replace(/_/g, ' ')}</TableCell>
-                  <TableCell>₦{calc.income.toFixed(2)}</TableCell>
-                  <TableCell>₦{calc.tax_amount.toFixed(2)}</TableCell>
-                  <TableCell>{new Date(calc.created_at).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+      <RecentCalculations />
     </div>
   );
 };

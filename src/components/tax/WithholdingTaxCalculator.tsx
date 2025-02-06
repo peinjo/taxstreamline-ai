@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { TaxCalculatorLayout } from "./components/TaxCalculatorLayout";
+import { WithholdingTaxForm } from "./components/WithholdingTaxForm";
+import { TaxResult } from "./components/TaxResult";
 
 export const WithholdingTaxCalculator = () => {
+  const { toast } = useToast();
   const [income, setIncome] = useState("");
   const [type, setType] = useState("dividends");
-  const { toast } = useToast();
+  const [result, setResult] = useState<number | null>(null);
 
   const calculateTax = async () => {
     if (!income || isNaN(Number(income))) {
@@ -55,6 +54,8 @@ export const WithholdingTaxCalculator = () => {
 
       if (error) throw error;
 
+      setResult(taxAmount);
+
       toast({
         title: "Tax Calculated",
         description: `Withholding Tax Amount: ₦${taxAmount.toFixed(2)}`,
@@ -69,40 +70,15 @@ export const WithholdingTaxCalculator = () => {
   };
 
   return (
-    <div className="mt-6">
-      <Card className="p-6">
-        <h2 className="text-2xl font-semibold mb-6">Withholding Tax Calculator</h2>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Income Type</Label>
-            <Select value={type} onValueChange={setType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="dividends">Dividends</SelectItem>
-                <SelectItem value="rent">Rent</SelectItem>
-                <SelectItem value="royalties">Royalties</SelectItem>
-                <SelectItem value="professional_fees">Professional Fees</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Income Amount (₦)</Label>
-            <Input
-              type="number"
-              value={income}
-              onChange={(e) => setIncome(e.target.value)}
-              placeholder="Enter income amount"
-            />
-          </div>
-
-          <Button onClick={calculateTax} className="w-full">
-            Calculate Withholding Tax
-          </Button>
-        </div>
-      </Card>
-    </div>
+    <TaxCalculatorLayout title="Withholding Tax Calculator">
+      <WithholdingTaxForm
+        income={income}
+        type={type}
+        onIncomeChange={setIncome}
+        onTypeChange={setType}
+        onCalculate={calculateTax}
+      />
+      <TaxResult amount={result} label="Withholding Tax" />
+    </TaxCalculatorLayout>
   );
 };
