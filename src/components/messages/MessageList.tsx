@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,9 +14,9 @@ export const MessageList = ({ teamId }: { teamId: number }) => {
         .from("messages")
         .select(`
           *,
-          sender:sender_id (
-            id,
-            email
+          profiles:sender_id (
+            full_name,
+            user_id
           )
         `)
         .eq("team_id", teamId)
@@ -32,14 +33,14 @@ export const MessageList = ({ teamId }: { teamId: number }) => {
         {messages?.map((message) => (
           <div key={message.id} className="flex items-start gap-4">
             <Avatar>
-              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${message.sender?.email}`} />
+              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${message.profiles?.full_name || ''}`} />
               <AvatarFallback>
-                {message.sender?.email?.charAt(0).toUpperCase()}
+                {(message.profiles?.full_name || '?').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
               <p className="text-sm font-medium leading-none">
-                {message.sender?.email}
+                {message.profiles?.full_name || 'Anonymous'}
               </p>
               <p className="text-sm text-gray-500">
                 {format(new Date(message.created_at), "PPp")}

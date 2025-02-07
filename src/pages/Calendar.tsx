@@ -11,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
-  id: string;
+  id: number;  // Changed from string to number to match database
   title: string;
   date: string;
   company: string;
@@ -59,9 +59,8 @@ const Calendar = () => {
     },
   });
 
-  // Remove event mutation
   const removeEventMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: number) => {  // Changed from string to number
       const { error } = await supabase
         .from("calendar_events")
         .delete()
@@ -79,7 +78,7 @@ const Calendar = () => {
     addEventMutation.mutate(eventData);
   };
 
-  const handleRemoveEvent = (id: string) => {
+  const handleRemoveEvent = (id: number) => {
     removeEventMutation.mutate(id);
   };
 

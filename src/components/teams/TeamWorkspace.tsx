@@ -1,12 +1,13 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, Users } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { CreateTeamDialog } from './CreateTeamDialog';
 import { toast } from 'sonner';
+import { Team } from '@/types/team';
 
 export function TeamWorkspace() {
   const { user } = useAuth();

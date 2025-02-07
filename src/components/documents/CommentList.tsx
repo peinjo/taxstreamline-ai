@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,9 +14,9 @@ export const CommentList = ({ documentId }: { documentId: string }) => {
         .from("document_comments")
         .select(`
           *,
-          user:user_id (
-            id,
-            email
+          profiles:user_id (
+            full_name,
+            user_id
           )
         `)
         .eq("document_id", documentId)
@@ -32,14 +33,14 @@ export const CommentList = ({ documentId }: { documentId: string }) => {
         {comments?.map((comment) => (
           <div key={comment.id} className="flex items-start gap-4">
             <Avatar>
-              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.user?.email}`} />
+              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.profiles?.full_name || ''}`} />
               <AvatarFallback>
-                {comment.user?.email?.charAt(0).toUpperCase()}
+                {(comment.profiles?.full_name || '?').charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
               <p className="text-sm font-medium leading-none">
-                {comment.user?.email}
+                {comment.profiles?.full_name || 'Anonymous'}
               </p>
               <p className="text-sm text-gray-500">
                 {format(new Date(comment.created_at), "PPp")}
