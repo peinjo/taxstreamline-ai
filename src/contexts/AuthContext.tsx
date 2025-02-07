@@ -1,7 +1,9 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import type { AppRole } from "@/types";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
@@ -29,27 +31,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userRole, setUserRole] = useState<AppRole | null>(null);
 
   useEffect(() => {
-    // Get initial session
+    // Set up initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserRole(session.user.id);
       }
+      setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserRole(session.user.id);
+        await fetchUserRole(session.user.id);
       } else {
         setUserRole(null);
       }
+      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchUserRole = async (userId: string) => {
@@ -69,30 +75,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
       setUserRole('user');
-    } finally {
-      setLoading(false);
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in");
+      throw error;
+    }
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
+      toast.success("Signup successful! Please check your email to confirm your account.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign up");
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success("Signed out successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign out");
+      throw error;
+    }
   };
 
   return (
