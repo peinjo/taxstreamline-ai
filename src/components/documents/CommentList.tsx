@@ -33,14 +33,18 @@ export const CommentList = ({ documentId }: { documentId: string }) => {
         {comments?.map((comment) => (
           <div key={comment.id} className="flex items-start gap-4">
             <Avatar>
-              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.profiles?.full_name || ''}`} />
+              <AvatarImage
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${
+                  comment.profiles?.full_name || ""
+                }`}
+              />
               <AvatarFallback>
-                {(comment.profiles?.full_name || '?').charAt(0).toUpperCase()}
+                {(comment.profiles?.full_name || "?").charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
               <p className="text-sm font-medium leading-none">
-                {comment.profiles?.full_name || 'Anonymous'}
+                {comment.profiles?.full_name || "Anonymous"}
               </p>
               <p className="text-sm text-gray-500">
                 {format(new Date(comment.created_at), "PPp")}
