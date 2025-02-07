@@ -1,3 +1,4 @@
+
 import React from "react";
 
 const SidebarHeader = () => {
@@ -5,11 +6,11 @@ const SidebarHeader = () => {
     <div className="p-4">
       <div className="mb-8 flex items-center gap-2 px-2">
         <img
-          src="/lovable-uploads/235a3f0b-697d-47c6-8c81-c2b3066c1717.png"
-          alt="Phester Consult Logo"
+          src="/lovable-uploads/8f4d9e33-a30b-4278-98bf-b226eb32a5f6.png"
+          alt="TaxPal Logo"
           className="h-8 w-8"
         />
-        <span className="text-xl font-bold text-white">Phester Consult</span>
+        <span className="text-xl font-bold text-white">TaxPal</span>
       </div>
     </div>
   );

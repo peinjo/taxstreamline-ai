@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
@@ -15,11 +16,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <main className="flex-1 pl-64">
         <div className="flex items-center border-b bg-white p-4 shadow-sm">
           <img
-            src="/lovable-uploads/235a3f0b-697d-47c6-8c81-c2b3066c1717.png"
-            alt="Phester Consult Logo"
+            src="/lovable-uploads/8f4d9e33-a30b-4278-98bf-b226eb32a5f6.png"
+            alt="TaxPal Logo"
             className="h-8 w-8"
           />
-          <span className="ml-2 text-xl font-semibold">Phester Consult</span>
+          <span className="ml-2 text-xl font-semibold">TaxPal</span>
         </div>
         <div className="container mx-auto p-8">{children}</div>
       </main>
