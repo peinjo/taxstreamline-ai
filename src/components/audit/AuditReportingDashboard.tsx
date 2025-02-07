@@ -5,7 +5,7 @@ import { ReportFilters } from "./ReportFilters";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AuditReportingDashboard = () => {
   const [filters, setFilters] = useState({
