@@ -2,7 +2,6 @@
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -10,15 +9,6 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   useDeadlineChecker();
-  const { loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-lg font-medium text-gray-700">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
