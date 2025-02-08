@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -35,6 +36,7 @@ export const useProfileForm = () => {
         
         if (!user) {
           toast.error("No authenticated user found");
+          navigate('/auth/login');
           return;
         }
 
@@ -44,7 +46,10 @@ export const useProfileForm = () => {
           .eq('user_id', user.id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
 
         if (data) {
           setFormData({
@@ -59,12 +64,13 @@ export const useProfileForm = () => {
           });
         }
       } catch (error) {
+        console.error('Error in fetchUserProfile:', error);
         toast.error("Failed to fetch profile information");
       }
     };
 
     fetchUserProfile();
-  }, []);
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,17 +81,17 @@ export const useProfileForm = () => {
       
       if (!user) {
         toast.error("No authenticated user found");
+        navigate('/auth/login');
         return;
       }
 
-      const { data: existingProfile } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      // Validate required fields
+      if (!formData.fullName || !formData.dateOfBirth || !formData.address) {
+        toast.error("Please fill in all required fields");
+        setLoading(false);
+        return;
+      }
 
-      let error;
-      
       const profileData = {
         full_name: formData.fullName,
         date_of_birth: formData.dateOfBirth,
@@ -97,23 +103,21 @@ export const useProfileForm = () => {
         avatar_url: formData.avatarUrl,
       };
 
-      if (existingProfile) {
-        ({ error } = await supabase
-          .from('user_profiles')
-          .update(profileData)
-          .eq('user_id', user.id));
-      } else {
-        ({ error } = await supabase
-          .from('user_profiles')
-          .insert([{ user_id: user.id, ...profileData }]));
-      }
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(profileData)
+        .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating profile:', error);
+        throw error;
+      }
 
       toast.success("Profile information saved successfully!");
       navigate("/dashboard");
-    } catch (error) {
-      toast.error("Failed to save profile information. Please try again.");
+    } catch (error: any) {
+      console.error('Error in handleSubmit:', error);
+      toast.error(error.message || "Failed to save profile information. Please try again.");
     } finally {
       setLoading(false);
     }
