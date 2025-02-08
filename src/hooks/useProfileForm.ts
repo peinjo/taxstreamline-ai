@@ -48,6 +48,7 @@ export const useProfileForm = () => {
 
         if (error) {
           console.error('Error fetching profile:', error);
+          toast.error("Failed to fetch profile information");
           return;
         }
 
@@ -92,32 +93,32 @@ export const useProfileForm = () => {
         return;
       }
 
-      const profileData = {
-        full_name: formData.fullName,
-        date_of_birth: formData.dateOfBirth,
-        address: formData.address,
-        phone_number: formData.phoneNumber,
-        company: formData.company,
-        job_title: formData.jobTitle,
-        bio: formData.bio,
-        avatar_url: formData.avatarUrl,
-      };
-
       const { error } = await supabase
         .from('user_profiles')
-        .update(profileData)
+        .upsert({
+          user_id: user.id,
+          full_name: formData.fullName,
+          date_of_birth: formData.dateOfBirth,
+          address: formData.address,
+          phone_number: formData.phoneNumber,
+          company: formData.company,
+          job_title: formData.jobTitle,
+          bio: formData.bio,
+          avatar_url: formData.avatarUrl,
+        })
         .eq('user_id', user.id);
 
       if (error) {
         console.error('Error updating profile:', error);
-        throw error;
+        toast.error("Failed to save profile information");
+        return;
       }
 
       toast.success("Profile information saved successfully!");
       navigate("/dashboard");
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
-      toast.error(error.message || "Failed to save profile information. Please try again.");
+      toast.error(error.message || "Failed to save profile information");
     } finally {
       setLoading(false);
     }

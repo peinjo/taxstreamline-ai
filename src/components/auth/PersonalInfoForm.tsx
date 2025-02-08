@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,8 +6,9 @@ import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { AvatarUpload } from "../profile/AvatarUpload";
-import { ProfileFormFields } from "../profile/ProfileForm";
+import { ProfileFormFields } from "../profile/ProfileFormFields";
 import { useProfileForm } from "@/hooks/useProfileForm";
+import { toast } from "sonner";
 
 const PersonalInfoForm = () => {
   const navigate = useNavigate();
