@@ -6,6 +6,18 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+interface CommentWithProfile {
+  id: number;
+  content: string;
+  created_at: string;
+  document_id: string;
+  user_id: string;
+  profiles: {
+    full_name: string;
+    user_id: string;
+  } | null;
+}
+
 export const CommentList = ({ documentId }: { documentId: string }) => {
   const { data: comments } = useQuery({
     queryKey: ["document-comments", documentId],
@@ -14,7 +26,7 @@ export const CommentList = ({ documentId }: { documentId: string }) => {
         .from("document_comments")
         .select(`
           *,
-          profiles:user_id (
+          profiles:user_profiles!document_comments_user_id_fkey (
             full_name,
             user_id
           )
@@ -23,7 +35,7 @@ export const CommentList = ({ documentId }: { documentId: string }) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as CommentWithProfile[];
     },
   });
 

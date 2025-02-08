@@ -6,6 +6,18 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+interface MessageWithProfile {
+  id: number;
+  content: string;
+  created_at: string;
+  team_id: number;
+  sender_id: string;
+  profiles: {
+    full_name: string;
+    user_id: string;
+  } | null;
+}
+
 export const MessageList = ({ teamId }: { teamId: number }) => {
   const { data: messages } = useQuery({
     queryKey: ["messages", teamId],
@@ -14,7 +26,7 @@ export const MessageList = ({ teamId }: { teamId: number }) => {
         .from("messages")
         .select(`
           *,
-          profiles:sender_id (
+          profiles:user_profiles!messages_sender_id_fkey (
             full_name,
             user_id
           )
@@ -23,7 +35,7 @@ export const MessageList = ({ teamId }: { teamId: number }) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as MessageWithProfile[];
     },
   });
 
