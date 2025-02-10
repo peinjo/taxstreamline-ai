@@ -19,16 +19,17 @@ const Login = () => {
     setLoading(true);
     
     try {
+      console.log("Login attempt with email:", email);
       await signIn(email, password);
-      toast({
-        title: "Success",
-        description: "Logged in successfully",
-      });
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", {
+        message: error.message,
+        details: error
+      });
       toast({
         title: "Error",
-        description: "Failed to log in. Please check your credentials.",
+        description: error.message || "Failed to log in. Please check your credentials.",
         variant: "destructive",
       });
     } finally {

@@ -95,20 +95,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
-        console.error("Supabase auth error:", error);
+        console.error("Supabase auth error:", error.message);
+        console.error("Error details:", error);
         throw error;
       }
       
       if (!data?.user) {
-        console.error("No user data returned from Supabase");
+        console.error("No user data returned");
         throw new Error("Authentication failed - no user data");
       }
 
       console.log("Auth successful:", data.user.id);
+      setUser(data.user);
+      await fetchUserRole(data.user.id);
       toast.success("Successfully logged in");
       return data;
     } catch (error: any) {
-      console.error("Full auth error:", error);
+      console.error("Sign in error details:", {
+        message: error.message,
+        stack: error.stack,
+        details: error
+      });
       toast.error(error.message || "Failed to sign in");
       throw error;
     }
