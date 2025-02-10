@@ -1,0 +1,79 @@
+[plugin:vite:react-swc] × the name `data` is defined multiple times
+     ╭─[/home/runner/workspace/src/contexts/AuthContext.tsx:103:1]
+ 100 │         throw sessionError;
+ 101 │       }
+ 102 │ 
+ 103 │       const { data, error } = await supabase.auth.signInWithPassword({
+     ·               ──┬─
+     ·                 ╰── previous definition of `data` here
+ 104 │         email,
+ 105 │         password,
+ 106 │       });
+ 107 │ 
+ 108 │       if (error) {
+ 109 │         console.error("Sign in error:", error);
+ 110 │         throw error;
+ 111 │       }
+ 112 │ 
+ 113 │       if (!data?.user) {
+ 114 │         throw new Error("No user data returned");
+ 115 │       }
+ 116 │ 
+ 117 │       if (sessionError) {
+ 118 │         console.error("Session check error:", sessionError);
+ 119 │       }
+ 120 │ 
+ 121 │       if (sessionData?.session) {
+ 122 │         console.log("Found existing session, signing out...");
+ 123 │         await supabase.auth.signOut();
+ 124 │       }
+ 125 │ 
+ 126 │       console.log("Attempting to sign in with credentials...");
+ 127 │       const { data, error } = await supabase.auth.signInWithPassword({
+     ·               ──┬─
+     ·                 ╰── `data` redefined here
+ 128 │         email,
+ 129 │         password,
+ 130 │       });
+     ╰────
+  × the name `error` is defined multiple times
+     ╭─[/home/runner/workspace/src/contexts/AuthContext.tsx:103:1]
+ 100 │         throw sessionError;
+ 101 │       }
+ 102 │ 
+ 103 │       const { data, error } = await supabase.auth.signInWithPassword({
+     ·                     ──┬──
+     ·                       ╰── previous definition of `error` here
+ 104 │         email,
+ 105 │         password,
+ 106 │       });
+ 107 │ 
+ 108 │       if (error) {
+ 109 │         console.error("Sign in error:", error);
+ 110 │         throw error;
+ 111 │       }
+ 112 │ 
+ 113 │       if (!data?.user) {
+ 114 │         throw new Error("No user data returned");
+ 115 │       }
+ 116 │ 
+ 117 │       if (sessionError) {
+ 118 │         console.error("Session check error:", sessionError);
+ 119 │       }
+ 120 │ 
+ 121 │       if (sessionData?.session) {
+ 122 │         console.log("Found existing session, signing out...");
+ 123 │         await supabase.auth.signOut();
+ 124 │       }
+ 125 │ 
+ 126 │       console.log("Attempting to sign in with credentials...");
+ 127 │       const { data, error } = await supabase.auth.signInWithPassword({
+     ·                     ──┬──
+     ·                       ╰── `error` redefined here
+ 128 │         email,
+ 129 │         password,
+ 130 │       });
+     ╰────
+/home/runner/workspace/src/contexts/AuthContext.tsx:103:1
+Click outside, press Esc key, or fix the code to dismiss.
+You can also disable this overlay by setting server.hmr.overlay to false in vite.config.ts.
