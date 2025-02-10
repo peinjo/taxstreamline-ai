@@ -87,21 +87,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log("Attempting Supabase auth...");
+      console.log("Starting sign in process...");
+      console.log("Checking current session...");
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
-      if (sessionData?.session) {
-        await supabase.auth.signOut(); // Clear any existing session
+      if (sessionError) {
+        console.error("Session check error:", sessionError);
       }
 
+      if (sessionData?.session) {
+        console.log("Found existing session, signing out...");
+        await supabase.auth.signOut();
+      }
+
+      console.log("Attempting to sign in with credentials...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Supabase auth error:", error.message);
-        console.error("Error details:", error);
+        console.error("Authentication failed:", {
+          errorMessage: error.message,
+          errorCode: error.status,
+          errorName: error.name,
+          details: error
+        });
         throw error;
       }
 
