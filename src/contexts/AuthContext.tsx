@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -89,31 +88,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log("Attempting Supabase auth...");
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionData?.session) {
+        await supabase.auth.signOut(); // Clear any existing session
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) {
         console.error("Supabase auth error:", error.message);
         console.error("Error details:", error);
         throw error;
       }
-      
+
       if (!data?.user) {
-        console.error("No user data returned");
+        console.error("No user data returned from Supabase");
         throw new Error("Authentication failed - no user data");
       }
 
-      console.log("Auth successful:", data.user.id);
       setUser(data.user);
-      await fetchUserRole(data.user.id);
+      console.log("Auth successful:", data.user.id);
       toast.success("Successfully logged in");
       return data;
     } catch (error: any) {
-      console.error("Sign in error details:", {
+      console.error("Sign in error:", {
         message: error.message,
-        stack: error.stack,
+        status: error.status,
         details: error
       });
       toast.error(error.message || "Failed to sign in");
