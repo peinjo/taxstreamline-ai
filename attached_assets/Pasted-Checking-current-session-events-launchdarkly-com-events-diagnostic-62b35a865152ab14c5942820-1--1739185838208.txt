@@ -1,0 +1,120 @@
+Checking current session...
+events.launchdarkly.com/events/diagnostic/62b35a865152ab14c5942820:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+events.launchdarkly.com/events/diagnostic/62b35a865152ab14c5942820:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A133b37d7&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=237f76eb-906f-4a34-821b-148eef190724:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+shared-fcc4a9c64ec9b…bb4bbff5f64437.js:1 Uncaught (in promise) FetchError: Error fetching https://r.stripe.com/b: Failed to fetch
+    at shared-fcc4a9c64ec9bb4025bb4bbff5f64437.js:1:182999Understand this errorAI
+shared-fcc4a9c64ec9b…bb4bbff5f64437.js:1 Uncaught (in promise) FetchError: Error fetching https://r.stripe.com/b: Failed to fetch
+    at shared-fcc4a9c64ec9bb4025bb4bbff5f64437.js:1:182999Understand this errorAI
+o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+shared-fcc4a9c64ec9b…bb4bbff5f64437.js:1 Uncaught (in promise) FetchError: Error fetching https://r.stripe.com/b: Failed to fetch
+    at shared-fcc4a9c64ec9bb4025bb4bbff5f64437.js:1:182999Understand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+r.stripe.com/b:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+shared-fcc4a9c64ec9b…bb4bbff5f64437.js:1 Uncaught (in promise) FetchError: Error fetching https://r.stripe.com/b: Failed to fetch
+    at shared-fcc4a9c64ec9bb4025bb4bbff5f64437.js:1:182999Understand this errorAI
+Console.js:61 Login attempt started: Object
+Console.js:61 Starting sign in process with Supabase... Object
+Console.js:61 Checking current session...
+events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENTUnderstand this errorAI
+events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820:1 
+        
+        
+       Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
