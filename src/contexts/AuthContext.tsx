@@ -100,6 +100,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw sessionError;
       }
 
+      if (sessionData?.session) {
+        console.log("Found existing session, signing out...");
+        await supabase.auth.signOut();
+      }
+
+      console.log("Attempting to sign in with credentials...");
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -113,21 +119,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!data?.user) {
         throw new Error("No user data returned");
       }
-
-      if (sessionError) {
-        console.error("Session check error:", sessionError);
-      }
-
-      if (sessionData?.session) {
-        console.log("Found existing session, signing out...");
-        await supabase.auth.signOut();
-      }
-
-      console.log("Attempting to sign in with credentials...");
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
 
       if (error) {
         console.error("Authentication failed:", {
