@@ -11,6 +11,9 @@ import { FileUploader } from "@/components/transfer-pricing/FileUploader";
 import { ActivityLog } from "@/components/transfer-pricing/ActivityLog";
 import { DocumentList } from "@/components/transfer-pricing/DocumentList";
 
+import { DocumentWizard } from '@/components/transfer-pricing/DocumentWizard';
+import { TransferPricingProvider } from '@/contexts/TransferPricingContext';
+
 const TransferPricing = () => {
   const [activeTab, setActiveTab] = useState<"master" | "local">("master");
   const [documents, setDocuments] = useState<Document[]>([
@@ -119,7 +122,8 @@ const TransferPricing = () => {
   };
 
   return (
-    <DashboardLayout>
+    <TransferPricingProvider>
+      <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Transfer Pricing Documentation</h1>
@@ -190,6 +194,7 @@ const TransferPricing = () => {
         <ActivityLog activities={activities} />
       </div>
     </DashboardLayout>
+    </TransferPricingProvider>
   );
 };
 
