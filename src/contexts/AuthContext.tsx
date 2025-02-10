@@ -88,12 +88,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting Supabase auth...");
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Supabase auth error:", error);
+        throw error;
+      }
+      
+      if (!data?.user) {
+        console.error("No user data returned from Supabase");
+        throw new Error("Authentication failed - no user data");
+      }
+
+      console.log("Auth successful:", data.user.id);
+      toast.success("Successfully logged in");
+      return data;
     } catch (error: any) {
+      console.error("Full auth error:", error);
       toast.error(error.message || "Failed to sign in");
       throw error;
     }
