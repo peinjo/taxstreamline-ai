@@ -11,7 +11,7 @@ const Index = () => {
       <div className="container mx-auto px-4 pt-20 pb-16">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            Smart Tax Management
+            Welcome to TaxPal
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Streamline your tax operations with AI-powered insights, comprehensive transfer pricing, and advanced audit reporting
