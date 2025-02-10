@@ -20,33 +20,23 @@ const Login = () => {
     e.preventDefault();
     if (loading) return;
     
-    if (!email.trim() || !password.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setLoading(true);
     
     try {
-      console.log("Attempting login...");
-      await signIn(email.trim(), password);
-      console.log("Login successful");
+      if (!email || !password) {
+        throw new Error("Please fill in all fields");
+      }
+      
+      await signIn(email, password);
       toast({
         title: "Success",
         description: "Logged in successfully",
       });
       navigate("/dashboard");
     } catch (error: any) {
-      console.error("Login error:", error);
       toast({
-        title: "Login Failed",
-        description: error.message === "Invalid login credentials"
-          ? "Incorrect email or password"
-          : "An error occurred while logging in. Please try again.",
+        title: "Error",
+        description: error.message || "Failed to log in. Please check your credentials.",
         variant: "destructive",
       });
     } finally {
