@@ -19,8 +19,9 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log("Login attempt with email:", email);
-      await signIn(email, password);
+      console.log("Login attempt started:", { email, timestamp: new Date().toISOString() });
+      const result = await signIn(email, password);
+      console.log("Login successful:", { userId: result?.user?.id });
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Login error:", {

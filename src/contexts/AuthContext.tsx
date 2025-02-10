@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log("Starting sign in process...");
+      console.log("Starting sign in process with Supabase...", { email, timestamp: new Date().toISOString() });
       console.log("Checking current session...");
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
