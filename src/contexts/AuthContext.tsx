@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -36,7 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userRole, setUserRole] = useState<AppRole | null>(null);
 
   useEffect(() => {
-    // Initialize auth state
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -53,7 +53,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeAuth();
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -93,11 +92,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      // First check and clear any existing session
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-
+      
       if (sessionError) {
-        console.error("Session error:", sessionError);
-        throw sessionError;
+        console.error("Session check error:", sessionError);
       }
 
       if (sessionData?.session) {
@@ -105,20 +104,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await supabase.auth.signOut();
       }
 
-      console.log("Attempting to sign in with credentials...");
+      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
-      if (error) {
-        console.error("Sign in error:", error);
-        throw error;
-      }
-
-      if (!data?.user) {
-        throw new Error("No user data returned");
-      }
 
       if (error) {
         console.error("Authentication failed:", {
@@ -138,7 +128,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(data.user);
       console.log("Auth successful:", data.user.id);
       toast.success("Successfully logged in");
-      return data;
     } catch (error: any) {
       console.error("Sign in error:", {
         message: error.message,
