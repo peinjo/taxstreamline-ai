@@ -38,6 +38,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="absolute top-4 left-4">
+        <Link to="/">
+          <Button variant="outline" size="sm">
+            ← Back to Home
+          </Button>
+        </Link>
+      </div>
       <Card className="w-full max-w-md p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Log In</h2>
         <form onSubmit={handleSubmit} className="space-y-4">

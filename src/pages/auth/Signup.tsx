@@ -31,6 +31,13 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="absolute top-4 left-4">
+        <Link to="/">
+          <Button variant="outline" size="sm">
+            ← Back to Home
+          </Button>
+        </Link>
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
