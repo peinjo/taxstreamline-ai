@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,25 +16,19 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
-    
     setLoading(true);
     
     try {
-      if (!email || !password) {
-        throw new Error("Please fill in all fields");
-      }
-      
       await signIn(email, password);
       toast({
         title: "Success",
         description: "Logged in successfully",
       });
       navigate("/dashboard");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to log in. Please check your credentials.",
+        description: "Failed to log in. Please check your credentials.",
         variant: "destructive",
       });
     } finally {
@@ -60,7 +52,6 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
-              disabled={loading}
             />
           </div>
           <div>
@@ -74,18 +65,10 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
-              disabled={loading}
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Logging in...
-              </>
-            ) : (
-              "Log In"
-            )}
+            {loading ? "Logging in..." : "Log In"}
           </Button>
         </form>
         <p className="text-center mt-4 text-sm text-gray-600">
