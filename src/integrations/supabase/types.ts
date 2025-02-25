@@ -745,7 +745,7 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string
-          date_of_birth: string
+          date_of_birth: string | null
           full_name: string
           id: number
           job_title: string | null
@@ -758,7 +758,7 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
-          date_of_birth: string
+          date_of_birth?: string | null
           full_name: string
           id?: never
           job_title?: string | null
@@ -771,7 +771,7 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
-          date_of_birth?: string
+          date_of_birth?: string | null
           full_name?: string
           id?: never
           job_title?: string | null
