@@ -18,9 +18,18 @@ const Login = () => {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        navigate("/dashboard");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session check error:", error);
+          return;
+        }
+        if (session?.user) {
+          console.log("Active session found, redirecting to dashboard");
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        console.error("Session check failed:", error);
       }
     };
     checkSession();
@@ -31,13 +40,42 @@ const Login = () => {
     setLoading(true);
     
     try {
+      if (!email || !password) {
+        throw new Error("Please enter both email and password");
+      }
+
       console.log("Attempting login with email:", email);
       await signIn(email, password);
-      console.log("Login successful");
+      
+      // Check session after sign in
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        throw sessionError;
+      }
+      
+      if (!session) {
+        throw new Error("Login successful but no session created");
+      }
+
+      console.log("Login successful, session established");
       navigate("/dashboard");
     } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Failed to log in");
+      console.error("Login error:", {
+        message: error.message,
+        details: error,
+        statusCode: error.status,
+        name: error.name
+      });
+      
+      // Provide more user-friendly error messages
+      let errorMessage = "Failed to log in";
+      if (error.message?.toLowerCase().includes("invalid login credentials")) {
+        errorMessage = "Invalid email or password";
+      } else if (error.message?.toLowerCase().includes("email not confirmed")) {
+        errorMessage = "Please confirm your email address before logging in";
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
