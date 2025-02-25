@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -19,11 +21,39 @@ const Signup = () => {
     setLoading(true);
     
     try {
+      // Input validation
+      if (!email || !password) {
+        throw new Error("Please fill in all fields");
+      }
+
+      if (password.length < 6) {
+        throw new Error("Password must be at least 6 characters long");
+      }
+
+      console.log("Starting signup process for email:", email);
       await signUp(email, password);
-      toast.success("Account created successfully! Please complete your profile.");
+      
+      console.log("Signup successful, redirecting to personal info page");
+      toast.success("Account created successfully! Please check your email to confirm your account.");
       navigate("/auth/personal-info");
-    } catch (error) {
-      toast.error("Failed to create account. Please try again.");
+    } catch (error: any) {
+      console.error("Signup error:", {
+        message: error.message,
+        code: error.code,
+        details: error
+      });
+      
+      // Provide user-friendly error messages
+      let errorMessage = "Failed to create account. Please try again.";
+      if (error.message?.includes("already registered")) {
+        errorMessage = "This email is already registered. Please try logging in instead.";
+      } else if (error.message?.includes("valid email")) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message?.includes("password")) {
+        errorMessage = "Password must be at least 6 characters long.";
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -76,7 +106,14 @@ const Signup = () => {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
           </form>
           <p className="text-center mt-4 text-sm text-gray-600">
