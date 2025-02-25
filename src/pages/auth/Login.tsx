@@ -1,38 +1,43 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        navigate("/dashboard");
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      console.log("Login attempt started:", { email, timestamp: new Date().toISOString() });
-      const result = await signIn(email, password);
-      console.log("Login successful:", { userId: result?.user?.id });
+      console.log("Attempting login with email:", email);
+      await signIn(email, password);
+      console.log("Login successful");
       navigate("/dashboard");
     } catch (error: any) {
-      console.error("Login error:", {
-        message: error.message,
-        details: error
-      });
-      toast({
-        title: "Error",
-        description: error.message || "Failed to log in. Please check your credentials.",
-        variant: "destructive",
-      });
+      console.error("Login error:", error);
+      toast.error(error.message || "Failed to log in");
     } finally {
       setLoading(false);
     }
@@ -61,6 +66,8 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               required
+              className="w-full"
+              disabled={loading}
             />
           </div>
           <div>
@@ -74,10 +81,19 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               required
+              className="w-full"
+              disabled={loading}
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Logging in..." : "Log In"}
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Log In"
+            )}
           </Button>
         </form>
         <p className="text-center mt-4 text-sm text-gray-600">
