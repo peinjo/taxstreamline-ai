@@ -8,7 +8,7 @@ export interface TPDocument {
   title: string;
   type: "master" | "local";
   status: "draft" | "published";
-  content?: string;
+  content: any;
   companyId: string;
   createdBy: string;
   createdAt: string;
@@ -53,17 +53,17 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       if (!user) throw new Error("No authenticated user");
 
       const { data, error } = await supabase
-        .from("transfer_pricing_documents")
-        .select("*")
-        .eq("created_by", user.id);
+        .from('transfer_pricing_documents')
+        .select('*')
+        .eq('created_by', user.id);
 
       if (error) throw error;
 
-      const typedDocuments = data.map(doc => ({
+      const typedDocuments: TPDocument[] = (data || []).map(doc => ({
         id: doc.id,
         title: doc.title,
-        type: doc.type as "master" | "local",
-        status: doc.status as "draft" | "published",
+        type: doc.type,
+        status: doc.status,
         content: doc.content,
         companyId: doc.company_id,
         createdBy: doc.created_by,
@@ -87,15 +87,17 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       if (!user) throw new Error("No authenticated user");
 
       const newDocument = {
-        ...document,
+        title: document.title,
+        type: document.type,
+        status: document.status || 'draft',
+        content: document.content,
+        company_id: document.companyId,
         created_by: user.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         version: 1,
       };
 
       const { data, error } = await supabase
-        .from("transfer_pricing_documents")
+        .from('transfer_pricing_documents')
         .insert([newDocument])
         .select()
         .single();
@@ -126,10 +128,19 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
   const updateDocument = async (id: string, updates: Partial<TPDocument>) => {
     try {
+      const updatePayload = {
+        title: updates.title,
+        type: updates.type,
+        status: updates.status,
+        content: updates.content,
+        company_id: updates.companyId,
+        version: updates.version,
+      };
+
       const { error } = await supabase
-        .from("transfer_pricing_documents")
-        .update(updates)
-        .eq("id", id);
+        .from('transfer_pricing_documents')
+        .update(updatePayload)
+        .eq('id', id);
 
       if (error) throw error;
 
@@ -149,9 +160,9 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
   const deleteDocument = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("transfer_pricing_documents")
+        .from('transfer_pricing_documents')
         .delete()
-        .eq("id", id);
+        .eq('id', id);
 
       if (error) throw error;
 

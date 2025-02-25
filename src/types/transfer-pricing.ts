@@ -12,31 +12,15 @@ export interface TPDocument {
   companyId: string;
   createdBy: string;
   approvedBy?: string;
-  content: any;
+  content: string | TPDocumentContent;
   version: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface TPTransaction {
-  id: string;
-  documentId: string;
-  transactionType: string;
-  description: string;
-  amount: number;
-  currency: string;
-  pricingMethod: PricingMethod;
-  supportingDocs: any;
-  createdAt: string;
-}
-
-export interface TPBenchmark {
-  id: string;
-  transactionId: string;
-  datasetSource: string;
-  comparables: any;
-  analysisResults: any;
-  createdAt: string;
+export interface TPDocumentContent {
+  entityDetails: EntityDetails;
+  transactions: ControlledTransaction[];
 }
 
 export interface EntityDetails {

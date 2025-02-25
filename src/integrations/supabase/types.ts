@@ -699,6 +699,45 @@ export type Database = {
         }
         Relationships: []
       }
+      transfer_pricing_documents: {
+        Row: {
+          company_id: string | null
+          content: Json | null
+          created_at: string
+          created_by: string | null
+          id: string
+          status: Database["public"]["Enums"]["tp_document_status"]
+          title: string
+          type: Database["public"]["Enums"]["tp_document_type"]
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          company_id?: string | null
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["tp_document_status"]
+          title: string
+          type: Database["public"]["Enums"]["tp_document_type"]
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          company_id?: string | null
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["tp_document_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["tp_document_type"]
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           address: string
@@ -785,6 +824,8 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       document_type: "receipt" | "filing" | "statement" | "report" | "other"
+      tp_document_status: "draft" | "published"
+      tp_document_type: "master" | "local"
     }
     CompositeTypes: {
       [_ in never]: never
