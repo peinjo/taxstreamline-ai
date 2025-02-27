@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           if (initialSession.user) {
             await fetchUserRole(initialSession.user.id);
+            await ensureUserProfile(initialSession.user.id, initialSession.user.email);
           }
         } else {
           console.log("No initial session found");
@@ -101,6 +102,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           if (currentSession?.user) {
             await fetchUserRole(currentSession.user.id);
+            
+            // Ensure user profile exists after login
+            if (event === 'SIGNED_IN') {
+              await ensureUserProfile(currentSession.user.id, currentSession.user.email);
+            }
           } else {
             setUserRole(null);
           }
@@ -118,6 +124,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Ensure a user profile exists - create a default one if missing
+  const ensureUserProfile = async (userId: string, email?: string | null) => {
+    try {
+      console.log("Checking if user profile exists for:", userId);
+      
+      // Check if profile exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from("user_profiles")
+        .select("id, full_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking user profile:", checkError);
+        return;
+      }
+      
+      if (!existingProfile) {
+        console.log("No profile found, creating default profile");
+        
+        // Extract name from email or use default
+        const emailName = email ? email.split('@')[0] : 'User';
+        const defaultName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+        
+        // Create a default profile
+        const { error: insertError } = await supabase
+          .from("user_profiles")
+          .insert({
+            user_id: userId,
+            full_name: defaultName,
+            address: "Please update your address",
+            date_of_birth: new Date().toISOString().split('T')[0] // Today's date as default
+          });
+        
+        if (insertError) {
+          console.error("Error creating default profile:", insertError);
+        } else {
+          console.log("Default profile created successfully");
+        }
+      } else {
+        console.log("Profile already exists:", existingProfile);
+      }
+    } catch (error) {
+      console.error("Error in ensureUserProfile:", error);
+    }
+  };
 
   const fetchUserRole = async (userId: string) => {
     try {
@@ -193,6 +246,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(data.user);
       setSession(data.session);
       await fetchUserRole(data.user.id);
+      await ensureUserProfile(data.user.id, data.user.email);
       
       toast.success("Successfully logged in");
       setLoading(false);
@@ -236,6 +290,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log("Signup successful:", data);
+      
+      // Create user profile during signup
+      if (data.user.id) {
+        await ensureUserProfile(data.user.id, email);
+      }
+      
       toast.success("Signup successful! Please check your email to confirm your account.");
       
       return;
