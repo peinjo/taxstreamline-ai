@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -42,25 +41,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Initialize auth and listen for changes
   useEffect(() => {
     console.log("AuthProvider initialized");
-    
+
     const initializeAuth = async () => {
       try {
         setLoading(true);
-        
+
         // Get initial session
         const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
-        
+
         if (sessionError) {
           console.error("Error getting initial session:", sessionError);
           setLoading(false);
           return;
         }
-        
+
         if (initialSession) {
           console.log("Initial session found:", initialSession.user.email);
           setSession(initialSession);
           setUser(initialSession.user);
-          
+
           if (initialSession.user) {
             await fetchUserRole(initialSession.user.id);
             await ensureUserProfile(initialSession.user.id, initialSession.user.email);
@@ -82,13 +81,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession?.user?.email);
-      
+
       // Important: Don't set loading to true on SIGNED_OUT events
       // as this can cause infinite loading screens
       if (event !== 'SIGNED_OUT') {
         setLoading(true);
       }
-      
+
       try {
         // For SIGNED_OUT events, immediately clear state
         if (event === 'SIGNED_OUT') {
@@ -99,10 +98,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
-          
+
           if (currentSession?.user) {
             await fetchUserRole(currentSession.user.id);
-            
+
             // Ensure user profile exists after login
             if (event === 'SIGNED_IN') {
               await ensureUserProfile(currentSession.user.id, currentSession.user.email);
@@ -129,29 +128,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const ensureUserProfile = async (userId: string, email?: string | null) => {
     try {
       console.log("Checking if user profile exists for:", userId);
-      
+
       // Check if profile exists
       const { data: existingProfile, error: checkError } = await supabase
         .from("user_profiles")
         .select("id, full_name")
         .eq("user_id", userId)
         .maybeSingle();
-      
-      if (checkError) {
+
+      if (checkError && !checkError.message.includes('No rows found')) {
         console.error("Error checking user profile:", checkError);
-        throw checkError;
+        return false; // Return false instead of throwing error
       }
-      
+
       if (!existingProfile) {
         console.log("No profile found, creating default profile");
-        
+
         // Extract name from email or use default
         const emailName = email ? email.split('@')[0] : 'User';
         const defaultName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-        
+
         // Current date formatted as YYYY-MM-DD for date_of_birth
         const today = new Date().toISOString().split('T')[0];
-        
+
         // Create a default profile
         const { error: insertError } = await supabase
           .from("user_profiles")
@@ -161,26 +160,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             address: "Please update your address",
             date_of_birth: today // Today's date as default
           });
-        
+
         if (insertError) {
           console.error("Error creating default profile:", insertError);
           console.error("Insert error details:", JSON.stringify(insertError));
-          throw insertError;
+
+          // The trigger should handle this, so we can safely ignore permission errors
+          if (insertError.code === "42501" || insertError.message.includes("permission denied")) {
+            console.log("Permission error, but profile may be created by trigger");
+            return true;
+          }
+
+          return false; // Return false instead of throwing error
         } else {
           console.log("Default profile created successfully");
+          return true;
         }
       } else {
         console.log("Profile already exists:", existingProfile);
+        return true;
       }
     } catch (error) {
       console.error("Error in ensureUserProfile:", error);
+      return false; // Return false instead of throwing error
     }
   };
 
   const fetchUserRole = async (userId: string) => {
     try {
       console.log("Fetching role for user:", userId);
-      
+
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -196,13 +205,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         console.log("No role found, defaulting to 'user'");
         setUserRole('user');
-        
+
         // Create default role if it doesn't exist
         try {
           const { error: insertError } = await supabase
             .from("user_roles")
             .insert({ user_id: userId, role: 'user' });
-            
+
           if (insertError) {
             console.error("Error creating default user role:", insertError);
           }
@@ -220,7 +229,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Signing in with email:", email);
       setLoading(true);
-      
+
       // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -245,14 +254,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log("Authentication successful:", data.user.email);
-      
+
       // Immediately update state without waiting for onAuthStateChange
       // This helps prevent loading issues
       setUser(data.user);
       setSession(data.session);
       await fetchUserRole(data.user.id);
       await ensureUserProfile(data.user.id, data.user.email);
-      
+
       toast.success("Successfully logged in");
       setLoading(false);
       return;
@@ -270,82 +279,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      console.log("Signing up with email:", email);
-      
-      // Sign up the user
+      console.log("Starting signup process for email:", email);
+      setLoading(true);
+
+      // Simplified signup process - this will rely on the database trigger
+      // we created to handle profile and role creation
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/login`,
-          data: {
-            email: email
-          }
-        },
+          emailRedirectTo: window.location.origin + '/dashboard'
+        }
       });
 
       if (error) {
-        console.error("Signup error:", error);
-        toast.error(`Auth error: ${error.message}`);
+        console.log("Signup error:", error);
+        let errorMessage = error.message;
+
+        // More user-friendly error messages
+        if (error.status === 500) {
+          errorMessage = "Server error during signup. Please try again later.";
+        } else if (error.message.includes("duplicate")) {
+          errorMessage = "An account with this email already exists.";
+        }
+
+        toast.error(`Signup failed: ${errorMessage}`);
         throw error;
       }
 
-      if (!data?.user) {
-        console.error("No user data returned from signup");
-        toast.error("Signup failed - no user data");
-        throw new Error("Signup failed - no user data");
-      }
+      console.log("Signup successful:", data);
 
-      console.log("Signup successful, user created:", data.user);
-      
-      // Create user profile during signup
-      if (data.user.id) {
-        try {
-          // First try to create user profile
-          await ensureUserProfile(data.user.id, email);
-          console.log("User profile created successfully");
-          
-          // Then try to create default role
-          try {
-            const { error: roleError } = await supabase
-              .from("user_roles")
-              .insert({ user_id: data.user.id, role: 'user' });
-              
-            if (roleError) {
-              console.error("Error creating default user role:", roleError.message, roleError.details, roleError.hint);
-              // If permission error, suggest RLS issue
-              if (roleError.code === "42501" || roleError.message.includes("permission denied")) {
-                toast.error("Database permission error: Please enable RLS and create policies in Supabase");
-                console.error("RLS Error: You need to enable Row Level Security and create policies for the user_roles table");
-              } else {
-                toast.error("Database error: Failed to set user role");
-              }
-            }
-          } catch (roleError: any) {
-            console.error("Exception creating default role:", roleError);
-            toast.error("Database error: Failed to set user role");
-          }
-          
-        } catch (profileError: any) {
-          console.error("Error creating user profile:", profileError?.message, profileError?.details, profileError?.hint);
-          
-          // If permission error, suggest RLS issue
-          if (profileError?.code === "42501" || (profileError?.message && profileError.message.includes("permission denied"))) {
-            toast.error("Database permission error: Please enable RLS and create policies in Supabase");
-            console.error("RLS Error: You need to enable Row Level Security and create policies for the user_profiles table");
-          } else {
-            toast.error("Database error saving new user profile");
-          }
-          throw profileError;
-        }
-      }
-      
-      toast.success("Signup successful! Please check your email to confirm your account.");
-      
-      return;
+      // No need to manually create profiles - our trigger will handle this
+
+      setLoading(false);
+      toast.success("Account created! Please check your email to confirm your account.");
+      return data;
+
     } catch (error: any) {
-      console.error("Signup failed:", error, typeof error);
-      toast.error(error.message || "Database error saving new user");
+      setLoading(false);
+      console.log("Signup process error:", error);
+      toast.error(`Signup failed: ${error.message || "Unknown error"}`);
       throw error;
     }
   };
@@ -354,17 +327,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Signing out");
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         console.error("Sign out error:", error);
         throw error;
       }
-      
+
       // Immediately clear state instead of waiting for the onAuthStateChange
       setUser(null);
       setSession(null);
       setUserRole(null);
-      
+
       console.log("Signed out successfully");
       toast.success("Signed out successfully");
     } catch (error: any) {
