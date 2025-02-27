@@ -188,13 +188,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Signing up with email:", email);
       
-      // Check if email already exists
-      const { data: existingUsers, error: checkError } = await supabase.auth.admin
-        .listUsers({ filter: { email } });
-      
-      if (checkError) {
-        console.warn("Error checking existing user:", checkError);
-      }
+      // We'll remove the check for existing users since admin.listUsers() has type issues
+      // and it requires admin privileges which may not be available in the client
       
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
