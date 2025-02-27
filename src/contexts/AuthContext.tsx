@@ -139,7 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (checkError) {
         console.error("Error checking user profile:", checkError);
-        return;
+        throw checkError;
       }
       
       if (!existingProfile) {
@@ -149,6 +149,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const emailName = email ? email.split('@')[0] : 'User';
         const defaultName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
         
+        // Current date formatted as YYYY-MM-DD for date_of_birth
+        const today = new Date().toISOString().split('T')[0];
+        
         // Create a default profile
         const { error: insertError } = await supabase
           .from("user_profiles")
@@ -156,11 +159,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             user_id: userId,
             full_name: defaultName,
             address: "Please update your address",
-            date_of_birth: new Date().toISOString().split('T')[0] // Today's date as default
+            date_of_birth: today // Today's date as default
           });
         
         if (insertError) {
           console.error("Error creating default profile:", insertError);
+          console.error("Insert error details:", JSON.stringify(insertError));
+          throw insertError;
         } else {
           console.log("Default profile created successfully");
         }
@@ -281,27 +286,52 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error("Signup error:", error);
+        toast.error(`Auth error: ${error.message}`);
         throw error;
       }
 
       if (!data?.user) {
         console.error("No user data returned from signup");
+        toast.error("Signup failed - no user data");
         throw new Error("Signup failed - no user data");
       }
 
-      console.log("Signup successful:", data);
+      console.log("Signup successful, user created:", data.user);
       
       // Create user profile during signup
       if (data.user.id) {
-        await ensureUserProfile(data.user.id, email);
+        try {
+          await ensureUserProfile(data.user.id, email);
+          console.log("User profile created successfully");
+          
+          // Create default role
+          try {
+            const { error: roleError } = await supabase
+              .from("user_roles")
+              .insert({ user_id: data.user.id, role: 'user' });
+              
+            if (roleError) {
+              console.error("Error creating default user role:", roleError);
+              toast.error("Database error: Failed to set user role");
+            }
+          } catch (roleError: any) {
+            console.error("Exception creating default role:", roleError);
+            toast.error("Database error: Failed to set user role");
+          }
+          
+        } catch (profileError: any) {
+          console.error("Error creating user profile:", profileError);
+          toast.error("Database error saving new user profile");
+          throw profileError;
+        }
       }
       
       toast.success("Signup successful! Please check your email to confirm your account.");
       
       return;
     } catch (error: any) {
-      console.error("Signup failed:", error);
-      toast.error(error.message || "Failed to sign up");
+      console.error("Signup failed:", error, typeof error);
+      toast.error(error.message || "Database error saving new user");
       throw error;
     }
   };
