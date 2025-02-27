@@ -12,42 +12,47 @@ import { TaskManagement } from "@/components/tasks/TaskManagement";
 const Dashboard = () => {
   const { user, userRole, loading: authLoading } = useAuth();
 
+  console.log("Dashboard rendering, auth state:", { 
+    userExists: !!user, 
+    userId: user?.id, 
+    authLoading,
+    userRole
+  });
+
   // Don't attempt to fetch profile data until we have a user
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ["user-profile", user?.id],
     queryFn: async () => {
       console.log("Fetching user profile for:", user?.id);
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("full_name")
-        .eq("user_id", user?.id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error("Error fetching user profile:", error);
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .select("full_name")
+          .eq("user_id", user?.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching user profile:", error);
+          throw error;
+        }
+        
+        console.log("Profile data received:", data);
+        return data || { full_name: "User" }; // Fallback if no profile found
+      } catch (err) {
+        console.error("Profile fetch exception:", err);
+        return { full_name: "User" }; // Fallback on error
       }
-      return data;
     },
     enabled: !!user?.id,
     retry: 1,
+    retryDelay: 1000,
   });
 
-  // Show a loading indicator while auth and profile are loading
-  if (authLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center h-full py-20">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent mb-4"></div>
-            <p>Loading your dashboard...</p>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
+  if (profileError) {
+    console.error("Profile query error:", profileError);
   }
 
-  // If profile data is loading after auth is ready, show a skeleton UI
+  // Use this approach for fewer loading states - continue rendering with default values
   const firstName = profile?.full_name?.split(" ")[0] || "User";
 
   const metrics = [

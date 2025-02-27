@@ -82,22 +82,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession?.user?.email);
       
-      // Set loading to true whenever authentication state changes
-      setLoading(true);
+      // Important: Don't set loading to true on SIGNED_OUT events
+      // as this can cause infinite loading screens
+      if (event !== 'SIGNED_OUT') {
+        setLoading(true);
+      }
       
       try {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        
-        if (currentSession?.user) {
-          await fetchUserRole(currentSession.user.id);
-        } else {
+        // For SIGNED_OUT events, immediately clear state
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setUserRole(null);
+          console.log("User signed out, state cleared");
+        } else {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          
+          if (currentSession?.user) {
+            await fetchUserRole(currentSession.user.id);
+          } else {
+            setUserRole(null);
+          }
         }
       } catch (error) {
         console.error("Error handling auth state change:", error);
       } finally {
-        // Make sure loading is set to false when we're done
         setLoading(false);
       }
     });
@@ -151,6 +161,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log("Signing in with email:", email);
+      setLoading(true);
       
       // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -165,20 +176,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           errorName: error.name,
           details: error
         });
+        setLoading(false);
         throw error;
       }
 
       if (!data?.user || !data?.session) {
         console.error("No user or session data returned from Supabase");
+        setLoading(false);
         throw new Error("Authentication failed - no user data");
       }
 
       console.log("Authentication successful:", data.user.email);
       
-      // The session will be updated through the onAuthStateChange event
-      // No need to manually set it here
+      // Immediately update state without waiting for onAuthStateChange
+      // This helps prevent loading issues
+      setUser(data.user);
+      setSession(data.session);
+      await fetchUserRole(data.user.id);
       
       toast.success("Successfully logged in");
+      setLoading(false);
       return;
     } catch (error: any) {
       console.error("Sign in error:", {
@@ -187,6 +204,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         details: error
       });
       toast.error(error.message || "Failed to sign in");
+      setLoading(false);
       throw error;
     }
   };
@@ -194,9 +212,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string) => {
     try {
       console.log("Signing up with email:", email);
-      
-      // We'll remove the check for existing users since admin.listUsers() has type issues
-      // and it requires admin privileges which may not be available in the client
       
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
@@ -241,8 +256,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
       
-      // The session will be cleared through the onAuthStateChange event
-      // No need to manually clear it here
+      // Immediately clear state instead of waiting for the onAuthStateChange
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
       
       console.log("Signed out successfully");
       toast.success("Signed out successfully");
