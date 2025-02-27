@@ -1,12 +1,13 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { User, Session } from "@supabase/supabase-js";
 import type { AppRole } from "@/types";
 import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   userRole: AppRole | null;
   signIn: (email: string, password: string) => Promise<void>;
@@ -16,6 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  session: null,
   loading: true,
   userRole: null,
   signIn: async () => {},
@@ -33,19 +35,39 @@ export function useAuth() {
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<AppRole | null>(null);
 
+  // Initialize auth and listen for changes
   useEffect(() => {
+    console.log("AuthProvider initialized");
+    
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchUserRole(session.user.id);
+        setLoading(true);
+        
+        // Get initial session
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Error getting initial session:", sessionError);
+          return;
+        }
+        
+        if (initialSession) {
+          console.log("Initial session found:", initialSession.user.email);
+          setSession(initialSession);
+          setUser(initialSession.user);
+          
+          if (initialSession.user) {
+            await fetchUserRole(initialSession.user.id);
+          }
+        } else {
+          console.log("No initial session found");
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error("Error in auth initialization:", error);
       } finally {
         setLoading(false);
       }
@@ -53,26 +75,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     initializeAuth();
 
+    // Set up auth state change listener
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("Auth state changed:", _event, session?.user?.id);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchUserRole(session.user.id);
+    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Auth state changed:", event, currentSession?.user?.email);
+      
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      
+      if (currentSession?.user) {
+        await fetchUserRole(currentSession.user.id);
       } else {
         setUserRole(null);
       }
+      
       setLoading(false);
     });
 
+    // Clean up subscription
     return () => {
+      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
 
   const fetchUserRole = async (userId: string) => {
     try {
+      console.log("Fetching role for user:", userId);
+      
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -82,8 +113,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error("Error fetching user role:", error);
         setUserRole('user');
+      } else if (data) {
+        console.log("User role found:", data.role);
+        setUserRole(data.role);
       } else {
-        setUserRole(data?.role || 'user');
+        console.log("No role found, defaulting to 'user'");
+        setUserRole('user');
+        
+        // Create default role if it doesn't exist
+        try {
+          const { error: insertError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: userId, role: 'user' });
+            
+          if (insertError) {
+            console.error("Error creating default user role:", insertError);
+          }
+        } catch (insertError) {
+          console.error("Exception creating default role:", insertError);
+        }
       }
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
@@ -93,18 +141,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      // First check and clear any existing session
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.log("Signing in with email:", email);
       
-      if (sessionError) {
-        console.error("Session check error:", sessionError);
-      }
-
-      if (sessionData?.session) {
-        console.log("Found existing session, signing out...");
-        await supabase.auth.signOut();
-      }
-
       // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -121,14 +159,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
 
-      if (!data?.user) {
-        console.error("No user data returned from Supabase");
+      if (!data?.user || !data?.session) {
+        console.error("No user or session data returned from Supabase");
         throw new Error("Authentication failed - no user data");
       }
 
+      console.log("Authentication successful:", data.user.email);
       setUser(data.user);
-      console.log("Auth successful:", data.user.id);
+      setSession(data.session);
+      
+      // Fetch role after successful login
+      await fetchUserRole(data.user.id);
+      
       toast.success("Successfully logged in");
+      return;
     } catch (error: any) {
       console.error("Sign in error:", {
         message: error.message,
@@ -142,16 +186,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log("Signing up with email:", email);
+      
+      // Check if email already exists
+      const { data: existingUsers, error: checkError } = await supabase.auth.admin
+        .listUsers({ filter: { email } });
+      
+      if (checkError) {
+        console.warn("Error checking existing user:", checkError);
+      }
+      
+      // Sign up the user
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth/login`,
+          data: {
+            email: email
+          }
         },
       });
-      if (error) throw error;
+
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
+
+      if (!data?.user) {
+        console.error("No user data returned from signup");
+        throw new Error("Signup failed - no user data");
+      }
+
+      console.log("Signup successful:", data);
       toast.success("Signup successful! Please check your email to confirm your account.");
+      
+      return;
     } catch (error: any) {
+      console.error("Signup failed:", error);
       toast.error(error.message || "Failed to sign up");
       throw error;
     }
@@ -159,17 +231,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
+      console.log("Signing out");
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      if (error) {
+        console.error("Sign out error:", error);
+        throw error;
+      }
+      
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      console.log("Signed out successfully");
       toast.success("Signed out successfully");
     } catch (error: any) {
+      console.error("Sign out failed:", error);
       toast.error(error.message || "Failed to sign out");
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      userRole, 
+      signIn, 
+      signUp, 
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );

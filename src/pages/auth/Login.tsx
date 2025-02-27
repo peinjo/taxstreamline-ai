@@ -15,8 +15,12 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Debug logs to track session state
+    console.log("Login component mounted, checking session");
+    
     const checkSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -25,8 +29,10 @@ const Login = () => {
           return;
         }
         if (session?.user) {
-          console.log("Active session found, redirecting to dashboard");
+          console.log("Active session found, user:", session.user.email);
           navigate("/dashboard");
+        } else {
+          console.log("No active session found");
         }
       } catch (error) {
         console.error("Session check failed:", error);
@@ -35,9 +41,25 @@ const Login = () => {
     checkSession();
   }, [navigate]);
 
+  // Monitor auth changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed in Login component:", event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' && session) {
+        navigate("/dashboard");
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError(null);
     
     try {
       if (!email || !password) {
@@ -45,6 +67,13 @@ const Login = () => {
       }
 
       console.log("Attempting login with email:", email);
+      
+      // Clear any existing sessions first
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        console.warn("Error clearing previous session:", signOutError);
+      }
+
       await signIn(email, password);
       
       // Check session after sign in
@@ -57,7 +86,7 @@ const Login = () => {
         throw new Error("Login successful but no session created");
       }
 
-      console.log("Login successful, session established");
+      console.log("Login successful, session established", session);
       navigate("/dashboard");
     } catch (error: any) {
       console.error("Login error:", {
@@ -75,6 +104,7 @@ const Login = () => {
         errorMessage = "Please confirm your email address before logging in";
       }
       
+      setAuthError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -92,6 +122,11 @@ const Login = () => {
       </div>
       <Card className="w-full max-w-md p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Log In</h2>
+        {authError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+            {authError}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-1">
