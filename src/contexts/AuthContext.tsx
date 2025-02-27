@@ -301,18 +301,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Create user profile during signup
       if (data.user.id) {
         try {
+          // First try to create user profile
           await ensureUserProfile(data.user.id, email);
           console.log("User profile created successfully");
           
-          // Create default role
+          // Then try to create default role
           try {
             const { error: roleError } = await supabase
               .from("user_roles")
               .insert({ user_id: data.user.id, role: 'user' });
               
             if (roleError) {
-              console.error("Error creating default user role:", roleError);
-              toast.error("Database error: Failed to set user role");
+              console.error("Error creating default user role:", roleError.message, roleError.details, roleError.hint);
+              // If permission error, suggest RLS issue
+              if (roleError.code === "42501" || roleError.message.includes("permission denied")) {
+                toast.error("Database permission error: Please enable RLS and create policies in Supabase");
+                console.error("RLS Error: You need to enable Row Level Security and create policies for the user_roles table");
+              } else {
+                toast.error("Database error: Failed to set user role");
+              }
             }
           } catch (roleError: any) {
             console.error("Exception creating default role:", roleError);
@@ -320,8 +327,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
           
         } catch (profileError: any) {
-          console.error("Error creating user profile:", profileError);
-          toast.error("Database error saving new user profile");
+          console.error("Error creating user profile:", profileError?.message, profileError?.details, profileError?.hint);
+          
+          // If permission error, suggest RLS issue
+          if (profileError?.code === "42501" || (profileError?.message && profileError.message.includes("permission denied"))) {
+            toast.error("Database permission error: Please enable RLS and create policies in Supabase");
+            console.error("RLS Error: You need to enable Row Level Security and create policies for the user_profiles table");
+          } else {
+            toast.error("Database error saving new user profile");
+          }
           throw profileError;
         }
       }
