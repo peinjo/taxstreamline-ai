@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,6 +58,10 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submission attempts
+    if (loading) return;
+    
     setLoading(true);
     setAuthError(null);
     
@@ -68,33 +72,17 @@ const Login = () => {
 
       console.log("Attempting login with email:", email);
       
-      // Clear any existing sessions first
-      const { error: signOutError } = await supabase.auth.signOut();
-      if (signOutError) {
-        console.warn("Error clearing previous session:", signOutError);
-      }
-
+      // We'll skip the signOut call as it may be causing issues
+      // and isn't necessary before login
+      
       await signIn(email, password);
       
-      // Check session after sign in
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        throw sessionError;
-      }
+      // Supabase will handle the session update through the onAuthStateChange listener,
+      // which will then trigger the navigation to dashboard
+      console.log("Login process completed, waiting for auth state to update");
       
-      if (!session) {
-        throw new Error("Login successful but no session created");
-      }
-
-      console.log("Login successful, session established", session);
-      navigate("/dashboard");
     } catch (error: any) {
-      console.error("Login error:", {
-        message: error.message,
-        details: error,
-        statusCode: error.status,
-        name: error.name
-      });
+      console.error("Login error:", error);
       
       // Provide more user-friendly error messages
       let errorMessage = "Failed to log in";
@@ -106,7 +94,8 @@ const Login = () => {
       
       setAuthError(errorMessage);
       toast.error(errorMessage);
-    } finally {
+      
+      // Make sure to update loading state on error
       setLoading(false);
     }
   };

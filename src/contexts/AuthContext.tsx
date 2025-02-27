@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (sessionError) {
           console.error("Error getting initial session:", sessionError);
+          setLoading(false);
           return;
         }
         
@@ -81,16 +82,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       console.log("Auth state changed:", event, currentSession?.user?.email);
       
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      // Set loading to true whenever authentication state changes
+      setLoading(true);
       
-      if (currentSession?.user) {
-        await fetchUserRole(currentSession.user.id);
-      } else {
-        setUserRole(null);
+      try {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession?.user) {
+          await fetchUserRole(currentSession.user.id);
+        } else {
+          setUserRole(null);
+        }
+      } catch (error) {
+        console.error("Error handling auth state change:", error);
+      } finally {
+        // Make sure loading is set to false when we're done
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     // Clean up subscription
@@ -165,11 +174,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log("Authentication successful:", data.user.email);
-      setUser(data.user);
-      setSession(data.session);
       
-      // Fetch role after successful login
-      await fetchUserRole(data.user.id);
+      // The session will be updated through the onAuthStateChange event
+      // No need to manually set it here
       
       toast.success("Successfully logged in");
       return;
@@ -234,9 +241,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
       
-      setUser(null);
-      setSession(null);
-      setUserRole(null);
+      // The session will be cleared through the onAuthStateChange event
+      // No need to manually clear it here
+      
       console.log("Signed out successfully");
       toast.success("Signed out successfully");
     } catch (error: any) {
