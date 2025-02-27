@@ -1,3 +1,4 @@
+
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,23 +10,49 @@ import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
 
 const Dashboard = () => {
-  const { user, userRole } = useAuth();
+  const { user, userRole, loading: authLoading } = useAuth();
 
-  const { data: profile } = useQuery({
-    queryKey: ["user-profile", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("full_name")
-        .eq("user_id", user?.id)
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user?.id,
+  console.log("Dashboard rendering, auth state:", { 
+    userExists: !!user, 
+    userId: user?.id, 
+    authLoading,
+    userRole
   });
 
+  // Don't attempt to fetch profile data until we have a user
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ["user-profile", user?.id],
+    queryFn: async () => {
+      console.log("Fetching user profile for:", user?.id);
+      try {
+        const { data, error } = await supabase
+          .from("user_profiles")
+          .select("full_name")
+          .eq("user_id", user?.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching user profile:", error);
+          throw error;
+        }
+        
+        console.log("Profile data received:", data);
+        return data || { full_name: "User" }; // Fallback if no profile found
+      } catch (err) {
+        console.error("Profile fetch exception:", err);
+        return { full_name: "User" }; // Fallback on error
+      }
+    },
+    enabled: !!user?.id,
+    retry: 1,
+    retryDelay: 1000,
+  });
+
+  if (profileError) {
+    console.error("Profile query error:", profileError);
+  }
+
+  // Use this approach for fewer loading states - continue rendering with default values
   const firstName = profile?.full_name?.split(" ")[0] || "User";
 
   const metrics = [

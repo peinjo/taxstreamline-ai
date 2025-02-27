@@ -1,7 +1,9 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -9,7 +11,25 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   useDeadlineChecker();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  
+  console.log("DashboardLayout rendering, auth state:", { 
+    userExists: !!user, 
+    userId: user?.id, 
+    loading 
+  });
+  
+  // Check for authentication and redirect if needed
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log("User not authenticated, redirecting to login");
+      navigate("/auth/login");
+    }
+  }, [user, loading, navigate]);
 
+  // IMPORTANT: We'll render the content even during loading to prevent flash
+  // This prevents infinite loading issues when auth state is correctly set
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
@@ -22,7 +42,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           />
           <span className="ml-2 text-xl font-semibold">TaxPal</span>
         </div>
-        <div className="container mx-auto p-8">{children}</div>
+        <div className="container mx-auto p-8">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center">
+                <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent mb-4"></div>
+                <p>Loading your dashboard...</p>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
+        </div>
       </main>
     </div>
   );

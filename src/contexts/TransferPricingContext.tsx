@@ -1,146 +1,191 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { TPDocument, TPTransaction, TPBenchmark } from '@/types/transfer-pricing';
-import { toast } from 'sonner';
+import React, { createContext, useContext, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+export interface TPDocument {
+  id: string;
+  title: string;
+  type: "master" | "local";
+  status: "draft" | "published";
+  content: any;
+  companyId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
 
 interface TransferPricingContextType {
   documents: TPDocument[];
-  currentDocument: TPDocument | null;
   loading: boolean;
-  createDocument: (doc: Partial<TPDocument>) => Promise<void>;
+  fetchDocuments: () => Promise<void>;
+  createDocument: (document: Partial<TPDocument>) => Promise<TPDocument | null>;
   updateDocument: (id: string, updates: Partial<TPDocument>) => Promise<void>;
-  approveDocument: (id: string) => Promise<void>;
-  rejectDocument: (id: string) => Promise<void>;
-  uploadSupportingDoc: (docId: string, file: File) => Promise<void>;
+  deleteDocument: (id: string) => Promise<void>;
 }
 
-const TransferPricingContext = createContext<TransferPricingContextType | undefined>(undefined);
+const TransferPricingContext = createContext<TransferPricingContextType>({
+  documents: [],
+  loading: false,
+  fetchDocuments: async () => {},
+  createDocument: async () => null,
+  updateDocument: async () => {},
+  deleteDocument: async () => {},
+});
 
-export function TransferPricingProvider({ children }: { children: React.ReactNode }) {
+export const useTransferPricing = () => {
+  const context = useContext(TransferPricingContext);
+  if (!context) {
+    throw new Error("useTransferPricing must be used within a TransferPricingProvider");
+  }
+  return context;
+};
+
+export const TransferPricingProvider = ({ children }: { children: React.ReactNode }) => {
   const [documents, setDocuments] = useState<TPDocument[]>([]);
-  const [currentDocument, setCurrentDocument] = useState<TPDocument | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
-
-  async function fetchDocuments() {
+  const fetchDocuments = async () => {
+    setLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
+
       const { data, error } = await supabase
-        .from('tp_documents')
+        .from('transfer_pricing_documents')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('created_by', user.id);
 
       if (error) throw error;
-      setDocuments(data);
-    } catch (error) {
-      toast.error('Error fetching documents');
+
+      const typedDocuments: TPDocument[] = (data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        type: doc.type,
+        status: doc.status,
+        content: doc.content,
+        companyId: doc.company_id,
+        createdBy: doc.created_by,
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        version: doc.version,
+      }));
+
+      setDocuments(typedDocuments);
+    } catch (error: any) {
+      console.error("Error fetching documents:", error);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function createDocument(doc: Partial<TPDocument>) {
+  const createDocument = async (document: Partial<TPDocument>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No authenticated user");
+
+      const newDocument = {
+        title: document.title,
+        type: document.type,
+        status: document.status || 'draft',
+        content: document.content,
+        company_id: document.companyId,
+        created_by: user.id,
+        version: 1,
+      };
+
       const { data, error } = await supabase
-        .from('tp_documents')
-        .insert([doc])
+        .from('transfer_pricing_documents')
+        .insert([newDocument])
         .select()
         .single();
 
       if (error) throw error;
-      setDocuments([...documents, data]);
-      toast.success('Document created successfully');
-    } catch (error) {
-      toast.error('Error creating document');
-    }
-  }
 
-  async function updateDocument(id: string, updates: Partial<TPDocument>) {
+      const typedDocument: TPDocument = {
+        id: data.id,
+        title: data.title,
+        type: data.type,
+        status: data.status,
+        content: data.content,
+        companyId: data.company_id,
+        createdBy: data.created_by,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        version: data.version,
+      };
+
+      setDocuments(prev => [...prev, typedDocument]);
+      return typedDocument;
+    } catch (error: any) {
+      console.error("Error creating document:", error);
+      toast.error(error.message);
+      return null;
+    }
+  };
+
+  const updateDocument = async (id: string, updates: Partial<TPDocument>) => {
     try {
+      const updatePayload = {
+        title: updates.title,
+        type: updates.type,
+        status: updates.status,
+        content: updates.content,
+        company_id: updates.companyId,
+        version: updates.version,
+      };
+
       const { error } = await supabase
-        .from('tp_documents')
-        .update(updates)
+        .from('transfer_pricing_documents')
+        .update(updatePayload)
         .eq('id', id);
 
       if (error) throw error;
-      await fetchDocuments();
-      toast.success('Document updated successfully');
-    } catch (error) {
-      toast.error('Error updating document');
-    }
-  }
 
-  async function approveDocument(id: string) {
+      setDocuments(prev =>
+        prev.map(doc =>
+          doc.id === id ? { ...doc, ...updates, updatedAt: new Date().toISOString() } : doc
+        )
+      );
+
+      toast.success("Document updated successfully");
+    } catch (error: any) {
+      console.error("Error updating document:", error);
+      toast.error(error.message);
+    }
+  };
+
+  const deleteDocument = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('tp_documents')
-        .update({ status: 'approved', approvedBy: supabase.auth.user()?.id })
+        .from('transfer_pricing_documents')
+        .delete()
         .eq('id', id);
 
       if (error) throw error;
-      await fetchDocuments();
-      toast.success('Document approved successfully');
-    } catch (error) {
-      toast.error('Error approving document');
+
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+      toast.success("Document deleted successfully");
+    } catch (error: any) {
+      console.error("Error deleting document:", error);
+      toast.error(error.message);
     }
-  }
-
-  async function rejectDocument(id: string) {
-    try {
-      const { error } = await supabase
-        .from('tp_documents')
-        .update({ status: 'rejected' })
-        .eq('id', id);
-
-      if (error) throw error;
-      await fetchDocuments();
-      toast.success('Document rejected');
-    } catch (error) {
-      toast.error('Error rejecting document');
-    }
-  }
-
-  async function uploadSupportingDoc(docId: string, file: File) {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${docId}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('supporting-docs')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-      toast.success('File uploaded successfully');
-    } catch (error) {
-      toast.error('Error uploading file');
-    }
-  }
-
-  const value = {
-    documents,
-    currentDocument,
-    loading,
-    createDocument,
-    updateDocument,
-    approveDocument,
-    rejectDocument,
-    uploadSupportingDoc,
   };
 
   return (
-    <TransferPricingContext.Provider value={value}>
+    <TransferPricingContext.Provider
+      value={{
+        documents,
+        loading,
+        fetchDocuments,
+        createDocument,
+        updateDocument,
+        deleteDocument,
+      }}
+    >
       {children}
     </TransferPricingContext.Provider>
   );
-}
-
-export const useTransferPricing = () => {
-  const context = useContext(TransferPricingContext);
-  if (context === undefined) {
-    throw new Error('useTransferPricing must be used within a TransferPricingProvider');
-  }
-  return context;
 };
