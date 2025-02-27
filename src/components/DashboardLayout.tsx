@@ -1,7 +1,9 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -9,6 +11,30 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   useDeadlineChecker();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  
+  // Check for authentication and redirect if needed
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log("User not authenticated, redirecting to login");
+      navigate("/auth/login");
+    }
+  }, [user, loading, navigate]);
+
+  // Show a minimal loading state while checking auth
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent mb-4"></div>
+      </div>
+    );
+  }
+
+  // If not authenticated and still loading, don't render anything
+  if (!user && !loading) {
+    return null; // Will redirect via the useEffect
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">

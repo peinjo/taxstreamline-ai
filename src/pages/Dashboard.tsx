@@ -1,3 +1,4 @@
+
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,23 +10,44 @@ import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
 
 const Dashboard = () => {
-  const { user, userRole } = useAuth();
+  const { user, userRole, loading: authLoading } = useAuth();
 
-  const { data: profile } = useQuery({
+  // Don't attempt to fetch profile data until we have a user
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile", user?.id],
     queryFn: async () => {
+      console.log("Fetching user profile for:", user?.id);
       const { data, error } = await supabase
         .from("user_profiles")
         .select("full_name")
         .eq("user_id", user?.id)
-        .single();
+        .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching user profile:", error);
+        throw error;
+      }
       return data;
     },
     enabled: !!user?.id,
+    retry: 1,
   });
 
+  // Show a loading indicator while auth and profile are loading
+  if (authLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-full py-20">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent mb-4"></div>
+            <p>Loading your dashboard...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // If profile data is loading after auth is ready, show a skeleton UI
   const firstName = profile?.full_name?.split(" ")[0] || "User";
 
   const metrics = [
