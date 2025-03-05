@@ -22,7 +22,7 @@ const Sidebar = () => {
   const { signOut } = useAuth();
 
   const menuItems = [
-    { icon: LayoutDashboard, text: "Dashboard", path: "/" },
+    { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
     { icon: UserRound, text: "Personal Info", path: "/auth/personal-info" },
     { icon: Calculator, text: "Tax Web App", path: "/tax-web-app" },
     { icon: ChartBar, text: "Audit & Reporting", path: "/audit-reporting" },
