@@ -28,8 +28,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   }, [user, loading, navigate]);
 
-  // IMPORTANT: We'll render the content even during loading to prevent flash
-  // This prevents infinite loading issues when auth state is correctly set
+  // Render content even during loading to prevent UI flashes,
+  // but show a loading indicator in place of the actual content
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />

@@ -19,10 +19,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected Route component
+// Protected Route component - simplified to prevent loops
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
+  // Only show the brief loading spinner during initial auth check
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -34,27 +35,33 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
+  // Redirect unauthenticated users
   if (!user) {
+    console.log("Protected route: User not authenticated, redirecting to login");
     return <Navigate to="/auth/login" replace />;
   }
 
+  // User is authenticated, render children
   return <>{children}</>;
 };
 
-// Public Route component - redirects to dashboard if user is authenticated
+// Public Route component - prevents authenticated users from accessing auth pages
 const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // For auth pages, we don't need to show loading state
-  // Just render the children while we check auth status
+  // Don't show loading state for auth pages, just render them
+  // This prevents flash of loading screen during auth flow
   if (loading) {
     return <>{children}</>;
   }
   
+  // Redirect authenticated users to dashboard
   if (user) {
+    console.log("Public auth route: User is authenticated, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
   }
 
+  // User is not authenticated, render the auth page
   return <>{children}</>;
 };
 
@@ -70,7 +77,7 @@ const App: React.FC = () => {
               <BrowserRouter>
                 <Routes>
                   {routes.map((route) => {
-                    // Special case for index route - no auth check
+                    // Special case for index route
                     if (route.path === "/") {
                       return (
                         <Route
@@ -81,6 +88,7 @@ const App: React.FC = () => {
                       );
                     }
                     
+                    // Handle all other routes with appropriate protection
                     return (
                       <Route
                         key={route.path}
