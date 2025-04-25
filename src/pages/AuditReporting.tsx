@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -7,8 +8,14 @@ import { SummaryMetrics } from "@/components/audit/SummaryMetrics";
 import { ReportFilters } from "@/components/audit/ReportFilters";
 import { TaxSummaryTable } from "@/components/audit/TaxSummaryTable";
 import { TaxCharts } from "@/components/audit/TaxCharts";
+import { MaterialityCalculator } from "@/components/audit/MaterialityCalculator";
+import { ConfirmationManager } from "@/components/audit/ConfirmationManager";
+import { InternalControlsMonitor } from "@/components/audit/InternalControlsMonitor";
+import { AccountsReceivableAnalysis } from "@/components/audit/AccountsReceivableAnalysis";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { FileDown } from "lucide-react";
 
 const AuditReporting = () => {
   const [filters, setFilters] = useState({
@@ -68,25 +75,37 @@ const AuditReporting = () => {
     complianceRate: 92,
   };
 
+  const handleGenerateAuditSummary = () => {
+    // In a real implementation, this would generate a PDF or downloadable report
+    console.log("Generating audit summary");
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6 space-y-8">
         <div>
           <h1 className="text-2xl font-semibold">Audit & Reporting</h1>
           <p className="text-muted-foreground">
-            View and analyze tax reports and activities
+            View and analyze tax reports, confirmations, and internal controls
           </p>
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="confirmations">Confirmations</TabsTrigger>
+            <TabsTrigger value="controls">Internal Controls</TabsTrigger>
             <TabsTrigger value="audit">Audit Logs</TabsTrigger>
-            <TabsTrigger value="export">Export Tax Report</TabsTrigger>
+            <TabsTrigger value="export">Tax Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics" className="space-y-6">
             <SummaryMetrics metrics={mockMetrics} />
+            
+            <div className="grid gap-6 md:grid-cols-2">
+              <MaterialityCalculator />
+              <AccountsReceivableAnalysis />
+            </div>
             
             <div className="grid gap-6 md:grid-cols-2">
               <AnalyticsCharts
@@ -100,6 +119,21 @@ const AuditReporting = () => {
                 description="Distribution of tax filings by type"
               />
             </div>
+            
+            <div className="flex justify-end">
+              <Button onClick={handleGenerateAuditSummary} className="gap-2">
+                <FileDown className="h-4 w-4" />
+                Generate Audit Summary
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="confirmations" className="space-y-6">
+            <ConfirmationManager />
+          </TabsContent>
+          
+          <TabsContent value="controls" className="space-y-6">
+            <InternalControlsMonitor />
           </TabsContent>
 
           <TabsContent value="audit">
@@ -119,7 +153,7 @@ const AuditReporting = () => {
                     data={taxReports || []} 
                     isLoading={isLoadingReports} 
                   />
-                  {taxReports && <TaxCharts data={taxReports} />}
+                  {taxReports && taxReports.length > 0 && <TaxCharts data={taxReports} />}
                 </div>
               </div>
             </div>
