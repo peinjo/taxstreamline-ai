@@ -8,6 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
+import { useDashboardMetrics, useRecentActivities, useUpcomingDeadlines } from "@/hooks/useDashboard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const { user, userRole, loading: authLoading } = useAuth();
@@ -18,6 +21,25 @@ const Dashboard = () => {
     authLoading,
     userRole
   });
+
+  // Fetch metrics from the database
+  const { 
+    data: metrics, 
+    isLoading: isMetricsLoading, 
+    error: metricsError 
+  } = useDashboardMetrics();
+  
+  // Fetch activities
+  const { 
+    data: activities, 
+    isLoading: isActivitiesLoading 
+  } = useRecentActivities();
+  
+  // Fetch upcoming deadlines
+  const { 
+    data: deadlines, 
+    isLoading: isDeadlinesLoading 
+  } = useUpcomingDeadlines();
 
   // Don't attempt to fetch profile data until we have a user
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
@@ -48,6 +70,13 @@ const Dashboard = () => {
     retryDelay: 1000,
   });
 
+  // Show error notification if metrics failed to load
+  React.useEffect(() => {
+    if (metricsError) {
+      toast.error("Failed to load dashboard metrics");
+    }
+  }, [metricsError]);
+
   if (profileError) {
     console.error("Profile query error:", profileError);
   }
@@ -55,28 +84,28 @@ const Dashboard = () => {
   // Use this approach for fewer loading states - continue rendering with default values
   const firstName = profile?.full_name?.split(" ")[0] || "User";
 
-  const metrics = [
+  const metricItems = [
     {
       title: "Upcoming Deadlines",
-      value: "5",
+      value: isMetricsLoading ? "..." : metrics?.upcoming_deadlines || "0",
       icon: Calendar,
       className: "bg-blue-500",
     },
     {
       title: "Active Clients",
-      value: "24",
+      value: isMetricsLoading ? "..." : metrics?.active_clients || "0",
       icon: Users,
       className: "bg-green-500",
     },
     {
       title: "Documents Pending",
-      value: "12",
+      value: isMetricsLoading ? "..." : metrics?.documents_pending || "0",
       icon: FileText,
       className: "bg-yellow-500",
     },
     {
       title: "Compliance Alerts",
-      value: "3",
+      value: isMetricsLoading ? "..." : metrics?.compliance_alerts || "0",
       icon: AlertOctagon,
       className: "bg-red-500",
     },
@@ -98,7 +127,7 @@ const Dashboard = () => {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => (
+          {metricItems.map((metric) => (
             <Card key={metric.title}>
               <CardContent className="flex items-center p-6">
                 <div
@@ -110,7 +139,11 @@ const Dashboard = () => {
                   <p className="text-sm font-medium text-muted-foreground">
                     {metric.title}
                   </p>
-                  <h2 className="text-3xl font-bold">{metric.value}</h2>
+                  {isMetricsLoading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <h2 className="text-3xl font-bold">{metric.value}</h2>
+                  )}
                 </div>
               </CardContent>
             </Card>
