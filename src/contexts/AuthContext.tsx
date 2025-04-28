@@ -154,11 +154,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setUserRole('user');
         
-        // Create default role if it doesn't exist
-        await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: 'user' })
-          .catch(err => console.error("Error creating default user role:", err));
+        // Fixed: Instead of using .catch(), handle errors properly with try-catch
+        try {
+          // Create default role if it doesn't exist
+          const { error: insertError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: userId, role: 'user' });
+            
+          if (insertError) {
+            console.error("Error creating default user role:", insertError);
+          }
+        } catch (err) {
+          console.error("Error creating default user role:", err);
+        }
       }
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
