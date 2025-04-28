@@ -39,8 +39,12 @@ export function useAuthProvider(): AuthState & AuthActions {
         
         // Only fetch user role if we have a valid session
         if (currentSession.user) {
-          const role = await fetchUserRole(currentSession.user.id);
-          setUserRole(role);
+          try {
+            const role = await fetchUserRole(currentSession.user.id);
+            setUserRole(role);
+          } catch (error) {
+            console.error("Error fetching user role:", error);
+          }
         }
       } else {
         setSession(null);
@@ -87,11 +91,13 @@ export function useAuthProvider(): AuthState & AuthActions {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
+      console.log("Signing in with email:", email);
       await signInWithEmail(email, password);
       // Session will be handled by onAuthStateChange
-      return;
     } catch (error: any) {
+      console.error("Login error:", error);
       toast.error(error.message || "Failed to sign in");
+      // Important: Set loading to false in case of error
       setLoading(false);
       throw error;
     }
@@ -101,10 +107,10 @@ export function useAuthProvider(): AuthState & AuthActions {
     try {
       setLoading(true);
       await signUpWithEmail(email, password);
-      setLoading(false);
-      return;
     } catch (error: any) {
+      console.error("Signup error:", error);
       toast.error(error.message || "Failed to sign up");
+      // Important: Set loading to false in case of error
       setLoading(false);
       throw error;
     }
@@ -116,10 +122,11 @@ export function useAuthProvider(): AuthState & AuthActions {
       await signOutUser();
       // Session will be cleared by onAuthStateChange
     } catch (error: any) {
+      console.error("Signout error:", error);
       toast.error(error.message || "Failed to sign out");
-      throw error;
-    } finally {
+      // Important: Set loading to false in case of error
       setLoading(false);
+      throw error;
     }
   };
 

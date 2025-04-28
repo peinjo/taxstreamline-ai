@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,24 @@ import { Loader2 } from "lucide-react";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp, loading: authLoading, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Track auth state changes
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple submission attempts
+    if (loading || authLoading) return;
+    
     setLoading(true);
     
     try {
@@ -89,6 +100,7 @@ const Signup = () => {
                 placeholder="Enter your email"
                 required
                 className="w-full"
+                disabled={loading || authLoading}
               />
             </div>
             <div>
@@ -103,10 +115,11 @@ const Signup = () => {
                 placeholder="Create a password"
                 required
                 className="w-full"
+                disabled={loading || authLoading}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
+            <Button type="submit" className="w-full" disabled={loading || authLoading}>
+              {loading || authLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Creating account...

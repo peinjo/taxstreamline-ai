@@ -45,8 +45,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Don't show loading for auth routes
-  if (loading) return null;
+  // Show minimal loading indicator for auth routes
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
+      </div>
+    );
+  }
   
   // Redirect authenticated users to dashboard
   if (user) {

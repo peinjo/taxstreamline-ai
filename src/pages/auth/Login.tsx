@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,11 +10,24 @@ import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, loading: authLoading } = useAuth();
+  const { signIn, loading: authLoading, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  
+  // Add logging to debug auth state
+  useEffect(() => {
+    console.log("Login component mounted, checking session");
+  }, []);
+  
+  // Track auth state changes
+  useEffect(() => {
+    if (user) {
+      console.log("Auth state changed in Login component:", "SIGNED_IN", user.email);
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
