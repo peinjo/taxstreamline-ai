@@ -39,22 +39,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<AppRole | null>(null);
 
-  // Initialize auth and listen for changes
+  // Initialize auth and listen for changes - simplified and improved
   useEffect(() => {
-    console.log("AuthProvider initialized");
+    console.log("AuthProvider initializing...");
     
+    // Set up auth state change listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      console.log("Auth state changed:", event);
+      
+      if (currentSession) {
+        setSession(currentSession);
+        setUser(currentSession.user);
+        
+        // Only fetch user role if we have a valid session
+        if (currentSession.user) {
+          await fetchUserRole(currentSession.user.id);
+        }
+      } else {
+        setSession(null);
+        setUser(null);
+        setUserRole(null);
+      }
+      
+      // Complete loading regardless of result
+      setLoading(false);
+    });
+    
+    // Get initial session AFTER setting up listener
     const initializeAuth = async () => {
       try {
-        setLoading(true);
-        
-        // Get initial session
-        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error("Error getting initial session:", sessionError);
-          setLoading(false);
-          return;
-        }
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (initialSession) {
           console.log("Initial session found:", initialSession.user.email);
@@ -65,75 +79,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             await fetchUserRole(initialSession.user.id);
             await ensureUserProfile(initialSession.user.id, initialSession.user.email);
           }
-        } else {
-          console.log("No initial session found");
         }
       } catch (error) {
         console.error("Error in auth initialization:", error);
       } finally {
+        // Always complete loading even if there's an error
         setLoading(false);
       }
     };
-
+    
     initializeAuth();
-
-    // Set up auth state change listener
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event, currentSession?.user?.email);
-      
-      // Important: Don't set loading to true on SIGNED_OUT events
-      // as this can cause infinite loading screens
-      if (event !== 'SIGNED_OUT') {
-        setLoading(true);
-      }
-      
-      try {
-        // For SIGNED_OUT events, immediately clear state
-        if (event === 'SIGNED_OUT') {
-          setSession(null);
-          setUser(null);
-          setUserRole(null);
-          console.log("User signed out, state cleared");
-        } else {
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          
-          if (currentSession?.user) {
-            await fetchUserRole(currentSession.user.id);
-            
-            // Ensure user profile exists after login
-            if (event === 'SIGNED_IN') {
-              await ensureUserProfile(currentSession.user.id, currentSession.user.email);
-            }
-          } else {
-            setUserRole(null);
-          }
-        }
-      } catch (error) {
-        console.error("Error handling auth state change:", error);
-      } finally {
-        setLoading(false);
-      }
-    });
 
     // Clean up subscription
     return () => {
-      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
 
-  // Ensure a user profile exists - create a default one if missing
+  // Ensure a user profile exists - simplified
   const ensureUserProfile = async (userId: string, email?: string | null) => {
     try {
-      console.log("Checking if user profile exists for:", userId);
-      
       // Check if profile exists
       const { data: existingProfile, error: checkError } = await supabase
         .from("user_profiles")
-        .select("id, full_name")
+        .select("id")
         .eq("user_id", userId)
         .maybeSingle();
       
@@ -143,8 +112,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       if (!existingProfile) {
-        console.log("No profile found, creating default profile");
-        
         // Extract name from email or use default
         const emailName = email ? email.split('@')[0] : 'User';
         const defaultName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
@@ -156,26 +123,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             user_id: userId,
             full_name: defaultName,
             address: "Please update your address",
-            date_of_birth: new Date().toISOString().split('T')[0] // Today's date as default
+            date_of_birth: new Date().toISOString().split('T')[0]
           });
         
         if (insertError) {
           console.error("Error creating default profile:", insertError);
-        } else {
-          console.log("Default profile created successfully");
         }
-      } else {
-        console.log("Profile already exists:", existingProfile);
       }
     } catch (error) {
       console.error("Error in ensureUserProfile:", error);
     }
   };
 
+  // Simplified user role fetching
   const fetchUserRole = async (userId: string) => {
     try {
-      console.log("Fetching role for user:", userId);
-      
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
@@ -183,27 +145,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .maybeSingle();
 
       if (error) {
-        console.error("Error fetching user role:", error);
         setUserRole('user');
-      } else if (data) {
-        console.log("User role found:", data.role);
+        return;
+      }
+      
+      if (data) {
         setUserRole(data.role);
       } else {
-        console.log("No role found, defaulting to 'user'");
         setUserRole('user');
         
         // Create default role if it doesn't exist
-        try {
-          const { error: insertError } = await supabase
-            .from("user_roles")
-            .insert({ user_id: userId, role: 'user' });
-            
-          if (insertError) {
-            console.error("Error creating default user role:", insertError);
-          }
-        } catch (insertError) {
-          console.error("Exception creating default role:", insertError);
-        }
+        await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role: 'user' })
+          .catch(err => console.error("Error creating default user role:", err));
       }
     } catch (error) {
       console.error("Error in fetchUserRole:", error);
@@ -213,50 +168,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log("Signing in with email:", email);
       setLoading(true);
       
-      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Authentication failed:", {
-          errorMessage: error.message,
-          errorCode: error.status,
-          errorName: error.name,
-          details: error
-        });
         setLoading(false);
         throw error;
       }
 
       if (!data?.user || !data?.session) {
-        console.error("No user or session data returned from Supabase");
         setLoading(false);
         throw new Error("Authentication failed - no user data");
       }
 
-      console.log("Authentication successful:", data.user.email);
-      
-      // Immediately update state without waiting for onAuthStateChange
-      // This helps prevent loading issues
-      setUser(data.user);
-      setSession(data.session);
-      await fetchUserRole(data.user.id);
-      await ensureUserProfile(data.user.id, data.user.email);
-      
+      // Session will be handled by onAuthStateChange
       toast.success("Successfully logged in");
-      setLoading(false);
+      
       return;
     } catch (error: any) {
-      console.error("Sign in error:", {
-        message: error.message,
-        status: error.status,
-        details: error
-      });
       toast.error(error.message || "Failed to sign in");
       setLoading(false);
       throw error;
@@ -265,9 +198,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string) => {
     try {
-      console.log("Signing up with email:", email);
+      setLoading(true);
       
-      // Sign up the user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -280,53 +212,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
-        console.error("Signup error:", error);
+        setLoading(false);
         throw error;
       }
 
       if (!data?.user) {
-        console.error("No user data returned from signup");
+        setLoading(false);
         throw new Error("Signup failed - no user data");
       }
 
-      console.log("Signup successful:", data);
-      
       // Create user profile during signup
       if (data.user.id) {
         await ensureUserProfile(data.user.id, email);
       }
       
       toast.success("Signup successful! Please check your email to confirm your account.");
+      setLoading(false);
       
       return;
     } catch (error: any) {
-      console.error("Signup failed:", error);
       toast.error(error.message || "Failed to sign up");
+      setLoading(false);
       throw error;
     }
   };
 
   const signOut = async () => {
     try {
-      console.log("Signing out");
+      setLoading(true);
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error("Sign out error:", error);
         throw error;
       }
       
-      // Immediately clear state instead of waiting for the onAuthStateChange
-      setUser(null);
-      setSession(null);
-      setUserRole(null);
-      
-      console.log("Signed out successfully");
+      // Session will be cleared by onAuthStateChange
       toast.success("Signed out successfully");
     } catch (error: any) {
-      console.error("Sign out failed:", error);
       toast.error(error.message || "Failed to sign out");
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

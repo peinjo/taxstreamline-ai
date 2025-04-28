@@ -1,66 +1,26 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn, user, loading: authLoading } = useAuth();
+  const { signIn, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Debug logs to track session state
-    console.log("Login component mounted, checking session");
-    
-    const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Session check error:", error);
-          return;
-        }
-        if (session?.user) {
-          console.log("Active session found, user:", session.user.email);
-          navigate("/dashboard");
-        } else {
-          console.log("No active session found");
-        }
-      } catch (error) {
-        console.error("Session check failed:", error);
-      }
-    };
-    checkSession();
-  }, [navigate]);
-
-  // Monitor auth changes
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed in Login component:", event, session?.user?.email);
-      
-      if (event === 'SIGNED_IN' && session) {
-        navigate("/dashboard");
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Prevent multiple submission attempts
-    if (loading) return;
+    if (loading || authLoading) return;
     
     setLoading(true);
     setAuthError(null);
@@ -71,15 +31,8 @@ const Login = () => {
       }
 
       console.log("Attempting login with email:", email);
-      
-      // We'll skip the signOut call as it may be causing issues
-      // and isn't necessary before login
-      
       await signIn(email, password);
-      
-      // Supabase will handle the session update through the onAuthStateChange listener,
-      // which will then trigger the navigation to dashboard
-      console.log("Login process completed, waiting for auth state to update");
+      // Navigation will happen automatically via auth state change
       
     } catch (error: any) {
       console.error("Login error:", error);
@@ -94,8 +47,7 @@ const Login = () => {
       
       setAuthError(errorMessage);
       toast.error(errorMessage);
-      
-      // Make sure to update loading state on error
+    } finally {
       setLoading(false);
     }
   };
@@ -129,7 +81,7 @@ const Login = () => {
               placeholder="Enter your email"
               required
               className="w-full"
-              disabled={loading}
+              disabled={loading || authLoading}
             />
           </div>
           <div>
@@ -144,11 +96,11 @@ const Login = () => {
               placeholder="Enter your password"
               required
               className="w-full"
-              disabled={loading}
+              disabled={loading || authLoading}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
+          <Button type="submit" className="w-full" disabled={loading || authLoading}>
+            {loading || authLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Logging in...
