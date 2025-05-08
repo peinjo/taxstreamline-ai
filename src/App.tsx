@@ -19,25 +19,21 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected Route component - simplified to prevent loops
+// Simplified Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Only show the brief loading spinner during initial auth check
+  // Show minimal loading indicator
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     );
   }
   
-  // Redirect unauthenticated users
+  // Immediately redirect if not authenticated
   if (!user) {
-    console.log("Protected route: User not authenticated, redirecting to login");
     return <Navigate to="/auth/login" replace />;
   }
 
@@ -45,19 +41,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Public Route component - prevents authenticated users from accessing auth pages
+// Simplified Public Auth Route component
 const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // Don't show loading state for auth pages, just render them
-  // This prevents flash of loading screen during auth flow
+  // Show minimal loading indicator for auth routes
   if (loading) {
-    return <>{children}</>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
+      </div>
+    );
   }
   
   // Redirect authenticated users to dashboard
   if (user) {
-    console.log("Public auth route: User is authenticated, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -77,7 +75,7 @@ const App: React.FC = () => {
               <BrowserRouter>
                 <Routes>
                   {routes.map((route) => {
-                    // Special case for index route
+                    // Handle the index route
                     if (route.path === "/") {
                       return (
                         <Route

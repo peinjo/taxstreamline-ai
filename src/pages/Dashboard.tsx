@@ -8,22 +8,36 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { TeamWorkspace } from "@/components/teams/TeamWorkspace";
 import { TaskManagement } from "@/components/tasks/TaskManagement";
+import { useDashboardMetrics, useRecentActivities, useUpcomingDeadlines } from "@/hooks/useDashboard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Dashboard = () => {
-  const { user, userRole, loading: authLoading } = useAuth();
+  const { user, userRole } = useAuth();
 
-  console.log("Dashboard rendering, auth state:", { 
-    userExists: !!user, 
-    userId: user?.id, 
-    authLoading,
-    userRole
-  });
+  // Fetch metrics from the database
+  const { 
+    data: metrics, 
+    isLoading: isMetricsLoading, 
+    error: metricsError 
+  } = useDashboardMetrics();
+  
+  // Fetch activities
+  const { 
+    data: activities, 
+    isLoading: isActivitiesLoading 
+  } = useRecentActivities();
+  
+  // Fetch upcoming deadlines
+  const { 
+    data: deadlines, 
+    isLoading: isDeadlinesLoading 
+  } = useUpcomingDeadlines();
 
-  // Don't attempt to fetch profile data until we have a user
-  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+  // Only fetch profile if we have a user
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["user-profile", user?.id],
     queryFn: async () => {
-      console.log("Fetching user profile for:", user?.id);
       try {
         const { data, error } = await supabase
           .from("user_profiles")
@@ -31,52 +45,48 @@ const Dashboard = () => {
           .eq("user_id", user?.id)
           .maybeSingle();
         
-        if (error) {
-          console.error("Error fetching user profile:", error);
-          throw error;
-        }
-        
-        console.log("Profile data received:", data);
-        return data || { full_name: "User" }; // Fallback if no profile found
+        if (error) throw error;
+        return data || { full_name: "User" };
       } catch (err) {
-        console.error("Profile fetch exception:", err);
-        return { full_name: "User" }; // Fallback on error
+        console.error("Profile fetch error:", err);
+        return { full_name: "User" };
       }
     },
     enabled: !!user?.id,
     retry: 1,
-    retryDelay: 1000,
   });
 
-  if (profileError) {
-    console.error("Profile query error:", profileError);
-  }
+  // Show error notification if metrics failed to load
+  React.useEffect(() => {
+    if (metricsError) {
+      toast.error("Failed to load dashboard metrics");
+    }
+  }, [metricsError]);
 
-  // Use this approach for fewer loading states - continue rendering with default values
   const firstName = profile?.full_name?.split(" ")[0] || "User";
 
-  const metrics = [
+  const metricItems = [
     {
       title: "Upcoming Deadlines",
-      value: "5",
+      value: isMetricsLoading ? "..." : metrics?.upcoming_deadlines || "0",
       icon: Calendar,
       className: "bg-blue-500",
     },
     {
       title: "Active Clients",
-      value: "24",
+      value: isMetricsLoading ? "..." : metrics?.active_clients || "0",
       icon: Users,
       className: "bg-green-500",
     },
     {
       title: "Documents Pending",
-      value: "12",
+      value: isMetricsLoading ? "..." : metrics?.documents_pending || "0",
       icon: FileText,
       className: "bg-yellow-500",
     },
     {
       title: "Compliance Alerts",
-      value: "3",
+      value: isMetricsLoading ? "..." : metrics?.compliance_alerts || "0",
       icon: AlertOctagon,
       className: "bg-red-500",
     },
@@ -98,7 +108,7 @@ const Dashboard = () => {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => (
+          {metricItems.map((metric) => (
             <Card key={metric.title}>
               <CardContent className="flex items-center p-6">
                 <div
@@ -110,7 +120,11 @@ const Dashboard = () => {
                   <p className="text-sm font-medium text-muted-foreground">
                     {metric.title}
                   </p>
-                  <h2 className="text-3xl font-bold">{metric.value}</h2>
+                  {isMetricsLoading ? (
+                    <Skeleton className="h-8 w-16" />
+                  ) : (
+                    <h2 className="text-3xl font-bold">{metric.value}</h2>
+                  )}
                 </div>
               </CardContent>
             </Card>

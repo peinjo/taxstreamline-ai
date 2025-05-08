@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -7,6 +8,7 @@ import { DocumentManager } from "@/components/tax/DocumentManager";
 import { FilingForm } from "@/components/tax/FilingForm";
 import { FilingHistory } from "@/components/tax/FilingHistory";
 import { PaymentForm } from "@/components/tax/PaymentForm";
+import { PaymentHistory } from "@/components/tax/PaymentHistory";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 
@@ -65,7 +67,7 @@ const TaxWebApp = () => {
               </div>
               <div>
                 <h2 className="text-lg font-semibold mb-4">Recent Payments</h2>
-                {/* Add payment history component here */}
+                <PaymentHistory />
               </div>
             </div>
           </TabsContent>
