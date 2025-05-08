@@ -1,5 +1,3 @@
-
-import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +13,25 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Added error state
+
+  const logError = (error, source) => {
+    console.error(`${source} error:`, error);
+    // Add your logging logic here (e.g., send to an error tracking service)
+  };
+
+  const showUserFriendlyMessage = (error) => {
+    let errorMessage = "Failed to create account. Please try again.";
+    if (error.message?.includes("already registered")) {
+      errorMessage = "This email is already registered. Please try logging in instead.";
+    } else if (error.message?.includes("valid email")) {
+      errorMessage = "Please enter a valid email address.";
+    } else if (error.message?.includes("password")) {
+      errorMessage = "Password must be at least 6 characters long.";
+    }
+    toast.error(errorMessage);
+  };
+
 
   // Track auth state changes
   useEffect(() => {
@@ -30,7 +47,8 @@ const Signup = () => {
     if (loading || authLoading) return;
     
     setLoading(true);
-    
+    setError(null); // Clear previous errors
+
     try {
       // Input validation
       if (!email || !password) {
@@ -43,28 +61,16 @@ const Signup = () => {
 
       console.log("Starting signup process for email:", email);
       await signUp(email, password);
-      
+
       console.log("Signup successful, redirecting to personal info page");
       toast.success("Account created successfully! Please check your email to confirm your account.");
       navigate("/auth/personal-info");
-    } catch (error: any) {
-      console.error("Signup error:", {
-        message: error.message,
-        code: error.code,
-        details: error
-      });
-      
-      // Provide user-friendly error messages
-      let errorMessage = "Failed to create account. Please try again.";
-      if (error.message?.includes("already registered")) {
-        errorMessage = "This email is already registered. Please try logging in instead.";
-      } else if (error.message?.includes("valid email")) {
-        errorMessage = "Please enter a valid email address.";
-      } else if (error.message?.includes("password")) {
-        errorMessage = "Password must be at least 6 characters long.";
-      }
-      
-      toast.error(errorMessage);
+    } catch (err) {
+      console.error("Signup error:", err);
+      const error = err as Error;
+      logError(error, "Signup process");
+      showUserFriendlyMessage(error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -128,7 +134,27 @@ const Signup = () => {
                 "Sign Up"
               )}
             </Button>
+            {error && ( // Added error display
+              <div className="mt-2 text-sm text-red-600">
+                {error.message || "Failed to create account. Please try again."}
+              </div>
+            )}
           </form>
+          <div className="mt-4 text-center">
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            {/* Placeholder for ReplitAuthButton -  Requires implementation */}
+            <div>ReplitAuthButton Placeholder</div> 
+          </div>
+
           <p className="text-center mt-4 text-sm text-gray-600">
             Already have an account?{" "}
             <Link to="/auth/login" className="text-blue-600 hover:underline">
