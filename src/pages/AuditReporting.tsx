@@ -7,15 +7,17 @@ import { AnalyticsCharts } from "@/components/audit/AnalyticsCharts";
 import { SummaryMetrics } from "@/components/audit/SummaryMetrics";
 import { ReportFilters } from "@/components/audit/ReportFilters";
 import { TaxSummaryTable } from "@/components/audit/TaxSummaryTable";
-import { TaxCharts } from "@/components/audit/TaxCharts";
 import { MaterialityCalculator } from "@/components/audit/MaterialityCalculator";
 import { ConfirmationManager } from "@/components/audit/ConfirmationManager";
 import { InternalControlsMonitor } from "@/components/audit/InternalControlsMonitor";
 import { AccountsReceivableAnalysis } from "@/components/audit/AccountsReceivableAnalysis";
+import { AuditDashboard } from "@/components/audit/AuditDashboard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 const AuditReporting = () => {
   const [filters, setFilters] = useState({
@@ -24,7 +26,7 @@ const AuditReporting = () => {
     status: "all",
   });
 
-  const { data: activities } = useQuery({
+  const { data: activities, isLoading: isLoadingActivities, refetch: refetchActivities } = useQuery({
     queryKey: ["activities"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,42 +34,15 @@ const AuditReporting = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        toast.error(`Error loading audit activities: ${error.message}`);
+        throw error;
+      }
+      return data || [];
     },
   });
 
-  const { data: taxReports, isLoading: isLoadingReports } = useQuery({
-    queryKey: ["tax-reports", filters],
-    queryFn: async () => {
-      let query = supabase
-        .from("tax_reports")
-        .select("*")
-        .eq("tax_year", filters.year);
-
-      if (filters.taxType !== "all") {
-        query = query.eq("tax_type", filters.taxType);
-      }
-      if (filters.status !== "all") {
-        query = query.eq("status", filters.status);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  // Mock data for demonstration
-  const mockChartData = [
-    { name: "Jan", value: 4000 },
-    { name: "Feb", value: 3000 },
-    { name: "Mar", value: 2000 },
-    { name: "Apr", value: 2780 },
-    { name: "May", value: 1890 },
-    { name: "Jun", value: 2390 },
-  ];
-
+  // Mock data for demonstration - would ideally connect to real data
   const mockMetrics = {
     totalLiability: 15000000,
     filingCount: 24,
@@ -75,9 +50,23 @@ const AuditReporting = () => {
     complianceRate: 92,
   };
 
+  const handleRefreshActivities = async () => {
+    try {
+      await refetchActivities();
+      toast.success("Audit logs refreshed");
+    } catch (error) {
+      console.error("Error refreshing audit logs:", error);
+    }
+  };
+
   const handleGenerateAuditSummary = () => {
+    toast.success("Generating comprehensive audit summary...", {
+      duration: 3000,
+    });
     // In a real implementation, this would generate a PDF or downloadable report
-    console.log("Generating audit summary");
+    setTimeout(() => {
+      toast.success("Audit summary generated successfully");
+    }, 3000);
   };
 
   return (
@@ -90,14 +79,18 @@ const AuditReporting = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="analytics" className="space-y-6">
+        <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="confirmations">Confirmations</TabsTrigger>
             <TabsTrigger value="controls">Internal Controls</TabsTrigger>
             <TabsTrigger value="audit">Audit Logs</TabsTrigger>
-            <TabsTrigger value="export">Tax Reports</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard">
+            <AuditDashboard />
+          </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
             <SummaryMetrics metrics={mockMetrics} />
@@ -109,12 +102,25 @@ const AuditReporting = () => {
             
             <div className="grid gap-6 md:grid-cols-2">
               <AnalyticsCharts
-                taxData={mockChartData}
+                taxData={[
+                  { name: "Jan", value: 4000 },
+                  { name: "Feb", value: 3000 },
+                  { name: "Mar", value: 2000 },
+                  { name: "Apr", value: 2780 },
+                  { name: "May", value: 1890 },
+                  { name: "Jun", value: 2390 },
+                ]}
                 title="Monthly Tax Payments"
                 description="Overview of tax payments over time"
               />
               <AnalyticsCharts
-                taxData={mockChartData}
+                taxData={[
+                  { name: "Corporate", value: 4000 },
+                  { name: "VAT", value: 3000 },
+                  { name: "PAYE", value: 2000 },
+                  { name: "Capital Gains", value: 1500 },
+                  { name: "Withholding", value: 1200 },
+                ]}
                 title="Filing Distribution"
                 description="Distribution of tax filings by type"
               />
@@ -138,24 +144,21 @@ const AuditReporting = () => {
 
           <TabsContent value="audit">
             <div className="space-y-4">
-              <ReportFilters filters={filters} onFilterChange={setFilters} />
-              {activities && <AuditTable activities={activities} />}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="export" className="space-y-4">
-            <div className="grid gap-6">
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold mb-4">Tax Report Summary</h3>
-                <div className="space-y-4">
-                  <ReportFilters filters={filters} onFilterChange={setFilters} />
-                  <TaxSummaryTable 
-                    data={taxReports || []} 
-                    isLoading={isLoadingReports} 
-                  />
-                  {taxReports && taxReports.length > 0 && <TaxCharts data={taxReports} />}
-                </div>
+              <div className="flex justify-between items-center">
+                <ReportFilters filters={filters} onFilterChange={setFilters} />
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={handleRefreshActivities}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh Logs
+                </Button>
               </div>
+              <Card className="p-4">
+                <h3 className="text-lg font-semibold mb-4">Recent Activity Logs</h3>
+                {activities && <AuditTable activities={activities} />}
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
