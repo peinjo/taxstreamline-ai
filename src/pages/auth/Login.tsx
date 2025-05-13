@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { cleanupAuthState } from "@/lib/auth/authUtils";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ const Login = () => {
     
     // Prevent multiple submission attempts
     if (loading || authLoading) return;
+    
+    // Clean up auth state before signing in
+    cleanupAuthState();
     
     setLoading(true);
     setAuthError(null);

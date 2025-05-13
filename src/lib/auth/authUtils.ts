@@ -108,6 +108,9 @@ export const signInWithEmail = async (email: string, password: string) => {
  * Signs up a user with email and password
  */
 export const signUpWithEmail = async (email: string, password: string) => {
+  // Clean up before signing up to prevent auth conflicts
+  cleanupAuthState();
+  
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -140,11 +143,37 @@ export const signUpWithEmail = async (email: string, password: string) => {
  * Signs out the current user
  */
 export const signOutUser = async () => {
-  const { error } = await supabase.auth.signOut();
+  cleanupAuthState();
+  
+  const { error } = await supabase.auth.signOut({ scope: 'global' });
   
   if (error) {
     throw error;
   }
   
   toast.success("Signed out successfully");
+};
+
+/**
+ * Cleans up all Supabase auth state from browser storage
+ * This helps prevent auth state conflicts
+ */
+export const cleanupAuthState = () => {
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Also check sessionStorage if in use
+  try {
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  } catch (e) {
+    // Ignore sessionStorage errors
+  }
 };

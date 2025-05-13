@@ -15,14 +15,14 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Added error state
+  const [error, setError] = useState<Error | null>(null); // Fix type for error
 
-  const logError = (error, source) => {
+  const logError = (error: any, source: string) => {
     console.error(`${source} error:`, error);
     // Add your logging logic here (e.g., send to an error tracking service)
   };
 
-  const showUserFriendlyMessage = (error) => {
+  const showUserFriendlyMessage = (error: any) => {
     let errorMessage = "Failed to create account. Please try again.";
     if (error.message?.includes("already registered")) {
       errorMessage = "This email is already registered. Please try logging in instead.";

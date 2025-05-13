@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -40,8 +39,11 @@ export function useAuthProvider(): AuthState & AuthActions {
         // Only fetch user role if we have a valid session
         if (currentSession.user) {
           try {
-            const role = await fetchUserRole(currentSession.user.id);
-            setUserRole(role);
+            // Use setTimeout to prevent potential auth deadlocks
+            setTimeout(async () => {
+              const role = await fetchUserRole(currentSession.user.id);
+              setUserRole(role);
+            }, 0);
           } catch (error) {
             console.error("Error fetching user role:", error);
           }
@@ -67,9 +69,12 @@ export function useAuthProvider(): AuthState & AuthActions {
           setUser(initialSession.user);
           
           if (initialSession.user) {
-            const role = await fetchUserRole(initialSession.user.id);
-            setUserRole(role);
-            await ensureUserProfile(initialSession.user.id, initialSession.user.email);
+            // Use setTimeout to prevent potential auth deadlocks
+            setTimeout(async () => {
+              const role = await fetchUserRole(initialSession.user.id);
+              setUserRole(role);
+              await ensureUserProfile(initialSession.user.id, initialSession.user.email);
+            }, 0);
           }
         }
       } catch (error) {
@@ -107,6 +112,8 @@ export function useAuthProvider(): AuthState & AuthActions {
     try {
       setLoading(true);
       await signUpWithEmail(email, password);
+      // Important: Don't keep loading true forever
+      setLoading(false);
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error.message || "Failed to sign up");
