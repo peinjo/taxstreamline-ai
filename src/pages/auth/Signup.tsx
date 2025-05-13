@@ -1,3 +1,5 @@
+
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +33,6 @@ const Signup = () => {
     }
     toast.error(errorMessage);
   };
-
 
   // Track auth state changes
   useEffect(() => {
@@ -134,7 +135,7 @@ const Signup = () => {
                 "Sign Up"
               )}
             </Button>
-            {error && ( // Added error display
+            {error && (
               <div className="mt-2 text-sm text-red-600">
                 {error.message || "Failed to create account. Please try again."}
               </div>

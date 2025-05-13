@@ -1,3 +1,5 @@
+
+import React, { createContext, useContext } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import type { AppRole } from "@/types";
 import { useAuthProvider } from "@/hooks/useAuthProvider";
@@ -31,6 +33,7 @@ export function useAuth() {
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const auth = useAuthProvider();
 
   return (
     <AuthContext.Provider value={auth}>
