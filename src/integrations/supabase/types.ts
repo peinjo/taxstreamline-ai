@@ -108,6 +108,51 @@ export type Database = {
         }
         Relationships: []
       }
+      confirmation_requests: {
+        Row: {
+          amount: number | null
+          contact_email: string
+          created_at: string | null
+          date_requested: string | null
+          date_responded: string | null
+          entity_name: string
+          id: string
+          request_type: string
+          response: string | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          contact_email: string
+          created_at?: string | null
+          date_requested?: string | null
+          date_responded?: string | null
+          entity_name: string
+          id?: string
+          request_type: string
+          response?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          contact_email?: string
+          created_at?: string | null
+          date_requested?: string | null
+          date_responded?: string | null
+          entity_name?: string
+          id?: string
+          request_type?: string
+          response?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       "Dashboard Metrics": {
         Row: {
           "Active clients": number
@@ -266,6 +311,87 @@ export type Database = {
           tax_year?: number
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      internal_controls: {
+        Row: {
+          control_description: string
+          control_name: string
+          created_at: string | null
+          id: string
+          last_tested: string | null
+          risk_level: string
+          status: string
+          test_result: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          control_description: string
+          control_name: string
+          created_at?: string | null
+          id?: string
+          last_tested?: string | null
+          risk_level: string
+          status?: string
+          test_result?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          control_description?: string
+          control_name?: string
+          created_at?: string | null
+          id?: string
+          last_tested?: string | null
+          risk_level?: string
+          status?: string
+          test_result?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      materiality_calculations: {
+        Row: {
+          created_at: string | null
+          id: string
+          industry: string | null
+          materiality_percentage: number
+          materiality_threshold: number
+          notes: string | null
+          performance_materiality: number
+          performance_materiality_percentage: number
+          pre_tax_income: number
+          user_id: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          materiality_percentage: number
+          materiality_threshold: number
+          notes?: string | null
+          performance_materiality: number
+          performance_materiality_percentage: number
+          pre_tax_income: number
+          user_id?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          materiality_percentage?: number
+          materiality_threshold?: number
+          notes?: string | null
+          performance_materiality?: number
+          performance_materiality_percentage?: number
+          pre_tax_income?: number
+          user_id?: string | null
+          year?: number
         }
         Relationships: []
       }
