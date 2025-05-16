@@ -11,7 +11,7 @@ import { MaterialityCalculator } from "@/components/audit";  // Updated import p
 import { ConfirmationManager } from "@/components/audit/ConfirmationManager";
 import { InternalControlsMonitor } from "@/components/audit/InternalControlsMonitor";
 import { AccountsReceivableAnalysis } from "@/components/audit/AccountsReceivableAnalysis";
-import { AuditDashboard } from "@/components/audit/AuditDashboard";
+import { AuditDashboard } from "@/components/audit"; // Updated import path to use index.tsx export
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
