@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { TaxSummaryTable } from "./TaxSummaryTable";
+import { TaxSummaryTable } from "./tax-summary"; // Updated import path
 import { TaxCharts } from "./TaxCharts";
 import { ReportFilters } from "./ReportFilters";
 import { Button } from "@/components/ui/button";

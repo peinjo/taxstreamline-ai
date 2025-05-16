@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -5,7 +6,7 @@ import { AuditTable } from "@/components/audit/AuditTable";
 import { AnalyticsCharts } from "@/components/audit/AnalyticsCharts";
 import { SummaryMetrics } from "@/components/audit/SummaryMetrics";
 import { ReportFilters } from "@/components/audit/ReportFilters";
-import { TaxSummaryTable } from "@/components/audit/TaxSummaryTable";
+import { TaxSummaryTable } from "@/components/audit/tax-summary"; // Updated import path
 import { MaterialityCalculator } from "@/components/audit";  // Updated import path
 import { ConfirmationManager } from "@/components/audit/ConfirmationManager";
 import { InternalControlsMonitor } from "@/components/audit/InternalControlsMonitor";
