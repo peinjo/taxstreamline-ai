@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -85,7 +84,7 @@ export const ConfirmationManager = () => {
     mutationFn: async (confirmation: Partial<ConfirmationRequest>) => {
       const { data, error } = await supabase
         .from('confirmation_requests')
-        .insert([confirmation])
+        .insert(confirmation)
         .select();
 
       if (error) throw error;

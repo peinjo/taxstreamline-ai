@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -76,7 +75,7 @@ export const InternalControlsMonitor = () => {
     mutationFn: async (control: Partial<InternalControl>) => {
       const { data, error } = await supabase
         .from('internal_controls')
-        .insert([control])
+        .insert(control)
         .select();
 
       if (error) throw error;
