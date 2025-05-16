@@ -20,6 +20,8 @@ export interface InternalControl {
   status: string;
   last_tested?: string | null;
   test_result?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ConfirmationRequest {
@@ -32,4 +34,23 @@ export interface ConfirmationRequest {
   response?: string | null;
   date_requested?: string;
   date_responded?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AuditReportMetrics {
+  total_liability: number;
+  filing_count: number;
+  pending_payments: number;
+  compliance_rate: number;
+}
+
+export interface TaxReport {
+  id: number;
+  tax_type: string;
+  amount: number | null;
+  status: string;
+  tax_year: number;
+  created_at?: string;
+  updated_at?: string;
 }

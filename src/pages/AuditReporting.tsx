@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardLayout from "@/components/DashboardLayout";
 import { AuditTable } from "@/components/audit/AuditTable";
@@ -12,11 +12,11 @@ import { ConfirmationManager } from "@/components/audit/ConfirmationManager";
 import { InternalControlsMonitor } from "@/components/audit/InternalControlsMonitor";
 import { AccountsReceivableAnalysis } from "@/components/audit/AccountsReceivableAnalysis";
 import { AuditDashboard } from "@/components/audit/AuditDashboard";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileDown, RefreshCw } from "lucide-react";
+import { FileDown, RefreshCw, Database } from "lucide-react";
 import { toast } from "sonner";
 
 const AuditReporting = () => {
@@ -41,14 +41,101 @@ const AuditReporting = () => {
       return data || [];
     },
   });
+  
+  const { data: taxReports } = useQuery({
+    queryKey: ["tax-reports-check"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tax_reports")
+        .select("*")
+        .limit(1);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+  
+  // Create sample data if the tax_reports table is empty
+  const createSampleData = useMutation({
+    mutationFn: async () => {
+      // Sample tax reports data
+      const currentYear = new Date().getFullYear();
+      
+      const sampleTaxReports = [
+        // Corporate Income Tax reports
+        { tax_type: "corporate", tax_year: currentYear, amount: 4500000, status: "paid" },
+        { tax_type: "corporate", tax_year: currentYear - 1, amount: 4200000, status: "paid" },
+        { tax_type: "corporate", tax_year: currentYear - 2, amount: 3800000, status: "paid" },
+        
+        // VAT reports - current year
+        { tax_type: "vat", tax_year: currentYear, amount: 850000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear, amount: 780000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear, amount: 830000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear, amount: 795000, status: "pending" },
+        
+        // VAT reports - previous years
+        { tax_type: "vat", tax_year: currentYear - 1, amount: 770000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear - 1, amount: 750000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear - 1, amount: 780000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear - 2, amount: 720000, status: "paid" },
+        { tax_type: "vat", tax_year: currentYear - 2, amount: 690000, status: "paid" },
+        
+        // PAYE reports
+        { tax_type: "paye", tax_year: currentYear, amount: 1250000, status: "paid" },
+        { tax_type: "paye", tax_year: currentYear - 1, amount: 1150000, status: "paid" },
+        { tax_type: "paye", tax_year: currentYear - 2, amount: 980000, status: "paid" },
+        
+        // Withholding Tax reports
+        { tax_type: "withholding", tax_year: currentYear, amount: 320000, status: "pending" },
+        { tax_type: "withholding", tax_year: currentYear - 1, amount: 300000, status: "paid" },
+        { tax_type: "withholding", tax_year: currentYear - 2, amount: 270000, status: "paid" },
+        
+        // Capital Gains Tax
+        { tax_type: "capital_gains", tax_year: currentYear, amount: 180000, status: "pending" },
+        { tax_type: "capital_gains", tax_year: currentYear - 1, amount: 150000, status: "paid" },
+        
+        // Education Tax
+        { tax_type: "education", tax_year: currentYear, amount: 225000, status: "paid" },
+        { tax_type: "education", tax_year: currentYear - 1, amount: 210000, status: "paid" },
+        
+        // Stamp Duty
+        { tax_type: "stamp_duty", tax_year: currentYear, amount: 75000, status: "pending" },
+        { tax_type: "stamp_duty", tax_year: currentYear - 1, amount: 68000, status: "paid" },
+      ];
+      
+      const { error } = await supabase
+        .from("tax_reports")
+        .insert(sampleTaxReports);
 
-  // Mock data for demonstration - would ideally connect to real data
-  const mockMetrics = {
-    totalLiability: 15000000,
-    filingCount: 24,
-    pendingPayments: 3,
-    complianceRate: 92,
-  };
+      if (error) throw error;
+      
+      // Create a sample dashboard metric if needed
+      const { data: existingMetrics } = await supabase
+        .from("dashboard_metrics")
+        .select("*")
+        .limit(1);
+        
+      if (!existingMetrics?.length) {
+        await supabase
+          .from("dashboard_metrics")
+          .insert([{
+            upcoming_deadlines: 4,
+            active_clients: 28,
+            documents_pending: 12,
+            compliance_alerts: 3
+          }]);
+      }
+      
+      return true;
+    },
+    onSuccess: () => {
+      toast.success("Sample data created successfully.");
+      window.location.reload(); // Reload to show the new data
+    },
+    onError: (error) => {
+      toast.error(`Failed to create sample data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  });
 
   const handleRefreshActivities = async () => {
     try {
@@ -68,15 +155,41 @@ const AuditReporting = () => {
       toast.success("Audit summary generated successfully");
     }, 3000);
   };
+  
+  // Check if we need to create sample data
+  useEffect(() => {
+    if (taxReports !== undefined && taxReports.length === 0) {
+      toast("No tax reports found. Do you want to create sample data?", {
+        action: {
+          label: "Create Sample Data",
+          onClick: () => createSampleData.mutate()
+        },
+        duration: 10000,
+      });
+    }
+  }, [taxReports]);
 
   return (
     <DashboardLayout>
       <div className="container mx-auto p-6 space-y-8">
-        <div>
-          <h1 className="text-2xl font-semibold">Audit & Reporting</h1>
-          <p className="text-muted-foreground">
-            View and analyze tax reports, confirmations, and internal controls
-          </p>
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold">Audit & Reporting</h1>
+            <p className="text-muted-foreground">
+              View and analyze tax reports, confirmations, and internal controls
+            </p>
+          </div>
+          
+          {taxReports?.length === 0 && (
+            <Button 
+              onClick={() => createSampleData.mutate()} 
+              disabled={createSampleData.isPending}
+              className="gap-2"
+            >
+              <Database className="h-4 w-4" />
+              {createSampleData.isPending ? "Creating Sample Data..." : "Create Sample Data"}
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
@@ -93,7 +206,12 @@ const AuditReporting = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <SummaryMetrics metrics={mockMetrics} />
+            <SummaryMetrics metrics={{
+              totalLiability: 8500000,
+              filingCount: 24,
+              pendingPayments: 3,
+              complianceRate: 92,
+            }} />
             
             <div className="grid gap-6 md:grid-cols-2">
               <MaterialityCalculator />
