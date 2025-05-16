@@ -82,9 +82,17 @@ export const ConfirmationManager = () => {
   // Create new confirmation request
   const createConfirmationMutation = useMutation({
     mutationFn: async (confirmation: Partial<ConfirmationRequest>) => {
+      const confirmationData = {
+        entity_name: confirmation.entity_name!,
+        contact_email: confirmation.contact_email!,
+        request_type: confirmation.request_type!,
+        amount: confirmation.amount,
+        status: confirmation.status || 'pending'
+      };
+      
       const { data, error } = await supabase
         .from('confirmation_requests')
-        .insert(confirmation)
+        .insert(confirmationData)
         .select();
 
       if (error) throw error;

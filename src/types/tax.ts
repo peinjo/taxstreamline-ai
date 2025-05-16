@@ -1,3 +1,4 @@
+
 export interface TaxRate {
   id: number;
   category: string;
@@ -59,6 +60,12 @@ export interface TaxFiling {
   firs_reference?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface TaxFilingData {
+  year: number;
+  period: string;
+  income: number;
 }
 
 export interface TaxDocument {

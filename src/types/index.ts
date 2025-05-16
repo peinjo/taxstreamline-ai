@@ -12,8 +12,6 @@ export type {
   TaxRate,
   TaxTemplate, 
   TaxFilingData, 
-  TaxFilingStatus, 
-  TaxFilingReference,
   TaxCalculation,
-  TaxDocumentMetadata
+  TaxFiling
 } from './tax';

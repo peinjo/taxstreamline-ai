@@ -73,9 +73,17 @@ export const InternalControlsMonitor = () => {
   // Create new internal control
   const createControlMutation = useMutation({
     mutationFn: async (control: Partial<InternalControl>) => {
+      // Ensure required fields are present
+      const controlData = {
+        control_name: control.control_name!,
+        control_description: control.control_description!,
+        risk_level: control.risk_level!,
+        status: control.status || 'active'
+      };
+      
       const { data, error } = await supabase
         .from('internal_controls')
-        .insert(control)
+        .insert(controlData)
         .select();
 
       if (error) throw error;
