@@ -24,9 +24,9 @@ export const usePaymentStatus = (reference: string) => {
     queryKey: ["payment", reference],
     queryFn: () => verifyPayment(reference),
     enabled: !!reference,
-    refetchInterval: (queryResult) => {
+    refetchInterval: (query) => {
       // Keep checking status every 5 seconds until it's no longer pending
-      const paymentData = queryResult.data as PaymentTransaction | undefined;
+      const paymentData = query.state.data as PaymentTransaction | undefined;
       return paymentData && paymentData.status === "pending" ? 5000 : false;
     },
     meta: {
