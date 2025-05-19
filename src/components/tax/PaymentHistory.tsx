@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,11 +13,21 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
+import { ReceiptViewer } from "./ReceiptViewer";
 import type { PaymentTransaction } from "@/types/payment";
 import { format } from "date-fns";
 
 export function PaymentHistory() {
   const { user } = useAuth();
+  const [selectedReceipt, setSelectedReceipt] = useState<{
+    reference: string;
+    amount: number;
+    date: string;
+    status: string;
+  } | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
   
   const { data: payments, isLoading } = useQuery({
     queryKey: ["payment-history", user?.id],
@@ -39,6 +49,7 @@ export function PaymentHistory() {
     const statusStyles = {
       pending: "bg-yellow-100 text-yellow-800",
       success: "bg-green-100 text-green-800",
+      successful: "bg-green-100 text-green-800",
       failed: "bg-red-100 text-red-800",
     };
 
@@ -55,6 +66,16 @@ export function PaymentHistory() {
     return format(new Date(dateString), "PPP");
   };
 
+  const handleViewReceipt = (payment: PaymentTransaction) => {
+    setSelectedReceipt({
+      reference: payment.payment_reference,
+      amount: payment.amount,
+      date: payment.created_at,
+      status: payment.status,
+    });
+    setReceiptOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="rounded-md border">
@@ -65,6 +86,7 @@ export function PaymentHistory() {
               <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
+              <TableHead className="w-[80px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -74,6 +96,7 @@ export function PaymentHistory() {
                 <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
                 <TableCell><Skeleton className="h-6 w-[80px]" /></TableCell>
                 <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                <TableCell><Skeleton className="h-8 w-[32px]" /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -83,41 +106,62 @@ export function PaymentHistory() {
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Reference</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {payments?.length ? (
-            payments.map((payment) => (
-              <TableRow key={payment.id}>
-                <TableCell className="font-mono text-xs">
-                  {payment.payment_reference}
-                </TableCell>
-                <TableCell className="font-medium">
-                  {payment.currency} {payment.amount.toLocaleString()}
-                </TableCell>
-                <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {formatDate(payment.created_at)}
+    <>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Reference</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="w-[80px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {payments?.length ? (
+              payments.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell className="font-mono text-xs">
+                    {payment.payment_reference.substring(0, 12)}...
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {payment.currency} {payment.amount.toLocaleString()}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {formatDate(payment.created_at)}
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleViewReceipt(payment)}
+                      title="View Receipt"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                  No payment history found
                 </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
-                No payment history found
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {selectedReceipt && (
+        <ReceiptViewer 
+          open={receiptOpen} 
+          onOpenChange={setReceiptOpen} 
+          receipt={selectedReceipt}
+        />
+      )}
+    </>
   );
 }

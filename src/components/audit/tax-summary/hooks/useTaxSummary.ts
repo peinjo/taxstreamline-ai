@@ -1,89 +1,72 @@
 
-import { useState, useMemo } from "react";
-import { TaxReport } from "@/types";
-import { TaxReportFilterState, ScheduleConfigState } from "../types";
-import { filterAndSortData } from "../utils";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { TaxReport } from "@/types/tax";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
-export const useTaxSummary = (data: TaxReport[]) => {
-  const [selectedReport, setSelectedReport] = useState<TaxReport | null>(null);
-  const [viewMode, setViewMode] = useState<"table" | "card">("table");
+interface TaxSummaryParams {
+  searchQuery?: string;
+  yearFilter?: string;
+  statusFilter?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export const useTaxSummary = ({
+  searchQuery = "",
+  yearFilter = "all",
+  statusFilter = "all",
+  page = 1,
+  pageSize = 10,
+}: TaxSummaryParams = {}) => {
+  const { user } = useAuth();
   
-  // Filter and pagination state
-  const [filterState, setFilterState] = useState<TaxReportFilterState>({
-    searchTerm: "",
-    sortField: "tax_year",
-    sortDirection: "desc",
-    currentPage: 1,
-    pageSize: 10
-  });
-  
-  // Schedule configuration state
-  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfigState>({
-    frequency: "weekly",
-    recipients: "",
-    format: "pdf"
-  });
-  
-  // Handle sorting
-  const handleSort = (field: keyof TaxReport) => {
-    setFilterState(prev => {
-      if (prev.sortField === field) {
-        return { ...prev, sortDirection: prev.sortDirection === "asc" ? "desc" : "asc" };
-      } else {
-        return { ...prev, sortField: field, sortDirection: "asc" };
+  const fetchTaxReports = async (): Promise<TaxReport[]> => {
+    let query = supabase
+      .from("tax_reports")
+      .select("*");
+    
+    // Filter by user if authenticated
+    if (user?.id) {
+      query = query.eq("user_id", user.id);
+    }
+    
+    // Apply year filter
+    if (yearFilter !== "all") {
+      query = query.eq("tax_year", parseInt(yearFilter));
+    }
+    
+    // Apply status filter
+    if (statusFilter !== "all") {
+      query = query.eq("status", statusFilter);
+    }
+    
+    // Apply search query filter
+    if (searchQuery) {
+      query = query.ilike("tax_type", `%${searchQuery}%`);
+    }
+    
+    // Order by creation date descending
+    query = query.order("created_at", { ascending: false });
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as TaxReport[];
+  };
+
+  return useQuery({
+    queryKey: ["tax-reports", user?.id, searchQuery, yearFilter, statusFilter, page, pageSize],
+    queryFn: fetchTaxReports,
+    meta: {
+      onError: (error: Error) => {
+        console.error("Error fetching tax reports:", error);
+        toast.error("Failed to fetch tax reports");
       }
-    });
-  };
-
-  // Apply filters and sorting
-  const sortedData = useMemo(() => 
-    filterAndSortData(
-      data, 
-      filterState.searchTerm, 
-      filterState.sortField, 
-      filterState.sortDirection
-    ),
-  [data, filterState.searchTerm, filterState.sortField, filterState.sortDirection]);
-  
-  // Pagination
-  const totalPages = Math.ceil(sortedData.length / filterState.pageSize);
-  const paginatedData = useMemo(() => 
-    sortedData.slice(
-      (filterState.currentPage - 1) * filterState.pageSize,
-      filterState.currentPage * filterState.pageSize
-    ),
-  [sortedData, filterState.currentPage, filterState.pageSize]);
-  
-  // Handle page size change
-  const setPageSize = (size: number) => {
-    setFilterState(prev => ({ ...prev, pageSize: size, currentPage: 1 }));
-  };
-  
-  // Handle page change
-  const setCurrentPage = (page: number) => {
-    setFilterState(prev => ({ ...prev, currentPage: page }));
-  };
-  
-  // Handle search term change
-  const setSearchTerm = (term: string) => {
-    setFilterState(prev => ({ ...prev, searchTerm: term, currentPage: 1 }));
-  };
-
-  return {
-    selectedReport,
-    setSelectedReport,
-    filterState,
-    setFilterState,
-    scheduleConfig,
-    setScheduleConfig,
-    viewMode,
-    setViewMode,
-    sortedData,
-    paginatedData,
-    totalPages,
-    handleSort,
-    setSearchTerm,
-    setCurrentPage,
-    setPageSize
-  };
+    },
+  });
 };

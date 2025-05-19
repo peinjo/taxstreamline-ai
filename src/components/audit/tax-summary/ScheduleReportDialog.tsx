@@ -1,97 +1,116 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScheduleConfigState } from "./types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format, addDays } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface ScheduleReportDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  scheduleConfig: ScheduleConfigState;
-  setScheduleConfig: (config: ScheduleConfigState) => void;
 }
 
 export const ScheduleReportDialog: React.FC<ScheduleReportDialogProps> = ({
-  isOpen,
+  open,
   onOpenChange,
-  scheduleConfig,
-  setScheduleConfig,
 }) => {
-  const handleScheduleReport = () => {
-    // This would typically connect to a backend service
-    toast.success(`Report scheduled for ${scheduleConfig.frequency} delivery`, {
-      description: `Will be sent in ${scheduleConfig.format.toUpperCase()} format to ${scheduleConfig.recipients || "configured recipients"}.`
-    });
+  const [taxType, setTaxType] = useState<string>("");
+  const [date, setDate] = useState<Date | undefined>(addDays(new Date(), 7));
+
+  const handleSchedule = () => {
+    if (!taxType) {
+      toast.error("Please select a tax type");
+      return;
+    }
+
+    if (!date) {
+      toast.error("Please select a date");
+      return;
+    }
+
+    toast.success(`${taxType} report scheduled for ${format(date, "PPP")}`);
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Schedule Report</DialogTitle>
-          <DialogDescription>
-            Configure automatic delivery of this report.
-          </DialogDescription>
+          <DialogTitle>Schedule Tax Report</DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-4 pt-4">
+        <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label htmlFor="frequency" className="text-sm font-medium">Frequency</label>
-            <Select 
-              value={scheduleConfig.frequency}
-              onValueChange={(value) => setScheduleConfig({...scheduleConfig, frequency: value})}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select frequency" />
+            <label htmlFor="tax-type" className="text-sm font-medium">
+              Tax Type
+            </label>
+            <Select value={taxType} onValueChange={setTaxType}>
+              <SelectTrigger id="tax-type">
+                <SelectValue placeholder="Select tax type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="daily">Daily</SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="VAT">VAT</SelectItem>
+                <SelectItem value="Income Tax">Income Tax</SelectItem>
+                <SelectItem value="Corporate Tax">Corporate Tax</SelectItem>
+                <SelectItem value="Withholding Tax">Withholding Tax</SelectItem>
+                <SelectItem value="PAYE">PAYE</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
-            <label htmlFor="recipients" className="text-sm font-medium">Recipients (comma separated)</label>
-            <Input 
-              id="recipients"
-              placeholder="email@example.com, another@example.com"
-              value={scheduleConfig.recipients} 
-              onChange={(e) => setScheduleConfig({...scheduleConfig, recipients: e.target.value})}
-            />
+            <label htmlFor="date" className="text-sm font-medium">
+              Date
+            </label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="date"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  disabled={(date) => date < new Date()}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="format" className="text-sm font-medium">Format</label>
-            <Select 
-              value={scheduleConfig.format}
-              onValueChange={(value) => setScheduleConfig({...scheduleConfig, format: value})}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pdf">PDF</SelectItem>
-                <SelectItem value="excel">Excel</SelectItem>
-                <SelectItem value="both">Both PDF & Excel</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <Button className="w-full" onClick={handleScheduleReport}>Schedule Report</Button>
         </div>
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleSchedule}>
+            Schedule Report
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

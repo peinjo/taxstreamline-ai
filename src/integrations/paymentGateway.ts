@@ -1,4 +1,6 @@
+
 import { supabase } from "./supabase/client";
+import { toast } from "sonner";
 
 interface PaymentInitiationData {
   amount: number;
@@ -18,11 +20,22 @@ interface PaymentTransaction {
 
 export const initiatePayment = async (data: PaymentInitiationData) => {
   try {
+    // Get current user to associate with payment
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData.user;
+    
     // Initialize payment with Paystack
+    const paystackKey = process.env.PAYSTACK_SECRET_KEY || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
+    
+    if (!paystackKey) {
+      console.error("Paystack API key is not set");
+      throw new Error("Payment service is not properly configured");
+    }
+    
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        Authorization: `Bearer ${paystackKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -33,7 +46,16 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
       }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to initialize payment");
+    }
+
     const paymentData = await response.json();
+
+    if (!paymentData.status) {
+      throw new Error("Payment gateway returned an invalid response");
+    }
 
     // Store transaction in Supabase
     const { data: transaction, error } = await supabase
@@ -45,6 +67,7 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
         provider: "paystack",
         status: "pending",
         metadata: data.metadata,
+        user_id: user?.id
       })
       .select()
       .single();
@@ -59,14 +82,25 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
 
 export const verifyPayment = async (reference: string): Promise<PaymentTransaction> => {
   try {
+    const paystackKey = process.env.PAYSTACK_SECRET_KEY || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
+    
+    if (!paystackKey) {
+      throw new Error("Payment service is not properly configured");
+    }
+    
     const response = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${paystackKey}`,
         },
       }
     );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to verify payment");
+    }
 
     const verificationData = await response.json();
 
@@ -84,6 +118,14 @@ export const verifyPayment = async (reference: string): Promise<PaymentTransacti
       .single();
 
     if (error) throw error;
+    
+    // Show toast based on payment status
+    if (transaction.status === "success" || transaction.status === "successful") {
+      toast.success("Payment successful! Thank you for your payment.");
+    } else if (transaction.status === "failed") {
+      toast.error("Payment failed. Please try again or contact support.");
+    }
+    
     return transaction;
   } catch (error) {
     console.error("Error verifying payment:", error);

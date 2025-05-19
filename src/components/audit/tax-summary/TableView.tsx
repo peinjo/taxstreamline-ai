@@ -8,89 +8,55 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { TaxReport } from "@/types";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { formatTaxType } from "./utils";
 import { TaxReportStatus } from "./TaxReportStatus";
-import { TaxReportDetails } from "./TaxReportDetails";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
+import { format } from "date-fns";
+import { TaxReport } from "@/types/tax";
 
 interface TableViewProps {
-  paginatedData: TaxReport[];
-  sortField: keyof TaxReport;
-  sortDirection: "asc" | "desc";
-  handleSort: (field: keyof TaxReport) => void;
-  setSelectedReport: (report: TaxReport) => void;
+  reports: TaxReport[];
+  onViewDetails: (report: TaxReport) => void;
 }
 
-export const TableView: React.FC<TableViewProps> = ({
-  paginatedData,
-  sortField,
-  sortDirection,
-  handleSort,
-  setSelectedReport,
-}) => {
+export const TableView: React.FC<TableViewProps> = ({ reports, onViewDetails }) => {
+  if (!reports.length) {
+    return null;
+  }
+
   return (
-    <div className="border rounded-md">
+    <div className="border rounded-md overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("tax_type")}>
-              <div className="flex items-center">
-                Tax Type
-                {sortField === "tax_type" && (
-                  sortDirection === "asc" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("tax_year")}>
-              <div className="flex items-center">
-                Year
-                {sortField === "tax_year" && (
-                  sortDirection === "asc" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("amount")}>
-              <div className="flex items-center">
-                Amount
-                {sortField === "amount" && (
-                  sortDirection === "asc" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
-                )}
-              </div>
-            </TableHead>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("status")}>
-              <div className="flex items-center">
-                Status
-                {sortField === "status" && (
-                  sortDirection === "asc" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />
-                )}
-              </div>
-            </TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead>Tax Type</TableHead>
+            <TableHead>Year</TableHead>
+            <TableHead className="hidden md:table-cell">Amount</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="hidden md:table-cell">Last Updated</TableHead>
+            <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedData.map((report) => (
+          {reports.map((report) => (
             <TableRow key={report.id}>
-              <TableCell className="font-medium capitalize">
-                {formatTaxType(report.tax_type)}
-              </TableCell>
+              <TableCell className="font-medium">{report.tax_type}</TableCell>
               <TableCell>{report.tax_year}</TableCell>
-              <TableCell>
-                ₦{(report.amount || 0).toLocaleString()}
-              </TableCell>
+              <TableCell className="hidden md:table-cell">₦{report.amount.toLocaleString()}</TableCell>
               <TableCell>
                 <TaxReportStatus status={report.status} />
               </TableCell>
+              <TableCell className="hidden md:table-cell text-muted-foreground">
+                {format(new Date(report.updated_at), "dd MMM yyyy")}
+              </TableCell>
               <TableCell>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedReport(report)}>View</Button>
-                  </DialogTrigger>
-                  <TaxReportDetails />
-                </Dialog>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onViewDetails(report)}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

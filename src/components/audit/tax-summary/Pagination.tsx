@@ -4,107 +4,92 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   pageSize: number;
-  dataLength: number;
-  paginatedDataLength: number;
-  setCurrentPage: (page: number) => void;
-  setPageSize: (size: number) => void;
-  viewMode: "table" | "card";
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
 export const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
   pageSize,
-  dataLength,
-  paginatedDataLength,
-  setCurrentPage,
-  setPageSize,
-  viewMode
+  onPageChange,
+  onPageSizeChange,
 }) => {
-  if (viewMode === "table") {
-    return (
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing {Math.min(paginatedDataLength, pageSize)} of {dataLength} records
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <div className="text-sm">
-            Page {currentPage} of {totalPages || 1}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(currentPage < totalPages ? currentPage + 1 : totalPages)}
-            disabled={currentPage === totalPages || totalPages === 0}
-          >
-            Next
-          </Button>
-          <Select
-            value={pageSize.toString()}
-            onValueChange={(value) => {
-              setPageSize(Number(value));
-              setCurrentPage(1);
-            }}
-          >
-            <SelectTrigger className="w-[100px] h-8">
-              <SelectValue placeholder="10 per page" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Rows per page</SelectLabel>
-                <SelectItem value="10">10 rows</SelectItem>
-                <SelectItem value="20">20 rows</SelectItem>
-                <SelectItem value="50">50 rows</SelectItem>
-                <SelectItem value="100">100 rows</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <div className="col-span-full flex items-center justify-center mt-4">
-      <div className="flex items-center space-x-2">
+    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="text-sm text-muted-foreground">
+        Page {currentPage} of {totalPages || 1}
+      </div>
+
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
-          size="sm"
-          onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
+          size="icon"
+          onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          Previous
+          <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="text-sm">
-          Page {currentPage} of {totalPages || 1}
+
+        <div className="flex items-center gap-1">
+          {[...Array(Math.min(5, totalPages))].map((_, i) => {
+            let pageNum: number;
+            
+            // Calculate which page numbers to show
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            
+            return (
+              <Button
+                key={i}
+                variant={currentPage === pageNum ? "default" : "outline"}
+                size="sm"
+                onClick={() => onPageChange(pageNum)}
+                className="w-8 h-8 p-0"
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
         </div>
+
         <Button
           variant="outline"
-          size="sm"
-          onClick={() => setCurrentPage(currentPage < totalPages ? currentPage + 1 : totalPages)}
+          size="icon"
+          onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || totalPages === 0}
         >
-          Next
+          <ChevronRight className="h-4 w-4" />
         </Button>
+
+        <Select value={pageSize.toString()} onValueChange={(val) => onPageSizeChange(Number(val))}>
+          <SelectTrigger className="w-[80px]">
+            <SelectValue placeholder="10" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="5">5</SelectItem>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

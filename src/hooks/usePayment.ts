@@ -8,12 +8,10 @@ export const useInitiatePayment = () => {
 
   return useMutation({
     mutationFn: initiatePayment,
-    onSuccess: (data) => {
-      toast.success("Payment initiated successfully");
-      return data;
-    },
     onError: (error: Error) => {
+      console.error("Payment initiation error:", error);
       handleError(error, "Payment initiation");
+      toast.error(`Payment failed: ${error.message || "Unknown error"}`);
     },
   });
 };
@@ -25,10 +23,35 @@ export const usePaymentStatus = (reference: string) => {
     queryKey: ["payment", reference],
     queryFn: () => verifyPayment(reference),
     enabled: !!reference,
+    refetchInterval: (data) => {
+      // Keep checking status every 5 seconds until it's no longer pending
+      return data?.status === "pending" ? 5000 : false;
+    },
     meta: {
       onError: (error: Error) => {
         handleError(error, "Payment verification");
       },
+    },
+  });
+};
+
+export const useVerifyPayment = () => {
+  const { handleError } = useError();
+
+  return useMutation({
+    mutationFn: verifyPayment,
+    onSuccess: (data) => {
+      if (data.status === "success" || data.status === "successful") {
+        toast.success("Payment verified successfully!");
+      } else if (data.status === "pending") {
+        toast.info("Payment is still being processed");
+      } else {
+        toast.warning("Payment verification failed");
+      }
+      return data;
+    },
+    onError: (error: Error) => {
+      handleError(error, "Payment verification");
     },
   });
 };
