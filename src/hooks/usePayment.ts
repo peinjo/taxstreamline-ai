@@ -1,4 +1,3 @@
-
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { initiatePayment, verifyPayment } from "@/integrations/paymentGateway";
 import { useError } from "@/contexts/ErrorContext";
@@ -27,7 +26,7 @@ export const usePaymentStatus = (reference: string) => {
     enabled: !!reference,
     refetchInterval: (data) => {
       // Keep checking status every 5 seconds until it's no longer pending
-      return data?.status === "pending" ? 5000 : false;
+      return data && data.status === "pending" ? 5000 : false;
     },
     meta: {
       onError: (error: Error) => {
