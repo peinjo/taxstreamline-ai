@@ -1,7 +1,9 @@
+
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { initiatePayment, verifyPayment } from "@/integrations/paymentGateway";
 import { useError } from "@/contexts/ErrorContext";
 import { toast } from "sonner";
+import { PaymentTransaction } from "@/types/payment";
 
 export const useInitiatePayment = () => {
   const { handleError } = useError();

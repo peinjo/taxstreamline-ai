@@ -11,6 +11,7 @@ import { TableView } from "./TableView";
 import { LoadingSkeleton } from "./LoadingSkeleton";
 import { NoReportsFound } from "./NoReportsFound";
 import { useTaxSummary } from "./hooks/useTaxSummary";
+import { TaxReport } from "@/types/tax";
 
 export const TaxSummaryTable: React.FC = () => {
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -20,10 +21,10 @@ export const TaxSummaryTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<any | null>(null);
+  const [selectedReport, setSelectedReport] = useState<TaxReport | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const { reports, isLoading, error } = useTaxSummary({
+  const { data: reports = [], isLoading, error } = useTaxSummary({
     searchQuery,
     yearFilter,
     statusFilter,
@@ -31,7 +32,7 @@ export const TaxSummaryTable: React.FC = () => {
     pageSize,
   });
 
-  const handleViewDetails = (report: any) => {
+  const handleViewDetails = (report: TaxReport) => {
     setSelectedReport(report);
     setDetailsOpen(true);
   };
@@ -46,16 +47,16 @@ export const TaxSummaryTable: React.FC = () => {
     return <LoadingSkeleton />;
   }
 
-  if (error || !reports) {
+  if (error) {
     return (
       <div className="py-4">
-        <p className="text-red-500">Error loading tax reports: {error?.message}</p>
+        <p className="text-red-500">Error loading tax reports: {(error as Error).message}</p>
       </div>
     );
   }
 
   if (reports.length === 0) {
-    return <NoReportsFound onScheduleReport={handleScheduleReport} />;
+    return <NoReportsFound searchTerm={searchQuery} setSearchTerm={setSearchQuery} />;
   }
 
   const paginatedReports = reports.slice(

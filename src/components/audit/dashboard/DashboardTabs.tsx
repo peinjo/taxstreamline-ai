@@ -6,9 +6,10 @@ import { TaxCharts } from "../TaxCharts";
 import { Card } from "@/components/ui/card";
 import { ChartsSkeleton } from "./ChartsSkeleton";
 import { NoDataDisplay } from "./NoDataDisplay";
+import { TaxReport } from "@/types/audit";
 
 interface DashboardTabsProps {
-  reports: any[] | null;
+  reports: TaxReport[] | null;
   isLoading: boolean;
 }
 
@@ -33,7 +34,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({ reports, isLoading
       </TabsContent>
 
       <TabsContent value="detailed">
-        <TaxSummaryTable data={reports || []} isLoading={isLoading} />
+        <TaxSummaryTable />
       </TabsContent>
     </Tabs>
   );

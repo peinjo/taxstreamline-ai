@@ -69,7 +69,7 @@ export const AuditReportingDashboard = () => {
         <TaxCharts data={reports || []} />
       </div>
 
-      <TaxSummaryTable data={reports || []} isLoading={isLoading} />
+      <TaxSummaryTable />
     </div>
   );
 };
