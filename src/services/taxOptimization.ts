@@ -14,6 +14,9 @@ import { OptimizationSuggestion } from "./taxOptimization/types";
 // Re-export the types for backward compatibility
 export type { OptimizationSuggestion } from "./taxOptimization/types";
 
+// Re-export functions that were moved to individual files
+export { getSectorIncentives, getGeneralSuggestions } from "./taxOptimization/incentives";
+
 // Get all applicable tax optimization suggestions based on tax data
 export const getTaxOptimizationSuggestions = (
   taxType: string, 

@@ -8,7 +8,11 @@ import { TaxOptimizationSuggestions } from "./components/TaxOptimizationSuggesti
 import { SavedOptimizationPlans } from "./components/SavedOptimizationPlans";
 import { useTaxCalculation } from "@/hooks/useTaxCalculation";
 import { useTaxOptimization } from "@/hooks/useTaxOptimization";
-import { getGeneralSuggestions, getSectorIncentives, OptimizationSuggestion } from "@/services/taxOptimization";
+import { 
+  getGeneralSuggestions, 
+  getSectorIncentives, 
+  OptimizationSuggestion 
+} from "@/services/taxOptimization";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PiggyBank, Lightbulb, TrendingUp } from "lucide-react";
