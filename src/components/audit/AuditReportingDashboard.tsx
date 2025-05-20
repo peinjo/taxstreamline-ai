@@ -1,12 +1,13 @@
 
 import React, { useState } from "react";
-import { TaxSummaryTable } from "./tax-summary"; // Updated import path
-import { TaxCharts } from "./TaxCharts";
 import { ReportFilters } from "./ReportFilters";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { DashboardTabs } from "./dashboard/DashboardTabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export const AuditReportingDashboard = () => {
   const [filters, setFilters] = useState({
@@ -38,38 +39,43 @@ export const AuditReportingDashboard = () => {
 
   const handleExport = (format: "pdf" | "excel") => {
     // Implementation for export functionality will be added later
+    toast(`Starting export as ${format}...`, {
+      description: "Your export will be ready shortly.",
+    });
     console.log(`Exporting as ${format}...`);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <ReportFilters filters={filters} onFilterChange={setFilters} />
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => handleExport("pdf")}
-            className="gap-2"
-          >
-            <FileDown className="h-4 w-4" />
-            Export PDF
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleExport("excel")}
-            className="gap-2"
-          >
-            <FileDown className="h-4 w-4" />
-            Export Excel
-          </Button>
+    <Card className="border-none shadow-none">
+      <CardHeader className="px-0">
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <CardTitle>Tax Reporting Dashboard</CardTitle>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => handleExport("pdf")}
+              className="gap-2"
+            >
+              <FileDown className="h-4 w-4" />
+              Export PDF
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => handleExport("excel")}
+              className="gap-2"
+            >
+              <FileDown className="h-4 w-4" />
+              Export Excel
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <TaxCharts data={reports || []} />
-      </div>
-
-      <TaxSummaryTable />
-    </div>
+      </CardHeader>
+      
+      <CardContent className="px-0 space-y-6">
+        <ReportFilters filters={filters} onFilterChange={setFilters} />
+        
+        <DashboardTabs reports={reports} isLoading={isLoading} />
+      </CardContent>
+    </Card>
   );
 };
