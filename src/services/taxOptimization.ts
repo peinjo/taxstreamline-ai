@@ -211,7 +211,7 @@ export const getSectorIncentives = (industry: string): OptimizationSuggestion[] 
         description: 'Consider investment tax allowances, graduated royalty rates, and gas utilization incentives that may apply to your operations.',
         potentialSavings: null,
         applicability: 'high',
-        category: 'allowance'
+        category: 'deduction'  // Changed from "allowance" to "deduction"
       });
       break;
       

@@ -65,7 +65,7 @@ export const TaxOptimizationFeature = ({
   }
 
   // All suggestions, including both current and historical
-  const allSuggestions = [...suggestions, ...historicalSuggestions];
+  const allSuggestions: OptimizationSuggestion[] = [...suggestions, ...historicalSuggestions];
 
   return (
     <div className="space-y-4">
