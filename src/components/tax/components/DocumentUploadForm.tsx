@@ -1,12 +1,12 @@
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
-import { DocumentType } from "../types/document-types";
 
 interface DocumentUploadFormProps {
   selectedYear: string;
-  selectedType: DocumentType;
+  selectedType: "receipt" | "filing" | "statement" | "report" | "other";
   uploading: boolean;
   onYearChange: (year: string) => void;
   onTypeChange: (type: string) => void;
@@ -22,7 +22,7 @@ export function DocumentUploadForm({
   onFileUpload,
 }: DocumentUploadFormProps) {
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-wrap gap-4">
       <Select value={selectedYear} onValueChange={onYearChange}>
         <SelectTrigger className="w-32">
           <SelectValue placeholder="Tax Year" />
@@ -52,20 +52,21 @@ export function DocumentUploadForm({
         </SelectContent>
       </Select>
 
-      <div>
+      <div className="flex-1 ml-auto">
         <Input
           type="file"
           id="document-upload"
           className="hidden"
           onChange={onFileUpload}
-          accept=".pdf,.doc,.docx,.txt,.csv,.xlsx"
+          accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.jpg,.jpeg,.png"
         />
         <Button
           onClick={() => document.getElementById("document-upload")?.click()}
           disabled={uploading}
+          className="w-full sm:w-auto"
         >
           <Upload className="mr-2 h-4 w-4" />
-          Upload Document
+          {uploading ? "Uploading..." : "Upload Document"}
         </Button>
       </div>
     </div>

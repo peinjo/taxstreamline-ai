@@ -1,3 +1,4 @@
+
 export interface DocumentMetadata {
   id: number;
   file_name: string;
@@ -9,6 +10,7 @@ export interface DocumentMetadata {
   user_id?: string;
   created_at: string;
   updated_at: string;
+  tags?: string[];
 }
 
 export type DocumentType = 'receipt' | 'filing' | 'statement' | 'report' | 'other';
