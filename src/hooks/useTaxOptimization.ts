@@ -49,13 +49,13 @@ export const useTaxOptimization = ({ taxType, inputs = {}, result }: UseTaxOptim
         // Process historical data to extract learning
         // This is a simplified version - in a real implementation, this would
         // analyze patterns across calculations to provide more personalized suggestions
-        const suggestions = calculations.map(calc => {
+        const suggestions: OptimizationSuggestion[] = calculations.map(calc => {
           return {
             id: `historical-${calc.id}`,
             title: "Based on Your Tax History",
             description: `Your recent ${taxType} calculations show potential for optimization. Review your tax strategy for this category.`,
             potentialSavings: null,
-            applicability: 'medium',
+            applicability: 'medium' as const, // Use a valid value from the union type
             category: 'other' as const
           };
         });
