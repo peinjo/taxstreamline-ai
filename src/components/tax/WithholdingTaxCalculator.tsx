@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { useTaxCalculation, TaxScenario } from "@/hooks/useTaxCalculation";
 import { TaxScenarioComparison } from "./components/TaxScenarioComparison";
 import { Save, ChartBar } from "lucide-react";
+import { TaxOptimizationFeature } from "./components/TaxOptimizationFeature";
 
 export const WithholdingTaxCalculator = () => {
   const { toast } = useToast();
@@ -212,6 +212,16 @@ export const WithholdingTaxCalculator = () => {
             income={Number(income)}
             taxType="Withholding Tax"
             details={{ type, rate: (result / Number(income)) * 100 }}
+          />
+
+          <TaxOptimizationFeature
+            taxType="withholding"
+            inputs={{ income: Number(income), type }}
+            result={result ? {
+              taxAmount: result,
+              effectiveRate: (result / Number(income)) * 100,
+              details: { type, rate: (result / Number(income)) * 100 }
+            } : undefined}
           />
         </>
       )}

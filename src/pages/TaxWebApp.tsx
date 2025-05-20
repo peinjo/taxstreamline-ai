@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,8 @@ import { Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChartBar, Wallet, FileText, Calendar } from "lucide-react";
+import { ChartBar, Wallet, FileText, Calendar, LightbulbIcon } from "lucide-react";
+import { TaxPlanner } from "@/components/tax/TaxPlanner";
 
 const TaxWebApp = () => {
   const { user, loading } = useAuth();
@@ -150,8 +150,12 @@ const TaxWebApp = () => {
         {renderDashboardMetrics()}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          <TabsList className="grid grid-cols-2 md:grid-cols-6 gap-2">
             <TabsTrigger value="calculator">Calculator</TabsTrigger>
+            <TabsTrigger value="planning">
+              <LightbulbIcon className="h-4 w-4 mr-1" />
+              Planning
+            </TabsTrigger>
             <TabsTrigger value="filings">Filings</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -160,6 +164,10 @@ const TaxWebApp = () => {
 
           <TabsContent value="calculator">
             <TaxCalculator />
+          </TabsContent>
+
+          <TabsContent value="planning">
+            <TaxPlanner />
           </TabsContent>
 
           <TabsContent value="filings" className="space-y-6">
