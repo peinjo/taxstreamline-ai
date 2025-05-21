@@ -76,13 +76,13 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
       if (error) throw error;
       
       const url = URL.createObjectURL(data);
-      const a = document.createElement("a");
+      const a = window.document.createElement("a");
       a.href = url;
       a.download = document.file_name;
-      document.body.appendChild(a);
+      window.document.body.appendChild(a);
       a.click();
       URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      window.document.body.removeChild(a);
     } catch (error) {
       console.error("Download error:", error);
       toast.error("Failed to download document");
