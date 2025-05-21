@@ -22,7 +22,10 @@ export function useDocumentFiltering(documents: DocumentMetadata[] | undefined) 
       const matchesSearch = searchQuery 
         ? doc.file_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
           (doc.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
-          (doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) || false)
+          // Safely access tags property with optional chaining and type checking
+          (Array.isArray((doc as any).tags) && (doc as any).tags.some((tag: string) => 
+            tag.toLowerCase().includes(searchQuery.toLowerCase())
+          ) || false)
         : true;
         
       const matchesType = filterType ? doc.file_type === filterType : true;
