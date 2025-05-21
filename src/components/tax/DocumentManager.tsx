@@ -79,7 +79,9 @@ export function DocumentManager() {
       if (uploadError) throw uploadError;
 
       // Parse tags from the comma-separated string
-      const tags = documentTags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      const parsedTags = documentTags.split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
 
       const { error: metadataError } = await supabase
         .from("document_metadata")
@@ -90,7 +92,7 @@ export function DocumentManager() {
           file_size: file.size,
           tax_year: parseInt(selectedYear),
           user_id: user.id,
-          tags: tags.length > 0 ? tags : undefined,
+          tags: parsedTags.length > 0 ? parsedTags : undefined
         });
 
       if (metadataError) throw metadataError;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Download, FileText, FileImage, FilePdf } from "lucide-react";
+import { X, Download, FileText, FileImage, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentMetadata } from "@/types/documents";
 import { toast } from "sonner";
@@ -55,7 +55,7 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) {
       return <FileImage className="h-8 w-8 text-blue-500" />;
     } else if (['pdf'].includes(extension || '')) {
-      return <FilePdf className="h-8 w-8 text-red-500" />;
+      return <File className="h-8 w-8 text-red-500" />;
     } else {
       return <FileText className="h-8 w-8 text-blue-500" />;
     }
