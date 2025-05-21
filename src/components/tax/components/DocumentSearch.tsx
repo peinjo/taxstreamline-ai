@@ -50,7 +50,7 @@ export function DocumentSearch({
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Types</SelectItem>
+            <SelectItem value="all">All Types</SelectItem>
             {documentTypes.map((type) => (
               <SelectItem key={type} value={type}>
                 {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -63,7 +63,7 @@ export function DocumentSearch({
             <SelectValue placeholder="Filter by year" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Years</SelectItem>
+            <SelectItem value="all">All Years</SelectItem>
             {uniqueYears.map((year) => (
               <SelectItem key={year} value={year}>
                 {year}

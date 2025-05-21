@@ -25,8 +25,8 @@ export function useDocumentFiltering(documents: DocumentMetadata[] | undefined) 
           (doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) || false)
         : true;
         
-      const matchesType = filterType ? doc.file_type === filterType : true;
-      const matchesYear = filterYear ? doc.tax_year.toString() === filterYear : true;
+      const matchesType = !filterType || filterType === "all" || doc.file_type === filterType;
+      const matchesYear = !filterYear || filterYear === "all" || doc.tax_year.toString() === filterYear;
       
       return matchesSearch && matchesType && matchesYear;
     });
