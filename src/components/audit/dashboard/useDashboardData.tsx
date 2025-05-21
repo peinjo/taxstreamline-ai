@@ -18,7 +18,7 @@ export const useDashboardData = () => {
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch tax reports with filters
+  // Fetch tax reports with filters and enhanced caching
   const { 
     data: reports, 
     isLoading,
@@ -45,9 +45,13 @@ export const useDashboardData = () => {
       }
       return data || [];
     },
+    staleTime: 5 * 60 * 1000, // Data considered fresh for 5 minutes
+    cacheTime: 30 * 60 * 1000, // Cache persists for 30 minutes
+    refetchOnWindowFocus: false, // Prevent refetching when window regains focus
+    refetchOnMount: true, // Fetch when component mounts
   });
 
-  // Fetch summary metrics
+  // Fetch summary metrics with enhanced caching
   const { data: metrics, isLoading: isLoadingMetrics } = useQuery({
     queryKey: ["audit-metrics"],
     queryFn: async () => {
@@ -84,6 +88,8 @@ export const useDashboardData = () => {
       };
     },
     enabled: !isLoading, // Only run after reports are loaded
+    staleTime: 10 * 60 * 1000, // Metrics considered fresh for 10 minutes
+    cacheTime: 60 * 60 * 1000, // Cache persists for 1 hour
   });
 
   const handleRefresh = async () => {

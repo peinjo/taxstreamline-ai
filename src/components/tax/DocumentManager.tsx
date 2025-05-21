@@ -9,12 +9,22 @@ import { DocumentPreview } from "./components/DocumentPreview";
 import { DocumentUploadSection } from "./components/DocumentUploadSection";
 import { DocumentSearch } from "./components/DocumentSearch";
 import { useDocumentFiltering } from "./hooks/useDocumentFiltering";
+import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
+import { secureStorage } from "@/utils/secureStorage";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Loader2, RefreshCw } from "lucide-react";
 
 export function DocumentManager() {
   const [selectedDocument, setSelectedDocument] = useState<DocumentMetadata | null>(null);
+  const { isMobile } = useResponsiveLayout();
 
-  const { data: documents, refetch } = useQuery({
+  const { 
+    data: documents, 
+    refetch,
+    isLoading,
+    isError 
+  } = useQuery({
     queryKey: ["tax-documents"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -23,8 +33,17 @@ export function DocumentManager() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as DocumentMetadata[];
+      
+      // Save encrypted copy locally for offline access
+      const docsForStorage = data as DocumentMetadata[];
+      secureStorage.setItem('cached_tax_documents', docsForStorage)
+        .catch(err => console.error('Failed to cache documents locally:', err));
+        
+      return docsForStorage;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   const {
@@ -35,7 +54,8 @@ export function DocumentManager() {
     filterYear,
     setFilterYear,
     filteredDocuments,
-    uniqueYears
+    uniqueYears,
+    clearFilters
   } = useDocumentFiltering(documents);
 
   const handleDelete = async (id: number, filePath: string) => {
@@ -84,16 +104,50 @@ export function DocumentManager() {
 
   const documentTypes = ["receipt", "filing", "statement", "report", "other"];
 
+  if (isLoading) {
+    return (
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>Tax Documents</CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center items-center py-12">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Loading documents...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle>Tax Documents</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-8 text-center">
+            <p className="text-red-500 mb-4">Failed to load documents</p>
+            <Button onClick={() => refetch()} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" /> Try Again
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Tax Documents</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Upload section */}
-        <DocumentUploadSection onUploadComplete={refetch} />
+        {/* Upload section - responsive design */}
+        <div className={isMobile ? "pb-4" : ""}>
+          <DocumentUploadSection onUploadComplete={refetch} />
+        </div>
 
-        {/* Search and Filter section */}
+        {/* Search and Filter section - responsive design */}
         <div className="border-t pt-4">
           <DocumentSearch
             searchQuery={searchQuery}
@@ -104,25 +158,39 @@ export function DocumentManager() {
             onFilterYearChange={setFilterYear}
             uniqueYears={uniqueYears}
             documentTypes={documentTypes}
+            onClearFilters={clearFilters}
+            isMobile={isMobile}
           />
         </div>
 
-        {/* Document list */}
+        {/* Document list - responsive design */}
         <div className="border-t pt-4">
-          <h3 className="mb-4 text-sm font-medium">Documents ({filteredDocuments.length})</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-medium">Documents ({filteredDocuments.length})</h3>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetch()} 
+              className="flex items-center"
+            >
+              <RefreshCw className="h-3 w-3 mr-2" /> Refresh
+            </Button>
+          </div>
           <DocumentList 
             documents={filteredDocuments}
             onDelete={handleDelete}
             onUpdateTags={handleUpdateTags}
             onViewDocument={setSelectedDocument}
+            isMobile={isMobile}
           />
         </div>
 
-        {/* Document preview */}
+        {/* Document preview - responsive design */}
         {selectedDocument && (
           <DocumentPreview 
             document={selectedDocument}
             onClose={() => setSelectedDocument(null)}
+            isMobile={isMobile}
           />
         )}
       </CardContent>
