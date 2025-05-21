@@ -6,6 +6,7 @@ import { X, Download, FileText, FileImage, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentMetadata } from "@/types/documents";
 import { toast } from "sonner";
+import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 
 interface DocumentPreviewProps {
   document: DocumentMetadata | null;
@@ -15,6 +16,7 @@ interface DocumentPreviewProps {
 export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { isMobile } = useResponsiveLayout();
   
   useEffect(() => {
     if (!document) return;
@@ -90,7 +92,7 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
   };
   
   return (
-    <Card className="fixed inset-0 z-50 flex flex-col bg-white shadow-xl md:inset-auto md:left-1/2 md:top-1/2 md:h-[80vh] md:w-[80vw] md:-translate-x-1/2 md:-translate-y-1/2">
+    <Card className={`fixed inset-0 z-50 flex flex-col bg-white shadow-xl ${isMobile ? "" : "md:inset-auto md:left-1/2 md:top-1/2 md:h-[80vh] md:w-[80vw] md:-translate-x-1/2 md:-translate-y-1/2"}`}>
       <CardHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
         <CardTitle className="flex items-center gap-2">
           {getFileIcon()}

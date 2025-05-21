@@ -46,7 +46,7 @@ export const useDashboardData = () => {
       return data || [];
     },
     staleTime: 5 * 60 * 1000, // Data considered fresh for 5 minutes
-    cacheTime: 30 * 60 * 1000, // Cache persists for 30 minutes
+    gcTime: 30 * 60 * 1000, // Cache persists for 30 minutes (renamed from cacheTime)
     refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     refetchOnMount: true, // Fetch when component mounts
   });
@@ -89,7 +89,7 @@ export const useDashboardData = () => {
     },
     enabled: !isLoading, // Only run after reports are loaded
     staleTime: 10 * 60 * 1000, // Metrics considered fresh for 10 minutes
-    cacheTime: 60 * 60 * 1000, // Cache persists for 1 hour
+    gcTime: 60 * 60 * 1000, // Cache persists for 1 hour (renamed from cacheTime)
   });
 
   const handleRefresh = async () => {

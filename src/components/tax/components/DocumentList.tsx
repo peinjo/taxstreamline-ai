@@ -7,6 +7,7 @@ import { DocumentMetadata } from "@/types/documents";
 import { formatFileSize } from "../utils/document-utils";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 
 interface DocumentListProps {
   documents: DocumentMetadata[];
@@ -23,6 +24,7 @@ export function DocumentList({
 }: DocumentListProps) {
   const [editingTagsForId, setEditingTagsForId] = useState<number | null>(null);
   const [newTag, setNewTag] = useState<string>("");
+  const { isMobile } = useResponsiveLayout();
 
   const handleAddTag = (document: DocumentMetadata) => {
     if (!newTag.trim() || !onUpdateTags) return;
@@ -58,7 +60,7 @@ export function DocumentList({
             key={doc.id}
             className="flex flex-col rounded-lg border p-4"
           >
-            <div className="flex items-start justify-between">
+            <div className={`flex items-start ${isMobile ? "flex-col" : "justify-between"}`}>
               <div className="flex items-start space-x-4">
                 <FileText className="h-8 w-8 text-blue-500 mt-1" />
                 <div className="space-y-1">
@@ -144,7 +146,7 @@ export function DocumentList({
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className={`flex items-center space-x-2 ${isMobile ? "mt-4 ml-12" : ""}`}>
                 {onViewDocument && (
                   <Button
                     variant="ghost"
