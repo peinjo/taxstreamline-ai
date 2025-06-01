@@ -8,6 +8,10 @@ import { GlobalMetricsCards } from "@/components/global-reporting/GlobalMetricsC
 import { UpcomingDeadlinesTable } from "@/components/global-reporting/UpcomingDeadlinesTable";
 import { RecentReportsTable } from "@/components/global-reporting/RecentReportsTable";
 import { ComplianceTracker } from "@/components/global-reporting/ComplianceTracker";
+import { GlobalDocumentManager } from "@/components/global-reporting/GlobalDocumentManager";
+import { GlobalWorldMap } from "@/components/global-reporting/GlobalWorldMap";
+import { GlobalFormWorkflows } from "@/components/global-reporting/GlobalFormWorkflows";
+import { GlobalAnalytics } from "@/components/global-reporting/GlobalAnalytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const GlobalReporting = () => {
@@ -53,13 +57,24 @@ const GlobalReporting = () => {
         <GlobalMetricsCards metrics={metrics} />
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="deadlines" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="deadlines">Deadlines</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
+            <TabsTrigger value="workflows">Workflows</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <GlobalWorldMap 
+              deadlines={deadlines} 
+              compliance={compliance} 
+              countries={countries}
+            />
+          </TabsContent>
 
           <TabsContent value="deadlines" className="space-y-6">
             <UpcomingDeadlinesTable deadlines={deadlines} isLoading={isLoading} />
@@ -69,15 +84,31 @@ const GlobalReporting = () => {
             <RecentReportsTable reports={reports} isLoading={isLoading} />
           </TabsContent>
 
+          <TabsContent value="documents" className="space-y-6">
+            <GlobalDocumentManager 
+              selectedCountry={filters.country}
+              countries={countries}
+            />
+          </TabsContent>
+
           <TabsContent value="compliance" className="space-y-6">
             <ComplianceTracker compliance={compliance} isLoading={isLoading} />
           </TabsContent>
 
+          <TabsContent value="workflows" className="space-y-6">
+            <GlobalFormWorkflows 
+              countries={countries}
+              deadlines={deadlines}
+            />
+          </TabsContent>
+
           <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <UpcomingDeadlinesTable deadlines={deadlines.slice(0, 5)} isLoading={isLoading} />
-              <RecentReportsTable reports={reports.slice(0, 5)} isLoading={isLoading} />
-            </div>
+            <GlobalAnalytics 
+              deadlines={deadlines}
+              reports={reports}
+              compliance={compliance}
+              countries={countries}
+            />
           </TabsContent>
         </Tabs>
       </div>
