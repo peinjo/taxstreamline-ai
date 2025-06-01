@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,8 +63,8 @@ export function GlobalAnalytics({ deadlines, reports, compliance, countries }: G
     
     return {
       month: date.toLocaleDateString('en-US', { month: 'short' }),
-      reports: monthlyReports.length,
-      amount: monthlyReports.reduce((sum, r) => sum + r.amount, 0)
+      reports: monthReports.length,
+      amount: monthReports.reduce((sum, r) => sum + r.amount, 0)
     };
   });
 
