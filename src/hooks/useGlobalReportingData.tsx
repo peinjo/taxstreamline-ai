@@ -110,7 +110,7 @@ export const useGlobalReportingData = () => {
     gcTime: 30 * 60 * 1000,
   });
 
-  // Get unique countries from deadlines
+  // Get unique countries including West African countries
   const { data: countries = [] } = useQuery({
     queryKey: ["global-countries"],
     queryFn: async () => {
@@ -121,8 +121,32 @@ export const useGlobalReportingData = () => {
 
       if (error) throw error;
       
-      const uniqueCountries = [...new Set(data?.map(item => item.country) || [])];
-      return uniqueCountries;
+      const dbCountries = [...new Set(data?.map(item => item.country) || [])];
+      
+      // Add West African countries to ensure they're always available
+      const westAfricanCountries = [
+        "Nigeria",
+        "Ghana",
+        "Senegal",
+        "Mali",
+        "Burkina Faso",
+        "Ivory Coast",
+        "Guinea",
+        "Benin",
+        "Togo",
+        "Sierra Leone",
+        "Liberia",
+        "Mauritania",
+        "Niger",
+        "Guinea-Bissau",
+        "Gambia",
+        "Cape Verde"
+      ];
+      
+      // Combine database countries with West African countries and remove duplicates
+      const allCountries = [...new Set([...dbCountries, ...westAfricanCountries])].sort();
+      
+      return allCountries;
     },
     staleTime: 60 * 60 * 1000, // 1 hour
     gcTime: 2 * 60 * 60 * 1000, // 2 hours
