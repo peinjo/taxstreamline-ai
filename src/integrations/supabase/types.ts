@@ -314,6 +314,84 @@ export type Database = {
         }
         Relationships: []
       }
+      global_compliance: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          frequency: string
+          id: number
+          next_due_date: string | null
+          requirement_type: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          frequency: string
+          id?: number
+          next_due_date?: string | null
+          requirement_type: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          id?: number
+          next_due_date?: string | null
+          requirement_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      global_deadlines: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          due_date: string
+          id: number
+          priority: string
+          status: string
+          tax_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: number
+          priority?: string
+          status?: string
+          tax_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: number
+          priority?: string
+          status?: string
+          tax_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       internal_controls: {
         Row: {
           control_description: string
@@ -709,6 +787,7 @@ export type Database = {
       tax_reports: {
         Row: {
           amount: number
+          country: string | null
           created_at: string
           id: number
           status: string
@@ -719,6 +798,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          country?: string | null
           created_at?: string
           id?: never
           status: string
@@ -729,6 +809,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          country?: string | null
           created_at?: string
           id?: never
           status?: string
