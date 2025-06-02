@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
@@ -9,18 +10,35 @@ import { format, isTomorrow } from "date-fns";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Event {
-  id: number;  // Changed from string to number to match database
+  id: number;
   title: string;
   date: string;
   company: string;
+  user_id: string;
 }
 
 const Calendar = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
+            <p className="text-gray-600">Please log in to view your calendar events.</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   // Fetch events
   const { data: events = [] } = useQuery({
@@ -34,33 +52,38 @@ const Calendar = () => {
       if (error) throw error;
       return data;
     },
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   // Add event mutation
   const addEventMutation = useMutation({
-    mutationFn: async (eventData: Omit<Event, "id">) => {
+    mutationFn: async (eventData: Omit<Event, "id" | "user_id">) => {
       const { data, error } = await supabase
         .from("calendar_events")
-        .insert([eventData])
+        .insert([{ ...eventData, user_id: user.id }])
         .select()
         .single();
       
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (newEvent) => {
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
       toast.success("Event added successfully");
       
       // Check if the event is tomorrow to show notification
-      if (isTomorrow(new Date(date))) {
+      if (isTomorrow(new Date(newEvent.date))) {
         toast.info(`Reminder: Event is tomorrow!`);
       }
+    },
+    onError: (error) => {
+      console.error("Error adding event:", error);
+      toast.error("Failed to add event. Please try again.");
     },
   });
 
   const removeEventMutation = useMutation({
-    mutationFn: async (id: number) => {  // Changed from string to number
+    mutationFn: async (id: number) => {
       const { error } = await supabase
         .from("calendar_events")
         .delete()
@@ -71,6 +94,10 @@ const Calendar = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
       toast.success("Event removed successfully");
+    },
+    onError: (error) => {
+      console.error("Error removing event:", error);
+      toast.error("Failed to remove event. Please try again.");
     },
   });
 
@@ -124,6 +151,7 @@ const Calendar = () => {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleRemoveEvent(event.id)}
+                        disabled={removeEventMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

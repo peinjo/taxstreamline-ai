@@ -58,6 +58,7 @@ export type Database = {
           date: string
           id: number
           title: string
+          user_id: string | null
         }
         Insert: {
           company: string
@@ -65,6 +66,7 @@ export type Database = {
           date: string
           id?: never
           title: string
+          user_id?: string | null
         }
         Update: {
           company?: string
@@ -72,6 +74,7 @@ export type Database = {
           date?: string
           id?: never
           title?: string
+          user_id?: string | null
         }
         Relationships: []
       }
