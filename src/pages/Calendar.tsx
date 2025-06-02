@@ -1,12 +1,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Trash2 } from "lucide-react";
+import { Calendar as CalendarIcon, Trash2, Edit } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { EventDialog } from "@/components/calendar/EventDialog";
-import { useState } from "react";
-import { format, isTomorrow } from "date-fns";
+import { EditEventDialog } from "@/components/calendar/EditEventDialog";
+import { EventFilters } from "@/components/calendar/EventFilters";
+import { useState, useMemo } from "react";
+import { format, isTomorrow, isSameDay, isToday, isThisWeek, isThisMonth, isAfter } from "date-fns";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +25,11 @@ interface Event {
 const Calendar = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterPeriod, setFilterPeriod] = useState("all");
+  const [sortBy, setSortBy] = useState("date-asc");
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
@@ -52,8 +59,69 @@ const Calendar = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!user, // Only fetch when user is authenticated
+    enabled: !!user,
   });
+
+  // Filter and sort events
+  const filteredAndSortedEvents = useMemo(() => {
+    let filtered = events;
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(event => 
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.company.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply period filter
+    if (filterPeriod !== "all") {
+      const now = new Date();
+      filtered = filtered.filter(event => {
+        const eventDate = new Date(event.date);
+        switch (filterPeriod) {
+          case "today":
+            return isToday(eventDate);
+          case "week":
+            return isThisWeek(eventDate);
+          case "month":
+            return isThisMonth(eventDate);
+          case "upcoming":
+            return isAfter(eventDate, now);
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "date-asc":
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        case "date-desc":
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        case "title-asc":
+          return a.title.localeCompare(b.title);
+        case "title-desc":
+          return b.title.localeCompare(a.title);
+        case "company-asc":
+          return a.company.localeCompare(b.company);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [events, searchTerm, filterPeriod, sortBy]);
+
+  // Filter events for selected date
+  const selectedDateEvents = events.filter(event => 
+    date && isSameDay(new Date(event.date), date)
+  );
+
+  // Get dates that have events for calendar highlighting
+  const eventDates = events.map(event => new Date(event.date));
 
   // Add event mutation
   const addEventMutation = useMutation({
@@ -71,7 +139,6 @@ const Calendar = () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
       toast.success("Event added successfully");
       
-      // Check if the event is tomorrow to show notification
       if (isTomorrow(new Date(newEvent.date))) {
         toast.info(`Reminder: Event is tomorrow!`);
       }
@@ -79,6 +146,28 @@ const Calendar = () => {
     onError: (error) => {
       console.error("Error adding event:", error);
       toast.error("Failed to add event. Please try again.");
+    },
+  });
+
+  const updateEventMutation = useMutation({
+    mutationFn: async ({ id, ...eventData }: Event) => {
+      const { data, error } = await supabase
+        .from("calendar_events")
+        .update(eventData)
+        .eq("id", id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["calendar-events"] });
+      toast.success("Event updated successfully");
+    },
+    onError: (error) => {
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event. Please try again.");
     },
   });
 
@@ -105,6 +194,20 @@ const Calendar = () => {
     addEventMutation.mutate(eventData);
   };
 
+  const handleUpdateEvent = (eventData: { title: string; date: string; company: string }) => {
+    if (editingEvent) {
+      updateEventMutation.mutate({
+        ...editingEvent,
+        ...eventData,
+      });
+    }
+  };
+
+  const handleEditEvent = (event: Event) => {
+    setEditingEvent(event);
+    setEditDialogOpen(true);
+  };
+
   const handleRemoveEvent = (id: number) => {
     removeEventMutation.mutate(id);
   };
@@ -120,12 +223,21 @@ const Calendar = () => {
           </Button>
         </div>
 
+        <EventFilters
+          onSearchChange={setSearchTerm}
+          onFilterChange={setFilterPeriod}
+          onSortChange={setSortBy}
+        />
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <CardContent className="p-6">
-              <h2 className="mb-4 text-xl font-semibold">Upcoming Events</h2>
+              <h2 className="mb-4 text-xl font-semibold">
+                {date ? `Events for ${format(date, "MMMM dd, yyyy")}` : "Events"}
+                {searchTerm && ` (Search: "${searchTerm}")`}
+              </h2>
               <div className="space-y-4">
-                {events.map((event) => (
+                {(date ? selectedDateEvents : filteredAndSortedEvents).map((event) => (
                   <div
                     key={event.id}
                     className="flex items-center justify-between border-b pb-4 last:border-0"
@@ -148,6 +260,14 @@ const Calendar = () => {
                     </div>
                     <div className="flex space-x-2">
                       <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditEvent(event)}
+                        disabled={updateEventMutation.isPending}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
                         variant="destructive"
                         size="sm"
                         onClick={() => handleRemoveEvent(event.id)}
@@ -158,8 +278,10 @@ const Calendar = () => {
                     </div>
                   </div>
                 ))}
-                {events.length === 0 && (
-                  <p className="text-center text-gray-500">No upcoming events</p>
+                {(date ? selectedDateEvents : filteredAndSortedEvents).length === 0 && (
+                  <p className="text-center text-gray-500">
+                    {date ? "No events for this date" : "No events found"}
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -173,7 +295,32 @@ const Calendar = () => {
                 selected={date}
                 onSelect={setDate}
                 className="rounded-md border"
+                modifiers={{
+                  hasEvents: eventDates,
+                }}
+                modifiersStyles={{
+                  hasEvents: {
+                    fontWeight: 'bold',
+                    backgroundColor: '#dbeafe',
+                    color: '#1e40af',
+                  },
+                }}
               />
+              {date && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm font-medium text-blue-800">
+                    {selectedDateEvents.length} event(s) on this date
+                  </p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="mt-2 text-blue-600"
+                    onClick={() => setDate(undefined)}
+                  >
+                    View all events
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -182,6 +329,13 @@ const Calendar = () => {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onSave={handleAddEvent}
+        />
+
+        <EditEventDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          onSave={handleUpdateEvent}
+          event={editingEvent}
         />
       </div>
     </DashboardLayout>
