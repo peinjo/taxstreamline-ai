@@ -170,9 +170,33 @@ const Calendar = () => {
   // Add event mutation
   const addEventMutation = useMutation({
     mutationFn: async (eventData: Partial<CalendarEvent>) => {
+      // Ensure all required fields are present
+      if (!eventData.title || !eventData.date || !eventData.company) {
+        throw new Error("Missing required fields");
+      }
+
+      const insertData = {
+        title: eventData.title,
+        date: eventData.date,
+        company: eventData.company,
+        user_id: user.id,
+        category: eventData.category || 'meeting',
+        priority: eventData.priority || 'medium',
+        status: eventData.status || 'upcoming',
+        description: eventData.description,
+        start_time: eventData.start_time,
+        end_time: eventData.end_time,
+        is_all_day: eventData.is_all_day ?? true,
+        recurrence_pattern: eventData.recurrence_pattern,
+        recurrence_end_date: eventData.recurrence_end_date,
+        parent_event_id: eventData.parent_event_id,
+        reminder_minutes: eventData.reminder_minutes || 15,
+        color: eventData.color || '#3B82F6'
+      };
+
       const { data, error } = await supabase
         .from("calendar_events")
-        .insert([{ ...eventData, user_id: user.id }])
+        .insert(insertData)
         .select()
         .single();
       
@@ -196,9 +220,18 @@ const Calendar = () => {
   const updateEventMutation = useMutation({
     mutationFn: async (eventData: Partial<CalendarEvent> & { id: number }) => {
       const { id, ...updateData } = eventData;
+      
+      // Clean up the update data to only include defined values
+      const cleanUpdateData: any = {};
+      Object.entries(updateData).forEach(([key, value]) => {
+        if (value !== undefined) {
+          cleanUpdateData[key] = value;
+        }
+      });
+
       const { data, error } = await supabase
         .from("calendar_events")
-        .update(updateData)
+        .update(cleanUpdateData)
         .eq("id", id)
         .select()
         .single();
