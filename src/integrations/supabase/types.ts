@@ -53,30 +53,74 @@ export type Database = {
       }
       calendar_events: {
         Row: {
+          category: string | null
+          color: string | null
           company: string
           created_at: string
           date: string
+          description: string | null
+          end_time: string | null
           id: number
+          is_all_day: boolean | null
+          parent_event_id: number | null
+          priority: string | null
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
+          reminder_minutes: number | null
+          start_time: string | null
+          status: string | null
           title: string
           user_id: string | null
         }
         Insert: {
+          category?: string | null
+          color?: string | null
           company: string
           created_at?: string
           date: string
+          description?: string | null
+          end_time?: string | null
           id?: never
+          is_all_day?: boolean | null
+          parent_event_id?: number | null
+          priority?: string | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          reminder_minutes?: number | null
+          start_time?: string | null
+          status?: string | null
           title: string
           user_id?: string | null
         }
         Update: {
+          category?: string | null
+          color?: string | null
           company?: string
           created_at?: string
           date?: string
+          description?: string | null
+          end_time?: string | null
           id?: never
+          is_all_day?: boolean | null
+          parent_event_id?: number | null
+          priority?: string | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          reminder_minutes?: number | null
+          start_time?: string | null
+          status?: string | null
           title?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       compliance_rules: {
         Row: {

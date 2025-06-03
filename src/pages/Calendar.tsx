@@ -1,34 +1,34 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Trash2, Edit } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Calendar as CalendarIcon, Trash2, Edit, Clock, MapPin, AlertCircle, Repeat } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { EventDialog } from "@/components/calendar/EventDialog";
-import { EditEventDialog } from "@/components/calendar/EditEventDialog";
-import { EventFilters } from "@/components/calendar/EventFilters";
+import { EnhancedEventDialog } from "@/components/calendar/EnhancedEventDialog";
+import { AdvancedEventFilters, FilterState } from "@/components/calendar/AdvancedEventFilters";
 import { useState, useMemo } from "react";
-import { format, isTomorrow, isSameDay, isToday, isThisWeek, isThisMonth, isAfter } from "date-fns";
+import { format, isTomorrow, isSameDay, isToday, isThisWeek, isThisMonth, isAfter, isBefore, isWithinInterval } from "date-fns";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface Event {
-  id: number;
-  title: string;
-  date: string;
-  company: string;
-  user_id: string;
-}
+import { CalendarEvent, EVENT_CATEGORIES, EVENT_PRIORITIES } from "@/types/calendar";
 
 const Calendar = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterPeriod, setFilterPeriod] = useState("all");
+  const [filters, setFilters] = useState<FilterState>({
+    period: "all",
+    category: "all",
+    priority: "all",
+    status: "all",
+    company: "",
+    dateRange: {}
+  });
   const [sortBy, setSortBy] = useState("date-asc");
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -57,7 +57,7 @@ const Calendar = () => {
         .order("date", { ascending: true });
       
       if (error) throw error;
-      return data;
+      return data as CalendarEvent[];
     },
     enabled: !!user,
   });
@@ -70,16 +70,36 @@ const Calendar = () => {
     if (searchTerm) {
       filtered = filtered.filter(event => 
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.company.toLowerCase().includes(searchTerm.toLowerCase())
+        event.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (event.description && event.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Apply advanced filters
+    if (filters.category !== "all") {
+      filtered = filtered.filter(event => event.category === filters.category);
+    }
+
+    if (filters.priority !== "all") {
+      filtered = filtered.filter(event => event.priority === filters.priority);
+    }
+
+    if (filters.status !== "all") {
+      filtered = filtered.filter(event => event.status === filters.status);
+    }
+
+    if (filters.company) {
+      filtered = filtered.filter(event => 
+        event.company.toLowerCase().includes(filters.company.toLowerCase())
       );
     }
 
     // Apply period filter
-    if (filterPeriod !== "all") {
+    if (filters.period !== "all") {
       const now = new Date();
       filtered = filtered.filter(event => {
         const eventDate = new Date(event.date);
-        switch (filterPeriod) {
+        switch (filters.period) {
           case "today":
             return isToday(eventDate);
           case "week":
@@ -91,6 +111,24 @@ const Calendar = () => {
           default:
             return true;
         }
+      });
+    }
+
+    // Apply date range filter
+    if (filters.dateRange.from || filters.dateRange.to) {
+      filtered = filtered.filter(event => {
+        const eventDate = new Date(event.date);
+        if (filters.dateRange.from && filters.dateRange.to) {
+          return isWithinInterval(eventDate, {
+            start: filters.dateRange.from,
+            end: filters.dateRange.to
+          });
+        } else if (filters.dateRange.from) {
+          return isAfter(eventDate, filters.dateRange.from) || isSameDay(eventDate, filters.dateRange.from);
+        } else if (filters.dateRange.to) {
+          return isBefore(eventDate, filters.dateRange.to) || isSameDay(eventDate, filters.dateRange.to);
+        }
+        return true;
       });
     }
 
@@ -107,13 +145,19 @@ const Calendar = () => {
           return b.title.localeCompare(a.title);
         case "company-asc":
           return a.company.localeCompare(b.company);
+        case "priority-desc":
+          const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
+          return (priorityOrder[b.priority as keyof typeof priorityOrder] || 0) - 
+                 (priorityOrder[a.priority as keyof typeof priorityOrder] || 0);
+        case "category-asc":
+          return a.category.localeCompare(b.category);
         default:
           return 0;
       }
     });
 
     return filtered;
-  }, [events, searchTerm, filterPeriod, sortBy]);
+  }, [events, searchTerm, filters, sortBy]);
 
   // Filter events for selected date
   const selectedDateEvents = events.filter(event => 
@@ -125,7 +169,7 @@ const Calendar = () => {
 
   // Add event mutation
   const addEventMutation = useMutation({
-    mutationFn: async (eventData: Omit<Event, "id" | "user_id">) => {
+    mutationFn: async (eventData: Partial<CalendarEvent>) => {
       const { data, error } = await supabase
         .from("calendar_events")
         .insert([{ ...eventData, user_id: user.id }])
@@ -150,10 +194,11 @@ const Calendar = () => {
   });
 
   const updateEventMutation = useMutation({
-    mutationFn: async ({ id, ...eventData }: Event) => {
+    mutationFn: async (eventData: Partial<CalendarEvent> & { id: number }) => {
+      const { id, ...updateData } = eventData;
       const { data, error } = await supabase
         .from("calendar_events")
-        .update(eventData)
+        .update(updateData)
         .eq("id", id)
         .select()
         .single();
@@ -190,26 +235,36 @@ const Calendar = () => {
     },
   });
 
-  const handleAddEvent = (eventData: { title: string; date: string; company: string }) => {
+  const handleAddEvent = (eventData: Partial<CalendarEvent>) => {
     addEventMutation.mutate(eventData);
   };
 
-  const handleUpdateEvent = (eventData: { title: string; date: string; company: string }) => {
+  const handleUpdateEvent = (eventData: Partial<CalendarEvent>) => {
     if (editingEvent) {
       updateEventMutation.mutate({
-        ...editingEvent,
         ...eventData,
+        id: editingEvent.id,
       });
     }
   };
 
-  const handleEditEvent = (event: Event) => {
+  const handleEditEvent = (event: CalendarEvent) => {
     setEditingEvent(event);
     setEditDialogOpen(true);
   };
 
   const handleRemoveEvent = (id: number) => {
     removeEventMutation.mutate(id);
+  };
+
+  const getPriorityColor = (priority: string) => {
+    const priorityData = EVENT_PRIORITIES.find(p => p.value === priority);
+    return priorityData?.color || '#6B7280';
+  };
+
+  const getCategoryColor = (category: string) => {
+    const categoryData = EVENT_CATEGORIES.find(c => c.value === category);
+    return categoryData?.color || '#6B7280';
   };
 
   return (
@@ -223,9 +278,9 @@ const Calendar = () => {
           </Button>
         </div>
 
-        <EventFilters
+        <AdvancedEventFilters
           onSearchChange={setSearchTerm}
-          onFilterChange={setFilterPeriod}
+          onFilterChange={setFilters}
           onSortChange={setSortBy}
         />
 
@@ -240,41 +295,83 @@ const Calendar = () => {
                 {(date ? selectedDateEvents : filteredAndSortedEvents).map((event) => (
                   <div
                     key={event.id}
-                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                    className="border rounded-lg p-4 space-y-3"
+                    style={{ borderLeftColor: event.color, borderLeftWidth: '4px' }}
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="rounded-lg bg-blue-100 p-2">
-                        <CalendarIcon className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{event.title}</p>
-                        <div className="flex space-x-4">
-                          <p className="text-sm text-gray-500">
-                            {format(new Date(event.date), "MMMM dd, yyyy")}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {event.company}
-                          </p>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{event.title}</h3>
+                          <Badge 
+                            style={{ backgroundColor: getCategoryColor(event.category) }}
+                            className="text-white text-xs"
+                          >
+                            {EVENT_CATEGORIES.find(c => c.value === event.category)?.label}
+                          </Badge>
+                          <Badge 
+                            style={{ backgroundColor: getPriorityColor(event.priority) }}
+                            className="text-white text-xs"
+                          >
+                            {EVENT_PRIORITIES.find(p => p.value === event.priority)?.label}
+                          </Badge>
                         </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <CalendarIcon className="h-4 w-4" />
+                            {format(new Date(event.date), "MMM dd, yyyy")}
+                          </div>
+                          
+                          {!event.is_all_day && event.start_time && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {event.start_time} - {event.end_time}
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {event.company}
+                          </div>
+                          
+                          {event.recurrence_pattern && (
+                            <div className="flex items-center gap-1">
+                              <Repeat className="h-4 w-4" />
+                              {event.recurrence_pattern}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {event.description && (
+                          <p className="text-sm text-gray-700">{event.description}</p>
+                        )}
+                        
+                        {event.reminder_minutes > 0 && (
+                          <div className="flex items-center gap-1 text-sm text-blue-600">
+                            <AlertCircle className="h-4 w-4" />
+                            Reminder: {event.reminder_minutes}min before
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditEvent(event)}
-                        disabled={updateEventMutation.isPending}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleRemoveEvent(event.id)}
-                        disabled={removeEventMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditEvent(event)}
+                          disabled={updateEventMutation.isPending}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleRemoveEvent(event.id)}
+                          disabled={removeEventMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -325,17 +422,19 @@ const Calendar = () => {
           </Card>
         </div>
 
-        <EventDialog
+        <EnhancedEventDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onSave={handleAddEvent}
+          mode="add"
         />
 
-        <EditEventDialog
+        <EnhancedEventDialog
           open={editDialogOpen}
           onOpenChange={setEditDialogOpen}
           onSave={handleUpdateEvent}
           event={editingEvent}
+          mode="edit"
         />
       </div>
     </DashboardLayout>
