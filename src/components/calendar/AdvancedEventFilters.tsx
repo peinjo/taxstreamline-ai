@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, CalendarIcon, X } from "lucide-react";
 import { useState } from "react";
 import { format } from "date-fns";
+import { DateRange } from "react-day-picker";
 import { EVENT_CATEGORIES, EVENT_PRIORITIES, EVENT_STATUSES } from "@/types/calendar";
 
 interface AdvancedEventFiltersProps {
@@ -67,6 +68,14 @@ export function AdvancedEventFilters({ onSearchChange, onFilterChange, onSortCha
     if (key === 'dateRange') return value.from || value.to;
     return value && value !== 'all' && value !== '';
   }).length;
+
+  // Convert our dateRange to proper DateRange format for the calendar
+  const calendarDateRange: DateRange | undefined = filters.dateRange.from || filters.dateRange.to 
+    ? {
+        from: filters.dateRange.from,
+        to: filters.dateRange.to
+      }
+    : undefined;
 
   return (
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
@@ -191,8 +200,13 @@ export function AdvancedEventFilters({ onSearchChange, onFilterChange, onSortCha
               initialFocus
               mode="range"
               defaultMonth={filters.dateRange.from}
-              selected={filters.dateRange}
-              onSelect={(dateRange) => handleFilterChange('dateRange', dateRange || {})}
+              selected={calendarDateRange}
+              onSelect={(dateRange: DateRange | undefined) => {
+                handleFilterChange('dateRange', {
+                  from: dateRange?.from,
+                  to: dateRange?.to
+                });
+              }}
               numberOfMonths={2}
             />
           </PopoverContent>
