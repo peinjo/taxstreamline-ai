@@ -3,9 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ComplianceItem {
-  id: number;
+  id: string;
   country: string;
   requirement_type: string;
   title: string;
@@ -15,14 +18,29 @@ interface ComplianceItem {
   status: string;
 }
 
-interface ComplianceTrackerProps {
-  compliance: ComplianceItem[];
-  isLoading: boolean;
-}
+export function ComplianceTracker() {
+  const { user } = useAuth();
 
-export function ComplianceTracker({ compliance, isLoading }: ComplianceTrackerProps) {
+  const { data: compliance = [], isLoading } = useQuery({
+    queryKey: ["compliance-items-summary", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("compliance_items")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("next_due_date", { ascending: true })
+        .limit(5);
+      
+      if (error) throw error;
+      return data as ComplianceItem[];
+    },
+    enabled: !!user?.id,
+  });
+
   const getStatusIcon = (status: string, dueDate?: string) => {
-    if (status === "completed") {
+    if (status === "compliant") {
       return <CheckCircle className="h-4 w-4 text-green-600" />;
     }
     

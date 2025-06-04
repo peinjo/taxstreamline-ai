@@ -122,6 +122,136 @@ export type Database = {
           },
         ]
       }
+      compliance_attachments: {
+        Row: {
+          compliance_item_id: string | null
+          file_path: string
+          file_size: number | null
+          filename: string
+          id: string
+          mime_type: string | null
+          uploaded_at: string
+          user_id: string | null
+        }
+        Insert: {
+          compliance_item_id?: string | null
+          file_path: string
+          file_size?: number | null
+          filename: string
+          id?: string
+          mime_type?: string | null
+          uploaded_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          compliance_item_id?: string | null
+          file_path?: string
+          file_size?: number | null
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          uploaded_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_attachments_compliance_item_id_fkey"
+            columns: ["compliance_item_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_history: {
+        Row: {
+          action: string
+          compliance_item_id: string | null
+          created_at: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          old_status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          compliance_item_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          compliance_item_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_history_compliance_item_id_fkey"
+            columns: ["compliance_item_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_items: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          frequency: string
+          id: string
+          last_completed_date: string | null
+          next_due_date: string | null
+          priority: string
+          requirement_type: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          id?: string
+          last_completed_date?: string | null
+          next_due_date?: string | null
+          priority?: string
+          requirement_type: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          frequency?: string
+          id?: string
+          last_completed_date?: string | null
+          next_due_date?: string | null
+          priority?: string
+          requirement_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       compliance_rules: {
         Row: {
           created_at: string

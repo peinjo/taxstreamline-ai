@@ -1,122 +1,124 @@
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { ComplianceFilters } from "@/components/compliance/ComplianceFilters";
+import { ComplianceStats } from "@/components/compliance/ComplianceStats";
+import { ComplianceItemCard } from "@/components/compliance/ComplianceItemCard";
+import { CreateComplianceDialog } from "@/components/compliance/CreateComplianceDialog";
+import { useCompliance } from "@/hooks/useCompliance";
+import { ComplianceItem } from "@/types/compliance";
 
 const ComplianceTracker = () => {
-  const complianceData = [
-    {
-      country: "United States",
-      status: "Compliant",
-      lastUpdate: "2024-03-15",
-      nextReview: "2024-06-15",
-    },
-    {
-      country: "United Kingdom",
-      status: "Pending",
-      lastUpdate: "2024-02-28",
-      nextReview: "2024-03-31",
-    },
-    {
-      country: "Germany",
-      status: "Attention",
-      lastUpdate: "2024-03-01",
-      nextReview: "2024-03-30",
-    },
-  ];
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingItem, setEditingItem] = useState<ComplianceItem | null>(null);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "Compliant":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "Pending":
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      case "Attention":
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return null;
+  const {
+    complianceItems,
+    searchTerm,
+    setSearchTerm,
+    filters,
+    setFilters,
+    isLoading,
+    createItem,
+    updateItem,
+    deleteItem,
+    isCreating,
+    stats,
+  } = useCompliance();
+
+  const handleCreateItem = (data: Omit<ComplianceItem, 'id' | 'created_at' | 'updated_at'>) => {
+    createItem(data);
+    setShowCreateDialog(false);
+  };
+
+  const handleUpdateStatus = (id: string, status: string) => {
+    updateItem({ 
+      id, 
+      status: status as ComplianceItem['status'],
+      last_completed_date: status === 'compliant' ? new Date().toISOString() : undefined
+    });
+  };
+
+  const handleDeleteItem = (id: string) => {
+    if (confirm("Are you sure you want to delete this compliance item?")) {
+      deleteItem(id);
     }
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Compliance Tracker</h1>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 bg-gray-200 rounded animate-pulse"></div>
+            ))}
+          </div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-48 bg-gray-200 rounded animate-pulse"></div>
+            ))}
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Compliance Tracker</h1>
-          <Button className="bg-blue-500 hover:bg-blue-600">
-            Run Compliance Check
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Compliance Item
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-lg border border-green-100 bg-green-50 p-4">
-            <div className="flex items-center gap-2 text-green-700">
-              <CheckCircle className="h-5 w-5" />
-              <span>Compliant</span>
-            </div>
-            <p className="mt-2 text-3xl font-bold text-green-700">15</p>
-          </div>
+        <ComplianceStats stats={stats} />
 
-          <div className="rounded-lg border border-yellow-100 bg-yellow-50 p-4">
-            <div className="flex items-center gap-2 text-yellow-700">
-              <Clock className="h-5 w-5" />
-              <span>Pending Review</span>
-            </div>
-            <p className="mt-2 text-3xl font-bold text-yellow-700">8</p>
-          </div>
+        <div className="space-y-6">
+          <ComplianceFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
 
-          <div className="rounded-lg border border-red-100 bg-red-50 p-4">
-            <div className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              <span>Needs Attention</span>
+          {complianceItems.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-4">No compliance items found</p>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create your first compliance item
+              </Button>
             </div>
-            <p className="mt-2 text-3xl font-bold text-red-700">3</p>
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-white">
-          <div className="p-4">
-            <h2 className="text-lg font-semibold">Compliance Status by Country</h2>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>COUNTRY</TableHead>
-                <TableHead>STATUS</TableHead>
-                <TableHead>LAST UPDATE</TableHead>
-                <TableHead>NEXT REVIEW</TableHead>
-                <TableHead>ACTIONS</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {complianceData.map((row) => (
-                <TableRow key={row.country}>
-                  <TableCell>{row.country}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(row.status)}
-                      {row.status}
-                    </div>
-                  </TableCell>
-                  <TableCell>{row.lastUpdate}</TableCell>
-                  <TableCell>{row.nextReview}</TableCell>
-                  <TableCell>
-                    <Button variant="link" className="text-blue-500">
-                      View Details
-                    </Button>
-                  </TableCell>
-                </TableRow>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {complianceItems.map((item) => (
+                <ComplianceItemCard
+                  key={item.id}
+                  item={item}
+                  onEdit={setEditingItem}
+                  onDelete={handleDeleteItem}
+                  onUpdateStatus={handleUpdateStatus}
+                />
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          )}
         </div>
+
+        <CreateComplianceDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          onSubmit={handleCreateItem}
+          isLoading={isCreating}
+        />
       </div>
     </DashboardLayout>
   );
