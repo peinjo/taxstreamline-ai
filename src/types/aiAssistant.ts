@@ -14,6 +14,7 @@ export interface AIActionContext {
   user: any;
   queryClient: any;
   currentRoute?: string;
+  conversationHistory?: ConversationMessage[];
 }
 
 export interface AIActionResult {
@@ -22,6 +23,7 @@ export interface AIActionResult {
   data?: any;
   requiresConfirmation?: boolean;
   confirmationData?: any;
+  suggestedActions?: string[];
 }
 
 export interface ConversationMessage {
@@ -29,4 +31,24 @@ export interface ConversationMessage {
   content: string;
   timestamp: string;
   actionResult?: AIActionResult;
+  metadata?: {
+    tokens?: number;
+    model?: string;
+    executionTime?: number;
+  };
+}
+
+export interface AIAssistantConfig {
+  maxHistoryLength: number;
+  enableContextAwareness: boolean;
+  enableSuggestions: boolean;
+  retryAttempts: number;
+}
+
+export interface ActionMetrics {
+  actionName: string;
+  executionCount: number;
+  successRate: number;
+  averageExecutionTime: number;
+  lastUsed: string;
 }

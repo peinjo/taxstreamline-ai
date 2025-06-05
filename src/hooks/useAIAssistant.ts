@@ -1,58 +1,98 @@
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { actionRegistry } from "@/services/aiActionRegistry";
 import { ConversationMessage, AIActionResult } from "@/types/aiAssistant";
 import { toast } from "sonner";
+import { useNavigate, useLocation } from "react-router-dom";
 import OpenAI from "openai";
 
 export function useAIAssistant() {
   const [messages, setMessages] = useState<ConversationMessage[]>([
     {
       role: "assistant",
-      content: `Hello! I'm your enhanced AI assistant. I can help you with:
+      content: `Hello! I'm your enhanced AI assistant with expanded capabilities. I can help you with:
 
-• **Calendar Management** - Create events, schedule meetings
-• **Compliance Tracking** - Create items, update statuses, get summaries  
-• **Navigation** - Move between different sections of the app
-• **Information Retrieval** - Get summaries and insights from your data
+• **Calendar Management** - Create events, check upcoming schedules, set reminders
+• **Compliance Tracking** - Create items, update statuses, get detailed summaries  
+• **Tax Management** - Create calculations, search documents, manage filings
+• **Document Management** - Search files, organize documents, track uploads
+• **Navigation** - Move between different sections seamlessly
+• **Analytics & Insights** - Get dashboard metrics, compliance summaries, and trends
 
-Try natural language commands like:
-- "Create a calendar event for quarterly review on March 31st"
-- "Add a compliance item for VAT filing in Germany"
-- "Show me a summary of overdue compliance items"
-- "Navigate to the compliance page"`,
+Try commands like:
+- "Create a quarterly review meeting for next Friday"
+- "Show me all overdue compliance items for Germany"
+- "What are my upcoming deadlines this week?"
+- "Search for VAT documents from 2024"
+- "Get me a summary of all my compliance items"
+- "Navigate to the tax calculator"`,
       timestamp: new Date().toISOString()
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingConfirmation, setPendingConfirmation] = useState<{
-    actionName: string;
-    params: any;
-    message: string;
-  } | null>(null);
+  const [conversationContext, setConversationContext] = useState<any[]>([]);
 
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
 
-  const executeAction = async (functionCall: any): Promise<AIActionResult> => {
+  const executeAction = useCallback(async (functionCall: any): Promise<AIActionResult> => {
     const actionName = functionCall.name;
     const params = JSON.parse(functionCall.arguments || "{}");
 
     console.log(`Executing action: ${actionName}`, params);
 
-    return await actionRegistry.executeAction(actionName, params, {
+    const result = await actionRegistry.executeAction(actionName, params, {
       user,
       queryClient,
-      currentRoute: window.location.pathname
+      currentRoute: location.pathname
     });
-  };
+
+    // Handle navigation requests
+    if (result.success && result.data?.navigation) {
+      navigate(result.data.navigation);
+    }
+
+    return result;
+  }, [user, queryClient, location.pathname, navigate]);
+
+  const buildContextualPrompt = useCallback(() => {
+    const currentPage = location.pathname.split('/')[1] || 'dashboard';
+    const timeContext = new Date().toLocaleString();
+    
+    return `You are an AI assistant for a comprehensive tax and compliance management application. 
+
+Current context:
+- User: ${user?.email || 'Anonymous user'}
+- Current page: ${currentPage}
+- Current time: ${timeContext}
+- Available functions: ${actionRegistry.getAllActions().length} actions
+
+Key capabilities:
+- Calendar management (creating events, checking schedules)
+- Compliance tracking (creating items, updating statuses, getting summaries)
+- Tax management (calculations, document search)
+- Document management (search, organization)
+- Navigation assistance
+- Analytics and reporting
+
+Guidelines:
+- Always try to use the appropriate function when the user requests an action
+- Be proactive in suggesting related actions
+- Provide context-aware responses based on the current page
+- If multiple actions could help, suggest the most relevant one
+- For navigation requests, use the navigate_to_page function
+- When creating items, suggest reasonable defaults for optional fields
+- Always confirm successful actions and provide next steps`;
+  }, [user, location.pathname]);
 
   const handleUserMessage = async (userMessage: string) => {
     if (!userMessage.trim() || isLoading) return;
@@ -68,37 +108,30 @@ Try natural language commands like:
 
     try {
       if (!import.meta.env.VITE_OPENAI_API_KEY) {
-        throw new Error("OpenAI API key is not configured");
+        throw new Error("OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.");
       }
+
+      // Build conversation history with context
+      const conversationHistory = [
+        {
+          role: "system" as const,
+          content: buildContextualPrompt()
+        },
+        ...conversationContext,
+        ...messages.slice(-10).map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        { role: "user" as const, content: userMessage }
+      ];
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI assistant for a tax and compliance management application. You can perform actions using the provided functions. 
-
-Key capabilities:
-- Calendar management (creating events)
-- Compliance tracking (creating items, updating statuses)
-- Information retrieval (getting summaries)
-- Navigation assistance
-
-Always try to use the appropriate function when the user requests an action. If no function matches, provide helpful information or suggestions.
-
-Current user context: ${user?.email || 'Anonymous user'}
-Current page: ${window.location.pathname}`
-          },
-          ...messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          })),
-          { role: "user", content: userMessage }
-        ],
+        messages: conversationHistory,
         functions: actionRegistry.getFunctionDefinitions(),
         function_call: "auto",
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 1500
       });
 
       const choice = response.choices[0];
@@ -115,6 +148,12 @@ Current page: ${window.location.pathname}`
         };
 
         setMessages(prev => [...prev, assistantMessage]);
+
+        // Update conversation context for better continuity
+        setConversationContext(prev => [...prev.slice(-5), {
+          role: "assistant",
+          content: `Executed ${choice.message.function_call.name} with result: ${actionResult.success ? 'success' : 'failure'}`
+        }]);
 
         if (actionResult.success) {
           toast.success("Action completed successfully");
@@ -139,6 +178,10 @@ Current page: ${window.location.pathname}`
       
       if (error.response?.status === 429) {
         errorMessage = "I'm currently at capacity. Please try again in a moment.";
+      } else if (error.response?.status === 401) {
+        errorMessage = "Authentication error. Please check your API configuration.";
+      } else if (error.message?.includes("API key")) {
+        errorMessage = "OpenAI API key is not configured. Please add your API key to continue.";
       } else if (error.message) {
         errorMessage = `Error: ${error.message}`;
       }
@@ -156,17 +199,24 @@ Current page: ${window.location.pathname}`
     }
   };
 
-  const clearConversation = () => {
+  const clearConversation = useCallback(() => {
     setMessages([messages[0]]); // Keep the initial greeting
-    setPendingConfirmation(null);
-  };
+    setConversationContext([]);
+  }, [messages]);
+
+  const retryLastAction = useCallback(async () => {
+    const lastUserMessage = messages.filter(m => m.role === "user").pop();
+    if (lastUserMessage) {
+      await handleUserMessage(lastUserMessage.content);
+    }
+  }, [messages]);
 
   return {
     messages,
     isLoading,
-    pendingConfirmation,
     handleUserMessage,
     clearConversation,
+    retryLastAction,
     actionRegistry
   };
 }

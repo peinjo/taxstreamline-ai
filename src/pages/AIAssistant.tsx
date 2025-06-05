@@ -2,16 +2,23 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bot, Share2, Send, Trash2, Zap } from "lucide-react";
+import { Bot, Share2, Send, Trash2, Zap, RefreshCw, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useAIAssistant } from "@/hooks/useAIAssistant";
 import { format } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
 
 const AIAssistant = () => {
   const [input, setInput] = useState("");
-  const { messages, isLoading, handleUserMessage, clearConversation } = useAIAssistant();
+  const { 
+    messages, 
+    isLoading, 
+    handleUserMessage, 
+    clearConversation, 
+    retryLastAction 
+  } = useAIAssistant();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,19 +33,28 @@ const AIAssistant = () => {
     if (!actionResult) return null;
 
     const variant = actionResult.success ? "default" : "destructive";
-    const icon = actionResult.success ? <Zap className="h-3 w-3" /> : null;
+    const icon = actionResult.success ? 
+      <CheckCircle className="h-3 w-3" /> : 
+      <AlertCircle className="h-3 w-3" />;
 
     return (
       <Badge variant={variant} className="ml-2 text-xs">
         {icon}
-        Action {actionResult.success ? "Completed" : "Failed"}
+        {actionResult.success ? "Completed" : "Failed"}
       </Badge>
     );
   };
 
+  const quickActions = [
+    { label: "Show upcoming events", command: "Show me my upcoming events this week" },
+    { label: "Compliance summary", command: "Get me a summary of all my compliance items" },
+    { label: "Dashboard metrics", command: "Show me my dashboard metrics" },
+    { label: "Search documents", command: "Search for tax documents" }
+  ];
+
   return (
     <DashboardLayout>
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bot className="h-8 w-8 text-blue-500" />
@@ -49,17 +65,48 @@ const AIAssistant = () => {
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={clearConversation}
-            className="flex items-center gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Clear Chat
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={retryLastAction}
+              className="flex items-center gap-2"
+              disabled={isLoading}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Retry
+            </Button>
+            <Button
+              variant="outline"
+              onClick={clearConversation}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear Chat
+            </Button>
+          </div>
         </div>
 
-        <div className="flex h-[calc(100vh-12rem)] flex-col rounded-lg border bg-white">
+        {/* Quick Actions */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <h3 className="text-sm font-medium mb-3">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {quickActions.map((action, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInput(action.command)}
+                  className="text-xs h-auto py-2 px-3"
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex h-[calc(100vh-16rem)] flex-col rounded-lg border bg-white">
           <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
               {messages.map((message, index) => (
@@ -70,17 +117,20 @@ const AIAssistant = () => {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-lg p-4 ${
+                    className={`max-w-[85%] rounded-lg p-4 ${
                       message.role === "assistant"
                         ? "bg-gray-50 border"
                         : "bg-blue-500 text-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <p className="whitespace-pre-wrap flex-1">{message.content}</p>
+                      <div className="flex-1">
+                        <p className="whitespace-pre-wrap">{message.content}</p>
+                      </div>
                       {getActionBadge(message.actionResult)}
                     </div>
-                    <div className="mt-2 text-xs opacity-70">
+                    <div className="mt-2 flex items-center gap-2 text-xs opacity-70">
+                      <Clock className="h-3 w-3" />
                       {format(new Date(message.timestamp), "HH:mm")}
                     </div>
                   </div>
@@ -88,10 +138,10 @@ const AIAssistant = () => {
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-50 border rounded-lg p-4 max-w-[80%]">
+                  <div className="bg-gray-50 border rounded-lg p-4 max-w-[85%]">
                     <div className="flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                      <span className="text-sm text-gray-600">Processing...</span>
+                      <span className="text-sm text-gray-600">Processing your request...</span>
                     </div>
                   </div>
                 </div>
@@ -113,7 +163,7 @@ const AIAssistant = () => {
               <div className="flex flex-1 items-center gap-2 rounded-lg border bg-white">
                 <Input
                   className="border-0 focus-visible:ring-0"
-                  placeholder="Ask me to create events, manage compliance, get summaries, or navigate..."
+                  placeholder="Ask me to create events, manage compliance, get summaries, search documents, or navigate..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   disabled={isLoading}
@@ -129,7 +179,7 @@ const AIAssistant = () => {
               </div>
             </form>
             <div className="mt-2 text-xs text-muted-foreground">
-              Tip: Try "Create a compliance item for VAT filing in Germany" or "Show me overdue items"
+              💡 Try: "Create a tax deadline reminder for March 31st" or "Show me overdue compliance items" or "Get dashboard metrics"
             </div>
           </div>
         </div>
