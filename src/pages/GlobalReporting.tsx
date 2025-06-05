@@ -92,7 +92,7 @@ const GlobalReporting = () => {
           </TabsContent>
 
           <TabsContent value="compliance" className="space-y-6">
-            <ComplianceTracker compliance={compliance} isLoading={isLoading} />
+            <ComplianceTracker />
           </TabsContent>
 
           <TabsContent value="workflows" className="space-y-6">
