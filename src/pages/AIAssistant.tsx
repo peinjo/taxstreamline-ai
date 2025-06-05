@@ -1,44 +1,17 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bot, Share2, Send } from "lucide-react";
+import { Bot, Share2, Send, Trash2, Zap } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import OpenAI from "openai";
-import { executeAICommand } from "@/utils/aiCommands";
-import { useQueryClient } from "@tanstack/react-query";
-
-interface Message {
-  role: "assistant" | "user";
-  content: string;
-}
+import { Badge } from "@/components/ui/badge";
+import { useAIAssistant } from "@/hooks/useAIAssistant";
+import { format } from "date-fns";
 
 const AIAssistant = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "assistant",
-      content: `Hello! I'm your AI assistant. I can help you with:
-
-- Creating and managing calendar events
-- Handling transfer pricing documentation
-- Managing compliance tasks
-- And more!
-
-Try commands like:
-- "Add a calendar event titled 'Quarterly Review' on March 31, 2024"
-- "Create a new transfer pricing document"
-`,
-    },
-  ]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const queryClient = useQueryClient();
-
-  const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true,
-  });
+  const { messages, isLoading, handleUserMessage, clearConversation } = useAIAssistant();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,77 +19,44 @@ Try commands like:
 
     const userMessage = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
-    setIsLoading(true);
+    await handleUserMessage(userMessage);
+  };
 
-    try {
-      // First, try to execute the command
-      const commandResult = await executeAICommand(userMessage, queryClient);
-      
-      if (commandResult.success) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: commandResult.message },
-        ]);
-        toast.success(commandResult.message);
-      } else {
-        // If command fails, use OpenAI for general response
-        if (!import.meta.env.VITE_OPENAI_API_KEY) {
-          throw new Error("OpenAI API key is not configured");
-        }
+  const getActionBadge = (actionResult: any) => {
+    if (!actionResult) return null;
 
-        const response = await openai.chat.completions.create({
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content: "You are a knowledgeable tax assistant. Focus on providing accurate, helpful information about tax-related matters, transfer pricing, compliance, and financial reporting.",
-            },
-            ...messages.map(msg => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-            { role: "user", content: userMessage },
-          ],
-          temperature: 0.7,
-          max_tokens: 1000,
-        });
+    const variant = actionResult.success ? "default" : "destructive";
+    const icon = actionResult.success ? <Zap className="h-3 w-3" /> : null;
 
-        const assistantMessage = response.choices[0]?.message?.content;
-        
-        if (assistantMessage) {
-          setMessages((prev) => [
-            ...prev,
-            { role: "assistant", content: assistantMessage },
-          ]);
-        } else {
-          throw new Error("No response from assistant");
-        }
-      }
-    } catch (error: any) {
-      console.error("AI Assistant Error:", error);
-      let errorMessage = "Failed to process your request. Please try again.";
-      
-      if (error.response?.status === 429) {
-        errorMessage = "API rate limit exceeded. Please try again later.";
-      } else if (error.response) {
-        errorMessage = `Error: ${error.response.data?.error?.message || error.message}`;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+    return (
+      <Badge variant={variant} className="ml-2 text-xs">
+        {icon}
+        Action {actionResult.success ? "Completed" : "Failed"}
+      </Badge>
+    );
   };
 
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-4xl">
-        <div className="mb-8 flex items-center gap-2">
-          <Bot className="h-8 w-8 text-blue-500" />
-          <h1 className="text-2xl font-bold">AI Tax Assistant</h1>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bot className="h-8 w-8 text-blue-500" />
+            <div>
+              <h1 className="text-2xl font-bold">Enhanced AI Assistant</h1>
+              <p className="text-sm text-muted-foreground">
+                Your intelligent assistant for tax, compliance, and workflow management
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            onClick={clearConversation}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Clear Chat
+          </Button>
         </div>
 
         <div className="flex h-[calc(100vh-12rem)] flex-col rounded-lg border bg-white">
@@ -132,14 +72,30 @@ Try commands like:
                   <div
                     className={`max-w-[80%] rounded-lg p-4 ${
                       message.role === "assistant"
-                        ? "bg-gray-50"
+                        ? "bg-gray-50 border"
                         : "bg-blue-500 text-white"
                     }`}
                   >
-                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="whitespace-pre-wrap flex-1">{message.content}</p>
+                      {getActionBadge(message.actionResult)}
+                    </div>
+                    <div className="mt-2 text-xs opacity-70">
+                      {format(new Date(message.timestamp), "HH:mm")}
+                    </div>
                   </div>
                 </div>
               ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-50 border rounded-lg p-4 max-w-[80%]">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                      <span className="text-sm text-gray-600">Processing...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </ScrollArea>
 
@@ -157,7 +113,7 @@ Try commands like:
               <div className="flex flex-1 items-center gap-2 rounded-lg border bg-white">
                 <Input
                   className="border-0 focus-visible:ring-0"
-                  placeholder="Type your message..."
+                  placeholder="Ask me to create events, manage compliance, get summaries, or navigate..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   disabled={isLoading}
@@ -166,12 +122,15 @@ Try commands like:
                   size="icon"
                   className="mr-2 shrink-0"
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !input.trim()}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
             </form>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Tip: Try "Create a compliance item for VAT filing in Germany" or "Show me overdue items"
+            </div>
           </div>
         </div>
       </div>
