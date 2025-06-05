@@ -156,7 +156,7 @@ actionRegistry.register({
     required: ["id", "status"]
   },
   handler: async (params, context) => {
-    const updateData = {
+    const updateData: any = {
       status: params.status,
       updated_at: new Date().toISOString()
     };
