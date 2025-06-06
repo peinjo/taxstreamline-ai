@@ -7,6 +7,8 @@ import { documentActions } from "./aiActions/documentActions";
 import { navigationActions } from "./aiActions/navigationActions";
 import { analyticsActions } from "./aiActions/analyticsActions";
 import { workflowActions } from "./aiActions/workflowActions";
+import { automationActions } from "./aiActions/automationActions";
+import { integrationActions } from "./aiActions/integrationActions";
 
 class AIActionRegistry extends BaseActionRegistry {
   constructor() {
@@ -35,6 +37,12 @@ class AIActionRegistry extends BaseActionRegistry {
 
     // Register workflow actions
     workflowActions.forEach(action => this.register(action));
+
+    // Register Phase 4: automation actions
+    automationActions.forEach(action => this.register(action));
+
+    // Register Phase 4: integration actions
+    integrationActions.forEach(action => this.register(action));
   }
 }
 

@@ -52,8 +52,18 @@ const AIAssistant = () => {
     { label: "Search documents", command: "Search for tax documents" },
     { label: "Workflow templates", command: "Show me available workflow templates" },
     { label: "Execute compliance workflow", command: "Execute the compliance reminder workflow" },
-    { label: "Create custom workflow", command: "Create a new workflow for monthly reporting" },
-    { label: "Workflow status", command: "Check my workflow execution status" }
+    // Phase 4: Smart Automation
+    { label: "Setup notifications", command: "Set up automated compliance deadline notifications" },
+    { label: "Client onboarding", command: "Create workflow for new client onboarding" },
+    { label: "Recurring tasks", command: "Generate recurring task template for monthly tax review" },
+    // Phase 4: Data Analysis
+    { label: "Compliance trends", command: "Analyze compliance performance trends" },
+    { label: "Tax opportunities", command: "Identify tax optimization opportunities" },
+    { label: "Risk assessment", command: "Generate comprehensive risk assessment report" },
+    // Phase 4: Integration & Export
+    { label: "Export to Excel", command: "Export compliance data to Excel" },
+    { label: "Sync calendar", command: "Sync calendar events with external systems" },
+    { label: "API report", command: "Generate API usage report for third-party tools" }
   ];
 
   return (
