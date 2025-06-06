@@ -59,8 +59,7 @@ const workflowTemplates: WorkflowTemplate[] = [
           }
         }
       ],
-      isActive: true,
-      executionCount: 0
+      isActive: true
     },
     tags: ["compliance", "reminders", "automation"]
   },
@@ -100,8 +99,7 @@ const workflowTemplates: WorkflowTemplate[] = [
           }
         }
       ],
-      isActive: true,
-      executionCount: 0
+      isActive: true
     },
     tags: ["tax", "reporting", "monthly"]
   }
@@ -187,7 +185,8 @@ export const workflowActions: AIAction[] = [
         ...template.workflow,
         id: `workflow_${Date.now()}`,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        executionCount: 0
       };
 
       try {
