@@ -52,7 +52,7 @@ export const automationActions: AIAction[] = [
             id: "send_notification",
             type: "notification" as const,
             notification: {
-              type: "toast",
+              type: "toast" as const,
               message: `📋 You have upcoming compliance deadlines in the next ${leadTimeDays} days. Check your compliance dashboard for details.`
             }
           }
@@ -143,7 +143,7 @@ export const automationActions: AIAction[] = [
             id: "send_welcome_notification",
             type: "notification" as const,
             notification: {
-              type: "toast",
+              type: "toast" as const,
               message: `🎉 Client onboarding workflow created for ${params.client_name}. Welcome meeting scheduled and initial assessments set up.`
             }
           }
@@ -233,7 +233,7 @@ export const automationActions: AIAction[] = [
             id: "final_notification",
             type: "notification" as const,
             notification: {
-              type: "toast",
+              type: "toast" as const,
               message: `✅ ${template.title} completed successfully.`
             }
           }
