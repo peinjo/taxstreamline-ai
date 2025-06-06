@@ -49,7 +49,11 @@ const AIAssistant = () => {
     { label: "Show upcoming events", command: "Show me my upcoming events this week" },
     { label: "Compliance summary", command: "Get me a summary of all my compliance items" },
     { label: "Dashboard metrics", command: "Show me my dashboard metrics" },
-    { label: "Search documents", command: "Search for tax documents" }
+    { label: "Search documents", command: "Search for tax documents" },
+    { label: "Workflow templates", command: "Show me available workflow templates" },
+    { label: "Execute compliance workflow", command: "Execute the compliance reminder workflow" },
+    { label: "Create custom workflow", command: "Create a new workflow for monthly reporting" },
+    { label: "Workflow status", command: "Check my workflow execution status" }
   ];
 
   return (

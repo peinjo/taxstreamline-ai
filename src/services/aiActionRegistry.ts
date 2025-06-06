@@ -6,6 +6,7 @@ import { taxActions } from "./aiActions/taxActions";
 import { documentActions } from "./aiActions/documentActions";
 import { navigationActions } from "./aiActions/navigationActions";
 import { analyticsActions } from "./aiActions/analyticsActions";
+import { workflowActions } from "./aiActions/workflowActions";
 
 class AIActionRegistry extends BaseActionRegistry {
   constructor() {
@@ -31,6 +32,9 @@ class AIActionRegistry extends BaseActionRegistry {
     
     // Register analytics actions
     analyticsActions.forEach(action => this.register(action));
+
+    // Register workflow actions
+    workflowActions.forEach(action => this.register(action));
   }
 }
 
