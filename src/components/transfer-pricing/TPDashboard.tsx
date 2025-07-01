@@ -100,7 +100,14 @@ const TPDashboard: React.FC<TPDashboardProps> = ({
       });
 
       setUpcomingDeadlines(deadlines || []);
-      setRiskAssessments(risks || []);
+      
+      // Convert Json types to Record<string, any> for risk assessments
+      const typedRisks: TPRiskAssessment[] = (risks || []).map(risk => ({
+        ...risk,
+        risk_factors: typeof risk.risk_factors === 'object' ? risk.risk_factors as Record<string, any> : {}
+      }));
+      
+      setRiskAssessments(typedRisks);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Failed to load dashboard data');

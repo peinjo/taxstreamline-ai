@@ -1,4 +1,5 @@
 
+
 export type UserRole = 'admin' | 'consultant' | 'client';
 export type DocumentType = 'master' | 'local' | 'supporting';
 export type DocumentStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected';
@@ -9,6 +10,25 @@ export type TPEntityType = 'parent' | 'subsidiary' | 'branch' | 'partnership' | 
 export type TPTransactionType = 'tangible_goods' | 'intangible_property' | 'services' | 'financial_transactions' | 'other';
 export type TPRiskLevel = 'low' | 'medium' | 'high' | 'critical';
 export type TPComplianceStatus = 'compliant' | 'pending' | 'overdue' | 'not_applicable';
+
+// Missing types for DocumentWizard
+export interface EntityDetails {
+  companyName: string;
+  structure: string;
+  ownership: string;
+  functions: string[];
+  risks: string[];
+  assets: string[];
+}
+
+export interface ControlledTransaction {
+  type: string;
+  parties: string[];
+  amount: number;
+  currency: string;
+  pricingMethod: PricingMethod;
+  description: string;
+}
 
 export interface TPEntity {
   id: string;
@@ -121,3 +141,4 @@ export interface TPDashboardMetrics {
     timestamp: string;
   }>;
 }
+

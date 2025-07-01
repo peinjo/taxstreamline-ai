@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,15 @@ const EntityManagement: React.FC<EntityManagementProps> = ({ onEntitySelect }) =
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setEntities(data || []);
+      
+      // Convert Json types to Record<string, any>
+      const typedEntities: TPEntity[] = (data || []).map(entity => ({
+        ...entity,
+        functional_analysis: typeof entity.functional_analysis === 'object' ? entity.functional_analysis as Record<string, any> : {},
+        financial_data: typeof entity.financial_data === 'object' ? entity.financial_data as Record<string, any> : {}
+      }));
+      
+      setEntities(typedEntities);
     } catch (error) {
       console.error('Error fetching entities:', error);
       toast.error('Failed to load entities');

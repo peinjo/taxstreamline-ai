@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -70,8 +71,8 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       const typedDocuments: TPDocument[] = (data || []).map(doc => ({
         id: doc.id,
         title: doc.title,
-        type: doc.type,
-        status: doc.status,
+        type: doc.type as 'master' | 'local',
+        status: doc.status as 'draft' | 'pending_approval' | 'approved' | 'rejected',
         content: doc.content,
         company_id: doc.company_id,
         created_by: doc.created_by,
@@ -106,7 +107,15 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setEntities(data || []);
+      
+      // Convert Json types to Record<string, any>
+      const typedEntities: TPEntity[] = (data || []).map(entity => ({
+        ...entity,
+        functional_analysis: typeof entity.functional_analysis === 'object' ? entity.functional_analysis as Record<string, any> : {},
+        financial_data: typeof entity.financial_data === 'object' ? entity.financial_data as Record<string, any> : {}
+      }));
+      
+      setEntities(typedEntities);
     } catch (error: any) {
       console.error("Error fetching entities:", error);
       toast.error(error.message);
@@ -124,7 +133,15 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         .eq('user_id', user.id);
 
       if (error) throw error;
-      setTransactions(data || []);
+      
+      // Convert Json types and fix enum mismatches
+      const typedTransactions: TPTransaction[] = (data || []).map(transaction => ({
+        ...transaction,
+        pricing_method: transaction.pricing_method === 'RPM' ? 'CPM' : transaction.pricing_method,
+        arm_length_range: typeof transaction.arm_length_range === 'object' ? transaction.arm_length_range as Record<string, any> : {}
+      }));
+      
+      setTransactions(typedTransactions);
     } catch (error: any) {
       console.error("Error fetching transactions:", error);
       toast.error(error.message);
@@ -180,8 +197,8 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       const typedDocument: TPDocument = {
         id: data.id,
         title: data.title,
-        type: data.type,
-        status: data.status,
+        type: data.type as 'master' | 'local',
+        status: data.status as 'draft' | 'pending_approval' | 'approved' | 'rejected',
         content: data.content,
         company_id: data.company_id,
         created_by: data.created_by,
@@ -279,8 +296,14 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       if (error) throw error;
 
-      setEntities(prev => [...prev, data]);
-      return data;
+      const typedEntity: TPEntity = {
+        ...data,
+        functional_analysis: typeof data.functional_analysis === 'object' ? data.functional_analysis as Record<string, any> : {},
+        financial_data: typeof data.financial_data === 'object' ? data.financial_data as Record<string, any> : {}
+      };
+
+      setEntities(prev => [...prev, typedEntity]);
+      return typedEntity;
     } catch (error: any) {
       console.error("Error creating entity:", error);
       toast.error(error.message);
