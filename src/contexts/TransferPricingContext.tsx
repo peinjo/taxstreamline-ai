@@ -71,8 +71,8 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       const typedDocuments: TPDocument[] = (data || []).map(doc => ({
         id: doc.id,
         title: doc.title,
-        type: doc.type as 'master' | 'local',
-        status: doc.status as 'draft' | 'pending_approval' | 'approved' | 'rejected',
+        type: doc.type as 'master' | 'local' | 'supporting',
+        status: mapDatabaseStatusToDocumentStatus(doc.status),
         content: doc.content,
         company_id: doc.company_id,
         created_by: doc.created_by,
@@ -93,6 +93,25 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       toast.error(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to map database status to our DocumentStatus type
+  const mapDatabaseStatusToDocumentStatus = (dbStatus: string) => {
+    switch (dbStatus) {
+      case 'draft': return 'draft';
+      case 'published': return 'approved';
+      default: return 'draft';
+    }
+  };
+
+  // Helper function to map our DocumentStatus to database status
+  const mapDocumentStatusToDatabase = (status: string) => {
+    switch (status) {
+      case 'approved': return 'published';
+      case 'rejected': return 'draft';
+      case 'pending_approval': return 'draft';
+      default: return 'draft';
     }
   };
 
@@ -174,7 +193,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       const newDocument = {
         title: document.title,
         type: document.type,
-        status: document.status || 'draft',
+        status: mapDocumentStatusToDatabase(document.status || 'draft'),
         content: document.content,
         company_id: document.company_id,
         created_by: user.id,
@@ -188,7 +207,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       const { data, error } = await supabase
         .from('transfer_pricing_documents')
-        .insert([newDocument])
+        .insert(newDocument)
         .select()
         .single();
 
@@ -197,8 +216,8 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       const typedDocument: TPDocument = {
         id: data.id,
         title: data.title,
-        type: data.type as 'master' | 'local',
-        status: data.status as 'draft' | 'pending_approval' | 'approved' | 'rejected',
+        type: data.type as 'master' | 'local' | 'supporting',
+        status: mapDatabaseStatusToDocumentStatus(data.status),
         content: data.content,
         company_id: data.company_id,
         created_by: data.created_by,
@@ -227,7 +246,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       const updatePayload = {
         title: updates.title,
         type: updates.type,
-        status: updates.status,
+        status: updates.status ? mapDocumentStatusToDatabase(updates.status) : undefined,
         content: updates.content,
         company_id: updates.company_id,
         version: updates.version,
@@ -282,7 +301,11 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       if (!user) throw new Error("No authenticated user");
 
       const newEntity = {
-        ...entity,
+        name: entity.name!,
+        entity_type: entity.entity_type!,
+        country_code: entity.country_code!,
+        tax_id: entity.tax_id,
+        business_description: entity.business_description,
         user_id: user.id,
         functional_analysis: entity.functional_analysis || {},
         financial_data: entity.financial_data || {},
@@ -290,7 +313,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       const { data, error } = await supabase
         .from('tp_entities')
-        .insert([newEntity])
+        .insert(newEntity)
         .select()
         .single();
 
