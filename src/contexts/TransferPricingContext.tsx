@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -106,7 +105,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
   };
 
   // Helper function to map our DocumentStatus to database status
-  const mapDocumentStatusToDatabase = (status: string) => {
+  const mapDocumentStatusToDatabase = (status: string): 'draft' | 'published' => {
     switch (status) {
       case 'approved': return 'published';
       case 'rejected': return 'draft';
