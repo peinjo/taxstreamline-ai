@@ -114,6 +114,16 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
     }
   };
 
+  // Helper function to map our DocumentType to database type
+  const mapDocumentTypeToDatabase = (type: DocumentType): 'master' | 'local' => {
+    switch (type) {
+      case 'supporting': return 'local'; // Map supporting to local for database
+      case 'master': return 'master';
+      case 'local': return 'local';
+      default: return 'local';
+    }
+  };
+
   const fetchEntities = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -191,7 +201,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       const newDocument = {
         title: document.title,
-        type: document.type,
+        type: mapDocumentTypeToDatabase(document.type || 'local'),
         status: mapDocumentStatusToDatabase(document.status || 'draft'),
         content: document.content,
         company_id: document.company_id,
@@ -244,7 +254,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
     try {
       const updatePayload = {
         title: updates.title,
-        type: updates.type,
+        type: updates.type ? mapDocumentTypeToDatabase(updates.type) : undefined,
         status: updates.status ? mapDocumentStatusToDatabase(updates.status) : undefined,
         content: updates.content,
         company_id: updates.company_id,
