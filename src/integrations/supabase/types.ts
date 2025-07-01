@@ -1083,14 +1083,296 @@ export type Database = {
         }
         Relationships: []
       }
+      tp_benchmarks: {
+        Row: {
+          comparable_name: string
+          country: string
+          created_at: string | null
+          financial_data: Json
+          id: string
+          industry: string | null
+          reliability_score: number | null
+          search_criteria: Json | null
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          comparable_name: string
+          country: string
+          created_at?: string | null
+          financial_data: Json
+          id?: string
+          industry?: string | null
+          reliability_score?: number | null
+          search_criteria?: Json | null
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          comparable_name?: string
+          country?: string
+          created_at?: string | null
+          financial_data?: Json
+          id?: string
+          industry?: string | null
+          reliability_score?: number | null
+          search_criteria?: Json | null
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_benchmarks_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "tp_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tp_deadlines: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          deadline_type: string
+          description: string | null
+          due_date: string
+          id: string
+          notification_sent: boolean | null
+          status: Database["public"]["Enums"]["tp_compliance_status"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          deadline_type: string
+          description?: string | null
+          due_date: string
+          id?: string
+          notification_sent?: boolean | null
+          status?: Database["public"]["Enums"]["tp_compliance_status"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          deadline_type?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          notification_sent?: boolean | null
+          status?: Database["public"]["Enums"]["tp_compliance_status"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tp_entities: {
+        Row: {
+          business_description: string | null
+          country_code: string
+          created_at: string | null
+          entity_type: Database["public"]["Enums"]["tp_entity_type"]
+          financial_data: Json | null
+          functional_analysis: Json | null
+          id: string
+          name: string
+          tax_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_description?: string | null
+          country_code: string
+          created_at?: string | null
+          entity_type: Database["public"]["Enums"]["tp_entity_type"]
+          financial_data?: Json | null
+          functional_analysis?: Json | null
+          id?: string
+          name: string
+          tax_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_description?: string | null
+          country_code?: string
+          created_at?: string | null
+          entity_type?: Database["public"]["Enums"]["tp_entity_type"]
+          financial_data?: Json | null
+          functional_analysis?: Json | null
+          id?: string
+          name?: string
+          tax_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tp_risk_assessments: {
+        Row: {
+          assessment_date: string | null
+          created_at: string | null
+          entity_id: string | null
+          id: string
+          recommendations: string | null
+          risk_factors: Json | null
+          risk_level: Database["public"]["Enums"]["tp_risk_level"]
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          assessment_date?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          recommendations?: string | null
+          risk_factors?: Json | null
+          risk_level: Database["public"]["Enums"]["tp_risk_level"]
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          assessment_date?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          recommendations?: string | null
+          risk_factors?: Json | null
+          risk_level?: Database["public"]["Enums"]["tp_risk_level"]
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_risk_assessments_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tp_risk_assessments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "tp_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tp_templates: {
+        Row: {
+          content: Json
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          jurisdiction: string
+          name: string
+          template_type: string
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          content: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          jurisdiction: string
+          name: string
+          template_type: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          jurisdiction?: string
+          name?: string
+          template_type?: string
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: []
+      }
+      tp_transactions: {
+        Row: {
+          amount: number | null
+          arm_length_range: Json | null
+          created_at: string | null
+          currency: string | null
+          description: string
+          documentation_status: string | null
+          entity_id: string | null
+          id: string
+          pricing_method:
+            | Database["public"]["Enums"]["tp_pricing_method"]
+            | null
+          transaction_type: Database["public"]["Enums"]["tp_transaction_type"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          arm_length_range?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          description: string
+          documentation_status?: string | null
+          entity_id?: string | null
+          id?: string
+          pricing_method?:
+            | Database["public"]["Enums"]["tp_pricing_method"]
+            | null
+          transaction_type: Database["public"]["Enums"]["tp_transaction_type"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          arm_length_range?: Json | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string
+          documentation_status?: string | null
+          entity_id?: string | null
+          id?: string
+          pricing_method?:
+            | Database["public"]["Enums"]["tp_pricing_method"]
+            | null
+          transaction_type?: Database["public"]["Enums"]["tp_transaction_type"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_transactions_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transfer_pricing_documents: {
         Row: {
           company_id: string | null
+          compliance_status:
+            | Database["public"]["Enums"]["tp_compliance_status"]
+            | null
           content: Json | null
           created_at: string
           created_by: string | null
+          entity_id: string | null
           id: string
+          jurisdiction: string | null
+          last_reviewed_at: string | null
+          risk_level: Database["public"]["Enums"]["tp_risk_level"] | null
           status: Database["public"]["Enums"]["tp_document_status"]
+          template_id: string | null
           title: string
           type: Database["public"]["Enums"]["tp_document_type"]
           updated_at: string
@@ -1098,11 +1380,19 @@ export type Database = {
         }
         Insert: {
           company_id?: string | null
+          compliance_status?:
+            | Database["public"]["Enums"]["tp_compliance_status"]
+            | null
           content?: Json | null
           created_at?: string
           created_by?: string | null
+          entity_id?: string | null
           id?: string
+          jurisdiction?: string | null
+          last_reviewed_at?: string | null
+          risk_level?: Database["public"]["Enums"]["tp_risk_level"] | null
           status?: Database["public"]["Enums"]["tp_document_status"]
+          template_id?: string | null
           title: string
           type: Database["public"]["Enums"]["tp_document_type"]
           updated_at?: string
@@ -1110,17 +1400,40 @@ export type Database = {
         }
         Update: {
           company_id?: string | null
+          compliance_status?:
+            | Database["public"]["Enums"]["tp_compliance_status"]
+            | null
           content?: Json | null
           created_at?: string
           created_by?: string | null
+          entity_id?: string | null
           id?: string
+          jurisdiction?: string | null
+          last_reviewed_at?: string | null
+          risk_level?: Database["public"]["Enums"]["tp_risk_level"] | null
           status?: Database["public"]["Enums"]["tp_document_status"]
+          template_id?: string | null
           title?: string
           type?: Database["public"]["Enums"]["tp_document_type"]
           updated_at?: string
           version?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "transfer_pricing_documents_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_pricing_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "tp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_profiles: {
         Row: {
@@ -1202,8 +1515,27 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       document_type: "receipt" | "filing" | "statement" | "report" | "other"
+      tp_compliance_status:
+        | "compliant"
+        | "pending"
+        | "overdue"
+        | "not_applicable"
       tp_document_status: "draft" | "published"
       tp_document_type: "master" | "local"
+      tp_entity_type:
+        | "parent"
+        | "subsidiary"
+        | "branch"
+        | "partnership"
+        | "other"
+      tp_pricing_method: "CUP" | "TNMM" | "RPM" | "PSM" | "OTHER"
+      tp_risk_level: "low" | "medium" | "high" | "critical"
+      tp_transaction_type:
+        | "tangible_goods"
+        | "intangible_property"
+        | "services"
+        | "financial_transactions"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1321,8 +1653,30 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       document_type: ["receipt", "filing", "statement", "report", "other"],
+      tp_compliance_status: [
+        "compliant",
+        "pending",
+        "overdue",
+        "not_applicable",
+      ],
       tp_document_status: ["draft", "published"],
       tp_document_type: ["master", "local"],
+      tp_entity_type: [
+        "parent",
+        "subsidiary",
+        "branch",
+        "partnership",
+        "other",
+      ],
+      tp_pricing_method: ["CUP", "TNMM", "RPM", "PSM", "OTHER"],
+      tp_risk_level: ["low", "medium", "high", "critical"],
+      tp_transaction_type: [
+        "tangible_goods",
+        "intangible_property",
+        "services",
+        "financial_transactions",
+        "other",
+      ],
     },
   },
 } as const
