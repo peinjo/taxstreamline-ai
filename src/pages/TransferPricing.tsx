@@ -15,10 +15,13 @@ import { OECDCompliantDocumentWizard } from '@/components/transfer-pricing/enhan
 import { TransferPricingProvider } from '@/contexts/TransferPricingContext';
 import TPDashboard from '@/components/transfer-pricing/TPDashboard';
 import EntityManagement from '@/components/transfer-pricing/EntityManagement';
+import { BenchmarkingDashboard } from '@/components/transfer-pricing/benchmarking/BenchmarkingDashboard';
+import { RiskAssessmentEngine } from '@/components/transfer-pricing/risk-assessment/RiskAssessmentEngine';
+import { FinancialDataIntegration } from '@/components/transfer-pricing/financial-integration/FinancialDataIntegration';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TransferPricing = () => {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial">("dashboard");
   const [documentTab, setDocumentTab] = useState<"master" | "local">("master");
   
   const [documents, setDocuments] = useState<Document[]>([
@@ -164,7 +167,7 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Dashboard
@@ -176,6 +179,18 @@ const TransferPricing = () => {
               <TabsTrigger value="entities" className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
                 Entities
+              </TabsTrigger>
+              <TabsTrigger value="benchmarking" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Benchmarking
+              </TabsTrigger>
+              <TabsTrigger value="risk" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Risk Assessment
+              </TabsTrigger>
+              <TabsTrigger value="financial" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Financial Data
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
@@ -227,6 +242,18 @@ const TransferPricing = () => {
 
             <TabsContent value="entities" className="mt-6">
               <EntityManagement />
+            </TabsContent>
+
+            <TabsContent value="benchmarking" className="mt-6">
+              <BenchmarkingDashboard />
+            </TabsContent>
+
+            <TabsContent value="risk" className="mt-6">
+              <RiskAssessmentEngine />
+            </TabsContent>
+
+            <TabsContent value="financial" className="mt-6">
+              <FinancialDataIntegration />
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">

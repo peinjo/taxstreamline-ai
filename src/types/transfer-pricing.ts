@@ -3,7 +3,7 @@
 export type UserRole = 'admin' | 'consultant' | 'client';
 export type DocumentType = 'master' | 'local' | 'supporting';
 export type DocumentStatus = 'draft' | 'pending_approval' | 'approved' | 'rejected';
-export type PricingMethod = 'CUP' | 'TNMM' | 'CPM' | 'PSM' | 'OTHER';
+export type PricingMethod = 'CUP' | 'TNMM' | 'CPM' | 'PSM' | 'RPM' | 'OTHER';
 
 // Enhanced database-aligned types
 export type TPEntityType = 'parent' | 'subsidiary' | 'branch' | 'partnership' | 'other';
