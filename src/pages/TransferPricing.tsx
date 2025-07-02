@@ -11,6 +11,7 @@ import { FileUploader } from "@/components/transfer-pricing/FileUploader";
 import { ActivityLog } from "@/components/transfer-pricing/ActivityLog";
 import { DocumentList } from "@/components/transfer-pricing/DocumentList";
 import { DocumentWizard } from '@/components/transfer-pricing/DocumentWizard';
+import { OECDCompliantDocumentWizard } from '@/components/transfer-pricing/enhanced-wizard/OECDCompliantDocumentWizard';
 import { TransferPricingProvider } from '@/contexts/TransferPricingContext';
 import TPDashboard from '@/components/transfer-pricing/TPDashboard';
 import EntityManagement from '@/components/transfer-pricing/EntityManagement';
@@ -210,13 +211,17 @@ const TransferPricing = () => {
                   </button>
                 </div>
 
-                <DocumentList 
-                  documents={documents}
-                  activeTab={documentTab}
-                  onEdit={handleEditDocument}
-                  onTitleChange={handleTitleChange}
-                  onDelete={handleDeleteDocument}
-                />
+                {documentTab === "master" ? (
+                  <OECDCompliantDocumentWizard />
+                ) : (
+                  <DocumentList 
+                    documents={documents}
+                    activeTab={documentTab}
+                    onEdit={handleEditDocument}
+                    onTitleChange={handleTitleChange}
+                    onDelete={handleDeleteDocument}
+                  />
+                )}
               </div>
             </TabsContent>
 
