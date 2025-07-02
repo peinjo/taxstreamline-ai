@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TPDocument, TPEntity, TPTransaction, TPDeadline } from "@/types/transfer-pricing";
+import { TPDocument, TPEntity, TPTransaction, TPDeadline, DocumentType } from "@/types/transfer-pricing";
 
 interface TransferPricingContextType {
   documents: TPDocument[];
@@ -201,7 +201,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       const newDocument = {
         title: document.title,
-        type: mapDocumentTypeToDatabase(document.type || 'local'),
+        type: mapDocumentTypeToDatabase((document.type || 'local') as DocumentType),
         status: mapDocumentStatusToDatabase(document.status || 'draft'),
         content: document.content,
         company_id: document.company_id,
@@ -254,7 +254,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
     try {
       const updatePayload = {
         title: updates.title,
-        type: updates.type ? mapDocumentTypeToDatabase(updates.type) : undefined,
+        type: updates.type ? mapDocumentTypeToDatabase(updates.type as DocumentType) : undefined,
         status: updates.status ? mapDocumentStatusToDatabase(updates.status) : undefined,
         content: updates.content,
         company_id: updates.company_id,
