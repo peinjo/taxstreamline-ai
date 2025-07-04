@@ -18,10 +18,12 @@ import EntityManagement from '@/components/transfer-pricing/EntityManagement';
 import { BenchmarkingDashboard } from '@/components/transfer-pricing/benchmarking/BenchmarkingDashboard';
 import { RiskAssessmentEngine } from '@/components/transfer-pricing/risk-assessment/RiskAssessmentEngine';
 import { FinancialDataIntegration } from '@/components/transfer-pricing/financial-integration/FinancialDataIntegration';
+import { AutomatedComplianceTracker } from '@/components/transfer-pricing/compliance/AutomatedComplianceTracker';
+import { SmartDocumentGenerator } from '@/components/transfer-pricing/ai/SmartDocumentGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TransferPricing = () => {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai">("dashboard");
   const [documentTab, setDocumentTab] = useState<"master" | "local">("master");
   
   const [documents, setDocuments] = useState<Document[]>([
@@ -167,7 +169,7 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-9">
               <TabsTrigger value="dashboard" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 Dashboard
@@ -186,11 +188,19 @@ const TransferPricing = () => {
               </TabsTrigger>
               <TabsTrigger value="risk" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Risk Assessment
+                Risk
               </TabsTrigger>
               <TabsTrigger value="financial" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Financial Data
+                Financial
+              </TabsTrigger>
+              <TabsTrigger value="compliance" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Compliance
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                AI Tools
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
@@ -254,6 +264,14 @@ const TransferPricing = () => {
 
             <TabsContent value="financial" className="mt-6">
               <FinancialDataIntegration />
+            </TabsContent>
+
+            <TabsContent value="compliance" className="mt-6">
+              <AutomatedComplianceTracker />
+            </TabsContent>
+
+            <TabsContent value="ai" className="mt-6">
+              <SmartDocumentGenerator />
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">

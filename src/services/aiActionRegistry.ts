@@ -9,6 +9,7 @@ import { analyticsActions } from "./aiActions/analyticsActions";
 import { workflowActions } from "./aiActions/workflowActions";
 import { automationActions } from "./aiActions/automationActions";
 import { integrationActions } from "./aiActions/integrationActions";
+import { transferPricingActions } from "./aiActions/transferPricingActions";
 
 class AIActionRegistry extends BaseActionRegistry {
   constructor() {
@@ -43,6 +44,9 @@ class AIActionRegistry extends BaseActionRegistry {
 
     // Register Phase 4: integration actions
     integrationActions.forEach(action => this.register(action));
+
+    // Register transfer pricing actions
+    transferPricingActions.forEach(action => this.register(action));
   }
 }
 
