@@ -169,42 +169,42 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-9">
-              <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Dashboard
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-1">
+              <TabsTrigger value="dashboard" className="text-xs lg:text-sm">
+                <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Dashboard</span>
               </TabsTrigger>
-              <TabsTrigger value="documents" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Documents
+              <TabsTrigger value="documents" className="text-xs lg:text-sm">
+                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Documents</span>
               </TabsTrigger>
-              <TabsTrigger value="entities" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Entities
+              <TabsTrigger value="entities" className="text-xs lg:text-sm">
+                <Building2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Entities</span>
               </TabsTrigger>
-              <TabsTrigger value="benchmarking" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Benchmarking
+              <TabsTrigger value="benchmarking" className="text-xs lg:text-sm">
+                <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Benchmark</span>
               </TabsTrigger>
-              <TabsTrigger value="risk" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Risk
+              <TabsTrigger value="risk" className="text-xs lg:text-sm">
+                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Risk</span>
               </TabsTrigger>
-              <TabsTrigger value="financial" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Financial
+              <TabsTrigger value="financial" className="text-xs lg:text-sm">
+                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Financial</span>
               </TabsTrigger>
-              <TabsTrigger value="compliance" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Compliance
+              <TabsTrigger value="compliance" className="text-xs lg:text-sm">
+                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Compliance</span>
               </TabsTrigger>
-              <TabsTrigger value="ai" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                AI Tools
+              <TabsTrigger value="ai" className="text-xs lg:text-sm">
+                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">AI Tools</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Analytics
+              <TabsTrigger value="analytics" className="text-xs lg:text-sm">
+                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
             </TabsList>
 
