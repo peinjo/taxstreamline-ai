@@ -20,10 +20,12 @@ import { RiskAssessmentEngine } from '@/components/transfer-pricing/risk-assessm
 import { FinancialDataIntegration } from '@/components/transfer-pricing/financial-integration/FinancialDataIntegration';
 import { AutomatedComplianceTracker } from '@/components/transfer-pricing/compliance/AutomatedComplianceTracker';
 import { SmartDocumentGenerator } from '@/components/transfer-pricing/ai/SmartDocumentGenerator';
+import { CountryByCountryReporting } from '@/components/transfer-pricing/reporting/CountryByCountryReporting';
+import { TPOverviewDashboard } from '@/components/transfer-pricing/dashboard/TPOverviewDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TransferPricing = () => {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai" | "reporting">("dashboard");
   const [documentTab, setDocumentTab] = useState<"master" | "local">("master");
   
   const [documents, setDocuments] = useState<Document[]>([
@@ -169,7 +171,7 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-1">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-1">
               <TabsTrigger value="dashboard" className="text-xs lg:text-sm">
                 <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -206,17 +208,14 @@ const TransferPricing = () => {
                 <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                 <span className="hidden sm:inline">Analytics</span>
               </TabsTrigger>
+              <TabsTrigger value="reporting" className="text-xs lg:text-sm">
+                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">CbC Report</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="dashboard" className="mt-6">
-              <TPDashboard
-                onCreateDocument={() => {
-                  setActiveTab("documents");
-                  setIsNewDocumentDialogOpen(true);
-                }}
-                onCreateEntity={() => setActiveTab("entities")}
-                onViewCompliance={() => setActiveTab("analytics")}
-              />
+              <TPOverviewDashboard />
             </TabsContent>
 
             <TabsContent value="documents" className="mt-6">
@@ -274,12 +273,16 @@ const TransferPricing = () => {
               <SmartDocumentGenerator />
             </TabsContent>
 
+            <TabsContent value="reporting" className="mt-6">
+              <CountryByCountryReporting />
+            </TabsContent>
+
             <TabsContent value="analytics" className="mt-6">
               <div className="text-center py-12">
                 <BarChart3 className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium mb-2">Analytics Dashboard</h3>
+                <h3 className="text-lg font-medium mb-2">Advanced Analytics</h3>
                 <p className="text-muted-foreground">
-                  Advanced analytics and compliance tracking coming soon.
+                  Advanced analytics and performance tracking coming soon.
                 </p>
               </div>
             </TabsContent>
