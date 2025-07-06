@@ -1083,6 +1083,125 @@ export type Database = {
         }
         Relationships: []
       }
+      tp_approval_steps: {
+        Row: {
+          approved_at: string | null
+          approver_role: string | null
+          approver_user_id: string | null
+          comments: string | null
+          id: string
+          status: string | null
+          step_number: number
+          workflow_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_role?: string | null
+          approver_user_id?: string | null
+          comments?: string | null
+          id?: string
+          status?: string | null
+          step_number: number
+          workflow_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approver_role?: string | null
+          approver_user_id?: string | null
+          comments?: string | null
+          id?: string
+          status?: string | null
+          step_number?: number
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_approval_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "tp_approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tp_approval_workflows: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          current_step: number | null
+          document_id: string
+          id: string
+          status: string | null
+          total_steps: number
+          workflow_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_step?: number | null
+          document_id: string
+          id?: string
+          status?: string | null
+          total_steps: number
+          workflow_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_step?: number | null
+          document_id?: string
+          id?: string
+          status?: string | null
+          total_steps?: number
+          workflow_name?: string
+        }
+        Relationships: []
+      }
+      tp_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       tp_benchmarks: {
         Row: {
           comparable_name: string
@@ -1130,6 +1249,36 @@ export type Database = {
           },
         ]
       }
+      tp_client_access: {
+        Row: {
+          access_level: string | null
+          client_user_id: string | null
+          created_at: string | null
+          document_id: string
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+        }
+        Insert: {
+          access_level?: string | null
+          client_user_id?: string | null
+          created_at?: string | null
+          document_id: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+        }
+        Update: {
+          access_level?: string | null
+          client_user_id?: string | null
+          created_at?: string | null
+          document_id?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       tp_deadlines: {
         Row: {
           country_code: string
@@ -1166,6 +1315,116 @@ export type Database = {
           status?: Database["public"]["Enums"]["tp_compliance_status"] | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      tp_document_comments: {
+        Row: {
+          comment_type: string | null
+          content: string
+          created_at: string | null
+          document_id: string
+          id: string
+          metadata: Json | null
+          parent_comment_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comment_type?: string | null
+          content: string
+          created_at?: string | null
+          document_id: string
+          id?: string
+          metadata?: Json | null
+          parent_comment_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comment_type?: string | null
+          content?: string
+          created_at?: string | null
+          document_id?: string
+          id?: string
+          metadata?: Json | null
+          parent_comment_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_document_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "tp_document_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tp_document_shares: {
+        Row: {
+          access_level: string | null
+          created_at: string | null
+          created_by: string | null
+          current_uses: number | null
+          document_id: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          password_hash: string | null
+          share_token: string
+        }
+        Insert: {
+          access_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          document_id: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          password_hash?: string | null
+          share_token?: string
+        }
+        Update: {
+          access_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          document_id?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          password_hash?: string | null
+          share_token?: string
+        }
+        Relationships: []
+      }
+      tp_document_teams: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          document_id: string
+          id: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          document_id: string
+          id?: string
+          role: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          document_id?: string
+          id?: string
+          role?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1357,6 +1616,33 @@ export type Database = {
           },
         ]
       }
+      tp_user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          permissions: Json | null
+          role: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permissions?: Json | null
+          role: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permissions?: Json | null
+          role?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       transfer_pricing_documents: {
         Row: {
           company_id: string | null
@@ -1503,12 +1789,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_tp_permission: {
+        Args: {
+          p_user_id: string
+          p_permission: string
+          p_document_id?: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: { required_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
       log_organization_activity: {
         Args: { org_id: number; action: string; details?: Json }
+        Returns: undefined
+      }
+      log_tp_audit_event: {
+        Args: {
+          p_action: string
+          p_resource_type: string
+          p_resource_id?: string
+          p_old_values?: Json
+          p_new_values?: Json
+          p_metadata?: Json
+        }
         Returns: undefined
       }
     }

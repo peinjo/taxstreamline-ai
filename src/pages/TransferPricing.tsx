@@ -22,10 +22,15 @@ import { AutomatedComplianceTracker } from '@/components/transfer-pricing/compli
 import { SmartDocumentGenerator } from '@/components/transfer-pricing/ai/SmartDocumentGenerator';
 import { CountryByCountryReporting } from '@/components/transfer-pricing/reporting/CountryByCountryReporting';
 import { TPOverviewDashboard } from '@/components/transfer-pricing/dashboard/TPOverviewDashboard';
+import { UserRoleManager } from '@/components/transfer-pricing/collaboration/UserRoleManager';
+import { DocumentComments } from '@/components/transfer-pricing/collaboration/DocumentComments';
+import { ApprovalWorkflow } from '@/components/transfer-pricing/collaboration/ApprovalWorkflow';
+import { AuditLogViewer } from '@/components/transfer-pricing/collaboration/AuditLogViewer';
+import { ClientPortal } from '@/components/transfer-pricing/collaboration/ClientPortal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TransferPricing = () => {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai" | "reporting">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai" | "reporting" | "collaboration">("dashboard");
   const [documentTab, setDocumentTab] = useState<"master" | "local">("master");
   
   const [documents, setDocuments] = useState<Document[]>([
@@ -171,7 +176,7 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-1">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-11 gap-1">
               <TabsTrigger value="dashboard" className="text-xs lg:text-sm">
                 <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -211,6 +216,10 @@ const TransferPricing = () => {
               <TabsTrigger value="reporting" className="text-xs lg:text-sm">
                 <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                 <span className="hidden sm:inline">CbC Report</span>
+              </TabsTrigger>
+              <TabsTrigger value="collaboration" className="text-xs lg:text-sm">
+                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Collaborate</span>
               </TabsTrigger>
             </TabsList>
 
@@ -284,6 +293,27 @@ const TransferPricing = () => {
                 <p className="text-muted-foreground">
                   Advanced analytics and performance tracking coming soon.
                 </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="collaboration" className="mt-6">
+              <div className="space-y-8">
+                <UserRoleManager />
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <DocumentComments 
+                    documentId="sample-document-id" 
+                    canComment={true}
+                  />
+                  <ApprovalWorkflow 
+                    documentId="sample-document-id"
+                    canManageWorkflows={true}
+                  />
+                </div>
+                
+                <ClientPortal />
+                
+                <AuditLogViewer />
               </div>
             </TabsContent>
           </Tabs>
