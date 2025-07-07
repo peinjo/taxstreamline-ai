@@ -1083,6 +1083,89 @@ export type Database = {
         }
         Relationships: []
       }
+      tp_advanced_benchmarks: {
+        Row: {
+          comparable_data: Json
+          confidence_level: number | null
+          created_at: string | null
+          database_source: string
+          final_arm_length_range: Json | null
+          id: string
+          rejection_reasons: string[] | null
+          search_strategy: Json
+          statistical_analysis: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          comparable_data: Json
+          confidence_level?: number | null
+          created_at?: string | null
+          database_source: string
+          final_arm_length_range?: Json | null
+          id?: string
+          rejection_reasons?: string[] | null
+          search_strategy: Json
+          statistical_analysis?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          comparable_data?: Json
+          confidence_level?: number | null
+          created_at?: string | null
+          database_source?: string
+          final_arm_length_range?: Json | null
+          id?: string
+          rejection_reasons?: string[] | null
+          search_strategy?: Json
+          statistical_analysis?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tp_analytics_data: {
+        Row: {
+          created_at: string | null
+          data_type: string
+          entity_id: string | null
+          id: string
+          insights: Json | null
+          metrics: Json
+          time_period: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          data_type: string
+          entity_id?: string | null
+          id?: string
+          insights?: Json | null
+          metrics: Json
+          time_period: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          data_type?: string
+          entity_id?: string | null
+          id?: string
+          insights?: Json | null
+          metrics?: Json
+          time_period?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_analytics_data_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tp_approval_steps: {
         Row: {
           approved_at: string | null
@@ -1201,6 +1284,59 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      tp_audit_trail: {
+        Row: {
+          assigned_to: string | null
+          audit_phase: string
+          audit_type: string
+          completed_at: string | null
+          created_at: string | null
+          due_date: string | null
+          entity_id: string | null
+          findings: Json | null
+          id: string
+          recommendations: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          audit_phase: string
+          audit_type: string
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          findings?: Json | null
+          id?: string
+          recommendations?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          audit_phase?: string
+          audit_type?: string
+          completed_at?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          entity_id?: string | null
+          findings?: Json | null
+          id?: string
+          recommendations?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_audit_trail_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tp_benchmarks: {
         Row: {
@@ -1428,6 +1564,56 @@ export type Database = {
         }
         Relationships: []
       }
+      tp_economic_substance: {
+        Row: {
+          assessment_date: string | null
+          compliance_score: number | null
+          created_at: string | null
+          deficiencies: string[] | null
+          entity_id: string | null
+          id: string
+          next_review_date: string | null
+          remediation_plan: string | null
+          substance_test: string
+          test_results: Json
+          user_id: string | null
+        }
+        Insert: {
+          assessment_date?: string | null
+          compliance_score?: number | null
+          created_at?: string | null
+          deficiencies?: string[] | null
+          entity_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          remediation_plan?: string | null
+          substance_test: string
+          test_results: Json
+          user_id?: string | null
+        }
+        Update: {
+          assessment_date?: string | null
+          compliance_score?: number | null
+          created_at?: string | null
+          deficiencies?: string[] | null
+          entity_id?: string | null
+          id?: string
+          next_review_date?: string | null
+          remediation_plan?: string | null
+          substance_test?: string
+          test_results?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tp_economic_substance_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tp_entities: {
         Row: {
           business_description: string | null
@@ -1467,6 +1653,93 @@ export type Database = {
           tax_id?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      tp_erp_integrations: {
+        Row: {
+          connection_config: Json
+          created_at: string | null
+          erp_system: string
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          mapping_rules: Json | null
+          sync_frequency: string | null
+          user_id: string | null
+        }
+        Insert: {
+          connection_config: Json
+          created_at?: string | null
+          erp_system: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          mapping_rules?: Json | null
+          sync_frequency?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          connection_config?: Json
+          created_at?: string | null
+          erp_system?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          mapping_rules?: Json | null
+          sync_frequency?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      tp_knowledge_base: {
+        Row: {
+          category: string
+          content: string
+          created_at: string | null
+          created_by: string | null
+          difficulty_level: string | null
+          id: string
+          is_published: boolean | null
+          jurisdiction: string
+          last_updated_at: string | null
+          metadata: Json | null
+          rating: number | null
+          tags: string[] | null
+          title: string
+          view_count: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?: string | null
+          id?: string
+          is_published?: boolean | null
+          jurisdiction: string
+          last_updated_at?: string | null
+          metadata?: Json | null
+          rating?: number | null
+          tags?: string[] | null
+          title: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          difficulty_level?: string | null
+          id?: string
+          is_published?: boolean | null
+          jurisdiction?: string
+          last_updated_at?: string | null
+          metadata?: Json | null
+          rating?: number | null
+          tags?: string[] | null
+          title?: string
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -1789,6 +2062,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_risk_trends: {
+        Args: { p_user_id: string; p_period?: string }
+        Returns: Json
+      }
       check_tp_permission: {
         Args: {
           p_user_id: string
@@ -1800,6 +2077,10 @@ export type Database = {
       has_role: {
         Args: { required_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
+      }
+      increment_kb_view_count: {
+        Args: { article_id: string }
+        Returns: undefined
       }
       log_organization_activity: {
         Args: { org_id: number; action: string; details?: Json }

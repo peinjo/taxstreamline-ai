@@ -27,6 +27,9 @@ import { DocumentComments } from '@/components/transfer-pricing/collaboration/Do
 import { ApprovalWorkflow } from '@/components/transfer-pricing/collaboration/ApprovalWorkflow';
 import { AuditLogViewer } from '@/components/transfer-pricing/collaboration/AuditLogViewer';
 import { ClientPortal } from '@/components/transfer-pricing/collaboration/ClientPortal';
+import { KnowledgeBase } from '@/components/transfer-pricing/knowledge/KnowledgeBase';
+import { AdvancedAnalytics } from '@/components/transfer-pricing/analytics/AdvancedAnalytics';
+import { PremiumFeatures } from '@/components/transfer-pricing/premium/PremiumFeatures';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TransferPricing = () => {
