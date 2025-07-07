@@ -84,7 +84,8 @@ export function AuditLogViewer({ resourceType, resourceId }: AuditLogViewerProps
         user_email: log.user_id ? 'user@example.com' : 'System',
         old_values: log.old_values as Record<string, any> || {},
         new_values: log.new_values as Record<string, any> || {},
-        metadata: log.metadata as Record<string, any> || {}
+        metadata: log.metadata as Record<string, any> || {},
+        ip_address: log.ip_address as string || ''
       }));
 
       setAuditLogs(logsWithEmails);

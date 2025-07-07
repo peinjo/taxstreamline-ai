@@ -54,9 +54,18 @@ export function DocumentComments({ documentId, canComment = true }: DocumentComm
 
       if (error) throw error;
 
-      // Organize comments into threads
-      const commentsWithReplies = organizeComments(data || []);
-      setComments(commentsWithReplies);
+    // Organize comments into threads with proper typing
+    const typedComments = (data || []).map(comment => ({
+      ...comment,
+      comment_type: comment.comment_type as 'comment' | 'suggestion' | 'approval' | 'rejection',
+      metadata: comment.metadata as Record<string, any> || {},
+      user_id: comment.user_id || '',
+      parent_comment_id: comment.parent_comment_id || undefined,
+      created_at: comment.created_at || '',
+      updated_at: comment.updated_at || ''
+    }));
+    const commentsWithReplies = organizeComments(typedComments);
+    setComments(commentsWithReplies);
     } catch (error) {
       console.error('Error fetching comments:', error);
       toast.error('Failed to load comments');
