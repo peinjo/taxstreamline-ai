@@ -33,7 +33,7 @@ import { PremiumFeatures } from '@/components/transfer-pricing/premium/PremiumFe
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TransferPricing = () => {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai" | "reporting" | "collaboration">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "documents" | "entities" | "analytics" | "benchmarking" | "risk" | "financial" | "compliance" | "ai" | "reporting" | "collaboration" | "knowledge" | "premium">("dashboard");
   const [documentTab, setDocumentTab] = useState<"master" | "local">("master");
   
   const [documents, setDocuments] = useState<Document[]>([
@@ -179,7 +179,7 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-11 gap-1">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:grid-cols-13 gap-1">
               <TabsTrigger value="dashboard" className="text-xs lg:text-sm">
                 <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                 <span className="hidden sm:inline">Dashboard</span>
@@ -223,6 +223,14 @@ const TransferPricing = () => {
               <TabsTrigger value="collaboration" className="text-xs lg:text-sm">
                 <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                 <span className="hidden sm:inline">Collaborate</span>
+              </TabsTrigger>
+              <TabsTrigger value="knowledge" className="text-xs lg:text-sm">
+                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Knowledge</span>
+              </TabsTrigger>
+              <TabsTrigger value="premium" className="text-xs lg:text-sm">
+                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                <span className="hidden sm:inline">Premium</span>
               </TabsTrigger>
             </TabsList>
 
@@ -290,34 +298,47 @@ const TransferPricing = () => {
             </TabsContent>
 
             <TabsContent value="analytics" className="mt-6">
-              <div className="text-center py-12">
-                <BarChart3 className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium mb-2">Advanced Analytics</h3>
-                <p className="text-muted-foreground">
-                  Advanced analytics and performance tracking coming soon.
-                </p>
-              </div>
+              <AdvancedAnalytics />
             </TabsContent>
 
             <TabsContent value="collaboration" className="mt-6">
-              <div className="space-y-8">
-                <UserRoleManager />
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <DocumentComments 
-                    documentId="sample-document-id" 
-                    canComment={true}
-                  />
-                  <ApprovalWorkflow 
-                    documentId="sample-document-id"
-                    canManageWorkflows={true}
-                  />
-                </div>
-                
-                <ClientPortal />
-                
-                <AuditLogViewer />
-              </div>
+              <Tabs defaultValue="roles" className="w-full">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="roles">User Roles</TabsTrigger>
+                  <TabsTrigger value="comments">Comments</TabsTrigger>
+                  <TabsTrigger value="approval">Approval</TabsTrigger>
+                  <TabsTrigger value="audit">Audit Log</TabsTrigger>
+                  <TabsTrigger value="client">Client Portal</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="roles">
+                  <UserRoleManager />
+                </TabsContent>
+
+                <TabsContent value="comments">
+                  <DocumentComments documentId="sample-doc-id" />
+                </TabsContent>
+
+                <TabsContent value="approval">
+                  <ApprovalWorkflow documentId="sample-doc-id" />
+                </TabsContent>
+
+                <TabsContent value="audit">
+                  <AuditLogViewer />
+                </TabsContent>
+
+                <TabsContent value="client">
+                  <ClientPortal />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+
+            <TabsContent value="knowledge" className="mt-6">
+              <KnowledgeBase />
+            </TabsContent>
+
+            <TabsContent value="premium" className="mt-6">
+              <PremiumFeatures />
             </TabsContent>
           </Tabs>
 

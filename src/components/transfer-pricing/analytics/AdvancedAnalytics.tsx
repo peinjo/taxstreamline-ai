@@ -73,7 +73,7 @@ export function AdvancedAnalytics() {
 
       if (error) throw error;
 
-      setTrendData(Array.isArray(data) ? data as TrendData[] : []);
+      setTrendData(Array.isArray(data) ? (data as unknown as TrendData[]) : []);
     } catch (error) {
       console.error('Error fetching trend data:', error);
       toast.error('Failed to load trend data');
