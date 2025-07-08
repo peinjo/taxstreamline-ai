@@ -221,9 +221,9 @@ export function KnowledgeBase() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
             <BookOpen className="h-6 w-6" />
             Transfer Pricing Knowledge Base
           </h2>
