@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, BookOpen, FileText, HelpCircle, PlayCircle, Award, Star, Eye, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
 interface KnowledgeBaseArticle {
   id: string;
   title: string;
@@ -23,6 +24,7 @@ interface KnowledgeBaseArticle {
   created_at: string;
   last_updated_at: string;
 }
+
 export function KnowledgeBase() {
   const [articles, setArticles] = useState<KnowledgeBaseArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,26 +32,33 @@ export function KnowledgeBase() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedJurisdiction, setSelectedJurisdiction] = useState<string>('all');
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeBaseArticle | null>(null);
+
   useEffect(() => {
     fetchArticles();
   }, [selectedCategory, selectedJurisdiction]);
+
   const fetchArticles = async () => {
     try {
       setLoading(true);
-      let query = supabase.from('tp_knowledge_base').select('*').eq('is_published', true).order('view_count', {
-        ascending: false
-      });
+      
+      let query = supabase
+        .from('tp_knowledge_base')
+        .select('*')
+        .eq('is_published', true)
+        .order('view_count', { ascending: false });
+
       if (selectedCategory !== 'all') {
         query = query.eq('category', selectedCategory);
       }
+
       if (selectedJurisdiction !== 'all') {
         query = query.eq('jurisdiction', selectedJurisdiction);
       }
-      const {
-        data,
-        error
-      } = await query;
+
+      const { data, error } = await query;
+
       if (error) throw error;
+
       setArticles((data || []).map(article => ({
         ...article,
         category: article.category as 'guide' | 'regulation' | 'faq' | 'tutorial' | 'case_study',
@@ -62,58 +71,65 @@ export function KnowledgeBase() {
       setLoading(false);
     }
   };
+
   const incrementViewCount = async (articleId: string) => {
     try {
-      const {
-        error
-      } = await supabase.rpc('increment_kb_view_count', {
+      const { error } = await supabase.rpc('increment_kb_view_count', {
         article_id: articleId
       });
+
       if (error) throw error;
     } catch (error) {
       console.error('Error incrementing view count:', error);
     }
   };
+
   const handleArticleView = (article: KnowledgeBaseArticle) => {
     setSelectedArticle(article);
     incrementViewCount(article.id);
   };
-  const filteredArticles = articles.filter(article => !searchTerm || article.title.toLowerCase().includes(searchTerm.toLowerCase()) || article.content.toLowerCase().includes(searchTerm.toLowerCase()) || article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
+
+  const filteredArticles = articles.filter(article =>
+    !searchTerm ||
+    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    article.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'guide':
-        return <BookOpen className="h-4 w-4" />;
-      case 'regulation':
-        return <FileText className="h-4 w-4" />;
-      case 'faq':
-        return <HelpCircle className="h-4 w-4" />;
-      case 'tutorial':
-        return <PlayCircle className="h-4 w-4" />;
-      case 'case_study':
-        return <Award className="h-4 w-4" />;
-      default:
-        return <BookOpen className="h-4 w-4" />;
+      case 'guide': return <BookOpen className="h-4 w-4" />;
+      case 'regulation': return <FileText className="h-4 w-4" />;
+      case 'faq': return <HelpCircle className="h-4 w-4" />;
+      case 'tutorial': return <PlayCircle className="h-4 w-4" />;
+      case 'case_study': return <Award className="h-4 w-4" />;
+      default: return <BookOpen className="h-4 w-4" />;
     }
   };
+
   const getDifficultyColor = (level: string) => {
     switch (level) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'beginner': return 'bg-green-100 text-green-800';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'advanced': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
+
   const getPopularArticles = () => {
-    return articles.sort((a, b) => b.view_count - a.view_count).slice(0, 5);
+    return articles
+      .sort((a, b) => b.view_count - a.view_count)
+      .slice(0, 5);
   };
+
   const getRecentArticles = () => {
-    return articles.sort((a, b) => new Date(b.last_updated_at).getTime() - new Date(a.last_updated_at).getTime()).slice(0, 5);
+    return articles
+      .sort((a, b) => new Date(b.last_updated_at).getTime() - new Date(a.last_updated_at).getTime())
+      .slice(0, 5);
   };
-  const renderArticleCard = (article: KnowledgeBaseArticle) => <Card key={article.id} className="hover:shadow-md transition-shadow cursor-pointer">
+
+  const renderArticleCard = (article: KnowledgeBaseArticle) => (
+    <Card key={article.id} className="hover:shadow-md transition-shadow cursor-pointer">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
@@ -145,13 +161,19 @@ export function KnowledgeBase() {
         </p>
         <div className="flex items-center justify-between">
           <div className="flex flex-wrap gap-1">
-            {article.tags.slice(0, 3).map(tag => <Badge key={tag} variant="outline" className="text-xs">
+            {article.tags.slice(0, 3).map(tag => (
+              <Badge key={tag} variant="outline" className="text-xs">
                 {tag}
-              </Badge>)}
+              </Badge>
+            ))}
           </div>
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" onClick={() => handleArticleView(article)}>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleArticleView(article)}
+              >
                 Read More
               </Button>
             </DialogTrigger>
@@ -171,14 +193,14 @@ export function KnowledgeBase() {
                     <span>Jurisdiction: {selectedArticle?.jurisdiction}</span>
                   </div>
                   <div className="prose max-w-none">
-                    <div dangerouslySetInnerHTML={{
-                    __html: selectedArticle?.content.replace(/\n/g, '<br>') || ''
-                  }} />
+                    <div dangerouslySetInnerHTML={{ __html: selectedArticle?.content.replace(/\n/g, '<br>') || '' }} />
                   </div>
                   <div className="flex flex-wrap gap-2 pt-4 border-t">
-                    {selectedArticle?.tags.map(tag => <Badge key={tag} variant="outline">
+                    {selectedArticle?.tags.map(tag => (
+                      <Badge key={tag} variant="outline">
                         {tag}
-                      </Badge>)}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </ScrollArea>
@@ -186,16 +208,25 @@ export function KnowledgeBase() {
           </Dialog>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
+
   if (loading) {
-    return <div className="flex items-center justify-center p-8">
+    return (
+      <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-6 mt-8">
+
+  return (
+    <div className="space-y-6 mt-8">
       <div className="flex items-start justify-between mb-8">
         <div className="flex-1 min-w-0">
-          
+          <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
+            <BookOpen className="h-6 w-6" />
+            Transfer Pricing Knowledge Base
+          </h2>
           <p className="text-muted-foreground">
             Comprehensive guides, regulations, and best practices
           </p>
@@ -208,7 +239,12 @@ export function KnowledgeBase() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search articles, guides, and tutorials..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                placeholder="Search articles, guides, and tutorials..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-full md:w-48">
@@ -248,14 +284,18 @@ export function KnowledgeBase() {
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          {filteredArticles.length === 0 ? <Card>
+          {filteredArticles.length === 0 ? (
+            <Card>
               <CardContent className="text-center py-8">
                 <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-muted-foreground">No articles found matching your criteria</p>
               </CardContent>
-            </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredArticles.map(renderArticleCard)}
-            </div>}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="popular" className="space-y-4">
@@ -270,5 +310,6 @@ export function KnowledgeBase() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 }
