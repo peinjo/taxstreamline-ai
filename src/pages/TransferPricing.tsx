@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Building2, BarChart3, Settings } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -179,60 +180,74 @@ const TransferPricing = () => {
           </div>
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-6 lg:grid-cols-13 gap-1">
-              <TabsTrigger value="dashboard" className="text-xs lg:text-sm">
-                <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </TabsTrigger>
-              <TabsTrigger value="documents" className="text-xs lg:text-sm">
-                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Documents</span>
-              </TabsTrigger>
-              <TabsTrigger value="entities" className="text-xs lg:text-sm">
-                <Building2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Entities</span>
-              </TabsTrigger>
-              <TabsTrigger value="benchmarking" className="text-xs lg:text-sm">
-                <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Benchmark</span>
-              </TabsTrigger>
-              <TabsTrigger value="risk" className="text-xs lg:text-sm">
-                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Risk</span>
-              </TabsTrigger>
-              <TabsTrigger value="financial" className="text-xs lg:text-sm">
-                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Financial</span>
-              </TabsTrigger>
-              <TabsTrigger value="compliance" className="text-xs lg:text-sm">
-                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Compliance</span>
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="text-xs lg:text-sm">
-                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">AI Tools</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs lg:text-sm">
-                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="reporting" className="text-xs lg:text-sm">
-                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">CbC Report</span>
-              </TabsTrigger>
-              <TabsTrigger value="collaboration" className="text-xs lg:text-sm">
-                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Collaborate</span>
-              </TabsTrigger>
-              <TabsTrigger value="knowledge" className="text-xs lg:text-sm">
-                <FileText className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Knowledge</span>
-              </TabsTrigger>
-              <TabsTrigger value="premium" className="text-xs lg:text-sm">
-                <Settings className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
-                <span className="hidden sm:inline">Premium</span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="w-full overflow-x-auto">
+              <TabsList className="flex w-max min-w-full h-auto p-1 bg-muted rounded-lg">
+                <TabsTrigger value="dashboard" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="sm:hidden">Dash</span>
+                </TabsTrigger>
+                <TabsTrigger value="documents" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Documents</span>
+                  <span className="sm:hidden">Docs</span>
+                </TabsTrigger>
+                <TabsTrigger value="entities" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Building2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Entities</span>
+                  <span className="sm:hidden">Ents</span>
+                </TabsTrigger>
+                <TabsTrigger value="benchmarking" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Benchmark</span>
+                  <span className="sm:hidden">Bench</span>
+                </TabsTrigger>
+                <TabsTrigger value="risk" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Risk</span>
+                </TabsTrigger>
+                <TabsTrigger value="financial" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Financial</span>
+                  <span className="sm:hidden">Fin</span>
+                </TabsTrigger>
+                <TabsTrigger value="compliance" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Compliance</span>
+                  <span className="sm:hidden">Comp</span>
+                </TabsTrigger>
+                <TabsTrigger value="ai" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">AI Tools</span>
+                  <span className="sm:hidden">AI</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Analytics</span>
+                  <span className="sm:hidden">Analy</span>
+                </TabsTrigger>
+                <TabsTrigger value="reporting" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">CbC Report</span>
+                  <span className="sm:hidden">CbC</span>
+                </TabsTrigger>
+                <TabsTrigger value="collaboration" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Collaborate</span>
+                  <span className="sm:hidden">Collab</span>
+                </TabsTrigger>
+                <TabsTrigger value="knowledge" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Knowledge</span>
+                  <span className="sm:hidden">Know</span>
+                </TabsTrigger>
+                <TabsTrigger value="premium" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                  <span className="hidden sm:inline">Premium</span>
+                  <span className="sm:hidden">Prem</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="dashboard" className="mt-6">
               <TPOverviewDashboard />
@@ -305,35 +320,44 @@ const TransferPricing = () => {
             </TabsContent>
 
             <TabsContent value="collaboration" className="mt-6">
-              <Tabs defaultValue="roles" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="roles">User Roles</TabsTrigger>
-                  <TabsTrigger value="comments">Comments</TabsTrigger>
-                  <TabsTrigger value="approval">Approval</TabsTrigger>
-                  <TabsTrigger value="audit">Audit Log</TabsTrigger>
-                  <TabsTrigger value="client">Client Portal</TabsTrigger>
-                </TabsList>
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                <Card className="lg:col-span-2 xl:col-span-3">
+                  <CardHeader>
+                    <CardTitle>Collaboration Hub</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Tabs defaultValue="roles" className="w-full">
+                      <TabsList className="grid w-full grid-cols-5 mb-4">
+                        <TabsTrigger value="roles" className="text-xs sm:text-sm">User Roles</TabsTrigger>
+                        <TabsTrigger value="comments" className="text-xs sm:text-sm">Comments</TabsTrigger>
+                        <TabsTrigger value="approval" className="text-xs sm:text-sm">Approval</TabsTrigger>
+                        <TabsTrigger value="audit" className="text-xs sm:text-sm">Audit Log</TabsTrigger>
+                        <TabsTrigger value="client" className="text-xs sm:text-sm">Client Portal</TabsTrigger>
+                      </TabsList>
 
-                <TabsContent value="roles">
-                  <UserRoleManager />
-                </TabsContent>
+                      <TabsContent value="roles" className="mt-4">
+                        <UserRoleManager />
+                      </TabsContent>
 
-                <TabsContent value="comments">
-                  <DocumentComments documentId="sample-doc-id" />
-                </TabsContent>
+                      <TabsContent value="comments" className="mt-4">
+                        <DocumentComments documentId="sample-doc-id" />
+                      </TabsContent>
 
-                <TabsContent value="approval">
-                  <ApprovalWorkflow documentId="sample-doc-id" />
-                </TabsContent>
+                      <TabsContent value="approval" className="mt-4">
+                        <ApprovalWorkflow documentId="sample-doc-id" />
+                      </TabsContent>
 
-                <TabsContent value="audit">
-                  <AuditLogViewer />
-                </TabsContent>
+                      <TabsContent value="audit" className="mt-4">
+                        <AuditLogViewer />
+                      </TabsContent>
 
-                <TabsContent value="client">
-                  <ClientPortal />
-                </TabsContent>
-              </Tabs>
+                      <TabsContent value="client" className="mt-4">
+                        <ClientPortal />
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             <TabsContent value="knowledge" className="mt-6">

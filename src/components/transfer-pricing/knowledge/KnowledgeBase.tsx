@@ -41,29 +41,50 @@ export function KnowledgeBase() {
     try {
       setLoading(true);
       
-      let query = supabase
-        .from('tp_knowledge_base')
-        .select('*')
-        .eq('is_published', true)
-        .order('view_count', { ascending: false });
+      // For now, use mock data since the table doesn't exist yet
+      const mockArticles: KnowledgeBaseArticle[] = [
+        {
+          id: '1',
+          title: 'OECD Transfer Pricing Guidelines Overview',
+          content: 'Comprehensive overview of the OECD Transfer Pricing Guidelines for Multinational Enterprises and Tax Administrations. This guide covers the fundamental principles of transfer pricing and provides practical guidance for implementation.',
+          category: 'guide',
+          jurisdiction: 'OECD',
+          tags: ['OECD', 'guidelines', 'fundamentals'],
+          difficulty_level: 'beginner',
+          view_count: 150,
+          rating: 4.8,
+          created_at: '2024-01-15T10:00:00Z',
+          last_updated_at: '2024-01-15T10:00:00Z'
+        },
+        {
+          id: '2',
+          title: 'Country-by-Country Reporting Requirements',
+          content: 'Detailed explanation of CbC reporting requirements, deadlines, and filing procedures across different jurisdictions. Includes templates and compliance checklists.',
+          category: 'regulation',
+          jurisdiction: 'US',
+          tags: ['CbC', 'reporting', 'compliance'],
+          difficulty_level: 'intermediate',
+          view_count: 89,
+          rating: 4.5,
+          created_at: '2024-01-10T14:30:00Z',
+          last_updated_at: '2024-01-20T09:15:00Z'
+        },
+        {
+          id: '3',
+          title: 'Economic Analysis Best Practices',
+          content: 'Step-by-step tutorial on conducting economic analysis for transfer pricing documentation, including selection of tested party and profit level indicators.',
+          category: 'tutorial',
+          jurisdiction: 'UK',
+          tags: ['economic analysis', 'documentation', 'PLI'],
+          difficulty_level: 'advanced',
+          view_count: 67,
+          rating: 4.9,
+          created_at: '2024-01-05T16:45:00Z',
+          last_updated_at: '2024-01-18T11:30:00Z'
+        }
+      ];
 
-      if (selectedCategory !== 'all') {
-        query = query.eq('category', selectedCategory);
-      }
-
-      if (selectedJurisdiction !== 'all') {
-        query = query.eq('jurisdiction', selectedJurisdiction);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-
-      setArticles((data || []).map(article => ({
-        ...article,
-        category: article.category as 'guide' | 'regulation' | 'faq' | 'tutorial' | 'case_study',
-        difficulty_level: article.difficulty_level as 'beginner' | 'intermediate' | 'advanced'
-      })));
+      setArticles(mockArticles);
     } catch (error) {
       console.error('Error fetching articles:', error);
       toast.error('Failed to load knowledge base articles');
@@ -74,11 +95,12 @@ export function KnowledgeBase() {
 
   const incrementViewCount = async (articleId: string) => {
     try {
-      const { error } = await supabase.rpc('increment_kb_view_count', {
-        article_id: articleId
-      });
-
-      if (error) throw error;
+      // For now, just update the local state
+      setArticles(prev => prev.map(article => 
+        article.id === articleId 
+          ? { ...article, view_count: article.view_count + 1 }
+          : article
+      ));
     } catch (error) {
       console.error('Error incrementing view count:', error);
     }
@@ -220,8 +242,8 @@ export function KnowledgeBase() {
   }
 
   return (
-    <div className="space-y-6 mt-8">
-      <div className="flex items-start justify-between mb-8">
+    <div className="space-y-6 pt-4">
+      <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
             <BookOpen className="h-6 w-6" />

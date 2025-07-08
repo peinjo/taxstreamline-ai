@@ -137,15 +137,26 @@ const TPDashboard: React.FC<TPDashboardProps> = ({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-              <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+                <div className="h-8 bg-muted rounded w-1/3"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(2)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6 h-64">
+                <div className="h-full bg-muted rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -332,8 +343,8 @@ const TPDashboard: React.FC<TPDashboardProps> = ({
         <CardContent>
           <div className="space-y-3">
             {metrics.recent_activity.map((activity, index) => (
-              <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <div className="flex-1">
                   <p className="text-sm">{activity.description}</p>
                   <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
