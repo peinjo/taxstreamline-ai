@@ -220,8 +220,8 @@ export function KnowledgeBase() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between mb-6">
+    <div className="space-y-6 mt-8">
+      <div className="flex items-start justify-between mb-8">
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold flex items-center gap-2 mb-2">
             <BookOpen className="h-6 w-6" />
@@ -234,7 +234,7 @@ export function KnowledgeBase() {
       </div>
 
       {/* Search and Filters */}
-      <Card>
+      <Card className="mt-6">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
