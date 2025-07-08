@@ -258,13 +258,16 @@ const TransferPricing = () => {
                 {documentTab === "master" ? (
                   <OECDCompliantDocumentWizard />
                 ) : (
-                  <DocumentList 
-                    documents={documents}
-                    activeTab={documentTab}
-                    onEdit={handleEditDocument}
-                    onTitleChange={handleTitleChange}
-                    onDelete={handleDeleteDocument}
-                  />
+                  <div className="space-y-6">
+                    <DocumentList 
+                      documents={documents}
+                      activeTab={documentTab}
+                      onEdit={handleEditDocument}
+                      onTitleChange={handleTitleChange}
+                      onDelete={handleDeleteDocument}
+                    />
+                    <ActivityLog activities={activities} />
+                  </div>
                 )}
               </div>
             </TabsContent>
@@ -349,8 +352,6 @@ const TransferPricing = () => {
             onSave={saveEditedDocument}
             onContentChange={setEditedContent}
           />
-
-          <ActivityLog activities={activities} />
         </div>
       </DashboardLayout>
     </TransferPricingProvider>
