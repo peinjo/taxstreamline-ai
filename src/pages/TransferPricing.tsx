@@ -145,7 +145,7 @@ const TransferPricing = () => {
   return (
     <TransferPricingProvider>
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-full overflow-hidden">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Transfer Pricing Hub</h1>
             <div className="flex gap-2">

@@ -136,8 +136,8 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
                 <SelectContent>
                   <SelectItem value="">All countries</SelectItem>
                   {countries.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
+                    <SelectItem key={country} value={country || ""}>
+                      {country || "Unknown"}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -153,8 +153,8 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
                 <SelectContent>
                   <SelectItem value="">All industries</SelectItem>
                   {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry}>
-                      {industry}
+                    <SelectItem key={industry} value={industry || ""}>
+                      {industry || "Unknown"}
                     </SelectItem>
                   ))}
                 </SelectContent>
