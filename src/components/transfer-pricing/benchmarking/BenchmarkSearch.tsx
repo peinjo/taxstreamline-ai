@@ -35,7 +35,7 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
   const [selectedBenchmark, setSelectedBenchmark] = useState<TPBenchmark | null>(null);
 
   const countries = useMemo(() => {
-    return Array.from(new Set(benchmarks.map(b => b.country))).sort();
+    return Array.from(new Set(benchmarks.map(b => b.country).filter(Boolean))).sort();
   }, [benchmarks]);
 
   const industries = useMemo(() => {
@@ -129,15 +129,15 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
 
             <div className="space-y-2">
               <Label htmlFor="country">Country</Label>
-              <Select value={filters.country} onValueChange={(value) => setFilters(prev => ({ ...prev, country: value }))}>
+              <Select value={filters.country || 'all'} onValueChange={(value) => setFilters(prev => ({ ...prev, country: value === 'all' ? '' : value }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="All countries" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All countries</SelectItem>
+                  <SelectItem value="all">All countries</SelectItem>
                   {countries.map((country) => (
-                    <SelectItem key={country} value={country || ""}>
-                      {country || "Unknown"}
+                    <SelectItem key={country} value={country}>
+                      {country}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -146,15 +146,15 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
 
             <div className="space-y-2">
               <Label htmlFor="industry">Industry</Label>
-              <Select value={filters.industry} onValueChange={(value) => setFilters(prev => ({ ...prev, industry: value }))}>
+              <Select value={filters.industry || 'all'} onValueChange={(value) => setFilters(prev => ({ ...prev, industry: value === 'all' ? '' : value }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="All industries" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All industries</SelectItem>
+                  <SelectItem value="all">All industries</SelectItem>
                   {industries.map((industry) => (
-                    <SelectItem key={industry} value={industry || ""}>
-                      {industry || "Unknown"}
+                    <SelectItem key={industry} value={industry}>
+                      {industry}
                     </SelectItem>
                   ))}
                 </SelectContent>
