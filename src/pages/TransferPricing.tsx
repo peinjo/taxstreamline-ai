@@ -181,7 +181,7 @@ const TransferPricing = () => {
 
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)}>
             <div className="w-full overflow-x-auto">
-              <TabsList className="flex w-max min-w-full h-auto p-1 bg-muted rounded-lg">
+              <TabsList className="flex w-max h-auto p-1 bg-muted rounded-lg">
                 <TabsTrigger value="dashboard" className="flex-shrink-0 text-xs sm:text-sm px-2 py-2">
                   <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                   <span className="hidden sm:inline">Dashboard</span>
