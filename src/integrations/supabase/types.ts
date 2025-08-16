@@ -21,7 +21,7 @@ export type Database = {
           document_title: string
           document_type: string
           id: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           action: string
@@ -29,7 +29,7 @@ export type Database = {
           document_title: string
           document_type: string
           id?: never
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           action?: string
@@ -37,7 +37,7 @@ export type Database = {
           document_title?: string
           document_type?: string
           id?: never
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -395,21 +395,21 @@ export type Database = {
           date: string
           id: number
           text: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
           date: string
           id?: never
           text: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
           date?: string
           id?: never
           text?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
