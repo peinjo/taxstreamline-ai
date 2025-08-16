@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -21,6 +21,7 @@ export type Database = {
           document_title: string
           document_type: string
           id: number
+          user_id: string | null
         }
         Insert: {
           action: string
@@ -28,6 +29,7 @@ export type Database = {
           document_title: string
           document_type: string
           id?: never
+          user_id?: string | null
         }
         Update: {
           action?: string
@@ -35,6 +37,7 @@ export type Database = {
           document_title?: string
           document_type?: string
           id?: never
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -364,6 +367,7 @@ export type Database = {
           documents_pending: number
           id: number
           upcoming_deadlines: number
+          user_id: string | null
         }
         Insert: {
           active_clients?: number
@@ -372,6 +376,7 @@ export type Database = {
           documents_pending?: number
           id?: never
           upcoming_deadlines?: number
+          user_id?: string | null
         }
         Update: {
           active_clients?: number
@@ -380,6 +385,7 @@ export type Database = {
           documents_pending?: number
           id?: never
           upcoming_deadlines?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -389,18 +395,21 @@ export type Database = {
           date: string
           id: number
           text: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           date: string
           id?: never
           text: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           date?: string
           id?: never
           text?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -421,6 +430,57 @@ export type Database = {
           Text?: number | null
         }
         Relationships: []
+      }
+      document_approvals: {
+        Row: {
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          created_at: string | null
+          document_id: string | null
+          id: string
+          status: string
+          updated_at: string | null
+          version_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          status: string
+          updated_at?: string | null
+          version_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          status?: string
+          updated_at?: string | null
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_approvals_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "transfer_pricing_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_approvals_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "document_versions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       document_comments: {
         Row: {
@@ -495,6 +555,50 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      document_versions: {
+        Row: {
+          changes_summary: string | null
+          checksum: string | null
+          content: Json
+          created_at: string | null
+          created_by: string
+          document_id: string | null
+          file_size: number | null
+          id: string
+          version_number: number
+        }
+        Insert: {
+          changes_summary?: string | null
+          checksum?: string | null
+          content: Json
+          created_at?: string | null
+          created_by: string
+          document_id?: string | null
+          file_size?: number | null
+          id?: string
+          version_number: number
+        }
+        Update: {
+          changes_summary?: string | null
+          checksum?: string | null
+          content?: Json
+          created_at?: string | null
+          created_by?: string
+          document_id?: string | null
+          file_size?: number | null
+          id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "transfer_pricing_documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       global_compliance: {
         Row: {
@@ -1923,6 +2027,8 @@ export type Database = {
       }
       transfer_pricing_documents: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           company_id: string | null
           compliance_status:
             | Database["public"]["Enums"]["tp_compliance_status"]
@@ -1932,8 +2038,10 @@ export type Database = {
           created_by: string | null
           entity_id: string | null
           id: string
+          is_current_version: boolean | null
           jurisdiction: string | null
           last_reviewed_at: string | null
+          parent_version_id: string | null
           risk_level: Database["public"]["Enums"]["tp_risk_level"] | null
           status: Database["public"]["Enums"]["tp_document_status"]
           template_id: string | null
@@ -1941,8 +2049,12 @@ export type Database = {
           type: Database["public"]["Enums"]["tp_document_type"]
           updated_at: string
           version: number
+          version_notes: string | null
+          version_number: number | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           company_id?: string | null
           compliance_status?:
             | Database["public"]["Enums"]["tp_compliance_status"]
@@ -1952,8 +2064,10 @@ export type Database = {
           created_by?: string | null
           entity_id?: string | null
           id?: string
+          is_current_version?: boolean | null
           jurisdiction?: string | null
           last_reviewed_at?: string | null
+          parent_version_id?: string | null
           risk_level?: Database["public"]["Enums"]["tp_risk_level"] | null
           status?: Database["public"]["Enums"]["tp_document_status"]
           template_id?: string | null
@@ -1961,8 +2075,12 @@ export type Database = {
           type: Database["public"]["Enums"]["tp_document_type"]
           updated_at?: string
           version?: number
+          version_notes?: string | null
+          version_number?: number | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           company_id?: string | null
           compliance_status?:
             | Database["public"]["Enums"]["tp_compliance_status"]
@@ -1972,8 +2090,10 @@ export type Database = {
           created_by?: string | null
           entity_id?: string | null
           id?: string
+          is_current_version?: boolean | null
           jurisdiction?: string | null
           last_reviewed_at?: string | null
+          parent_version_id?: string | null
           risk_level?: Database["public"]["Enums"]["tp_risk_level"] | null
           status?: Database["public"]["Enums"]["tp_document_status"]
           template_id?: string | null
@@ -1981,6 +2101,8 @@ export type Database = {
           type?: Database["public"]["Enums"]["tp_document_type"]
           updated_at?: string
           version?: number
+          version_notes?: string | null
+          version_number?: number | null
         }
         Relationships: [
           {
@@ -1988,6 +2110,13 @@ export type Database = {
             columns: ["entity_id"]
             isOneToOne: false
             referencedRelation: "tp_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transfer_pricing_documents_parent_version_id_fkey"
+            columns: ["parent_version_id"]
+            isOneToOne: false
+            referencedRelation: "transfer_pricing_documents"
             referencedColumns: ["id"]
           },
           {
@@ -2068,16 +2197,24 @@ export type Database = {
     }
     Functions: {
       calculate_risk_trends: {
-        Args: { p_user_id: string; p_period?: string }
+        Args: { p_period?: string; p_user_id: string }
         Returns: Json
       }
       check_tp_permission: {
         Args: {
-          p_user_id: string
-          p_permission: string
           p_document_id?: string
+          p_permission: string
+          p_user_id: string
         }
         Returns: boolean
+      }
+      create_document_version: {
+        Args: {
+          p_changes_summary?: string
+          p_content: Json
+          p_document_id: string
+        }
+        Returns: string
       }
       has_role: {
         Args: { required_role: Database["public"]["Enums"]["app_role"] }
@@ -2088,17 +2225,17 @@ export type Database = {
         Returns: undefined
       }
       log_organization_activity: {
-        Args: { org_id: number; action: string; details?: Json }
+        Args: { action: string; details?: Json; org_id: number }
         Returns: undefined
       }
       log_tp_audit_event: {
         Args: {
           p_action: string
-          p_resource_type: string
-          p_resource_id?: string
-          p_old_values?: Json
-          p_new_values?: Json
           p_metadata?: Json
+          p_new_values?: Json
+          p_old_values?: Json
+          p_resource_id?: string
+          p_resource_type: string
         }
         Returns: undefined
       }
