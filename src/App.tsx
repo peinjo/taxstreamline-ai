@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { routes } from "./config/routes";
 
 const queryClient = new QueryClient({
@@ -66,13 +67,14 @@ const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ErrorProvider>
-          <NotificationProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+      <ErrorBoundary>
+        <AuthProvider>
+          <ErrorProvider>
+            <NotificationProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
                 <Routes>
                   {routes.map((route) => {
                     // Handle the index route
@@ -102,11 +104,12 @@ const App: React.FC = () => {
                     );
                   })}
                 </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </NotificationProvider>
-        </ErrorProvider>
-      </AuthProvider>
+                </BrowserRouter>
+              </TooltipProvider>
+            </NotificationProvider>
+          </ErrorProvider>
+        </AuthProvider>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 };

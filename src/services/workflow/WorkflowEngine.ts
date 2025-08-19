@@ -142,12 +142,10 @@ export class WorkflowEngine {
         toast.info(notification.message);
         break;
       case 'in_app':
-        // This would integrate with the notification system
-        console.log('In-app notification:', notification.message);
+        // Integration with notification system would happen here
         break;
       case 'email':
-        // This would integrate with email service
-        console.log('Email notification:', notification.message);
+        // Integration with email service would happen here
         break;
     }
     return { notificationSent: true };

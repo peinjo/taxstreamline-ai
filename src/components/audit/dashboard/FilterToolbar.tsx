@@ -4,13 +4,15 @@ import { ReportFilters } from "../ReportFilters";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 
+interface ReportFiltersData {
+  year: number;
+  taxType: string;
+  status: string;
+}
+
 interface FilterToolbarProps {
-  filters: {
-    year: number;
-    taxType: string;
-    status: string;
-  };
-  onFilterChange: (filters: any) => void;
+  filters: ReportFiltersData;
+  onFilterChange: (filters: ReportFiltersData) => void;
   onExport: (format: "pdf" | "excel") => void;
 }
 

@@ -60,14 +60,14 @@ const Signup = () => {
         throw new Error("Password must be at least 6 characters long");
       }
 
-      console.log("Starting signup process for email:", email);
+      // Begin signup process
       await signUp(email, password);
 
-      console.log("Signup successful, redirecting to personal info page");
+      // Signup successful, redirect to profile completion
       toast.success("Account created successfully! Please check your email to confirm your account.");
       navigate("/auth/personal-info");
     } catch (err) {
-      console.error("Signup error:", err);
+      // Handle signup errors with proper logging
       const error = err as Error;
       logError(error, "Signup process");
       showUserFriendlyMessage(error);

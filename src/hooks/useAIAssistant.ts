@@ -44,11 +44,11 @@ Try commands like:
     dangerouslyAllowBrowser: true,
   });
 
-  const executeAction = useCallback(async (functionCall: any): Promise<AIActionResult> => {
+  const executeAction = useCallback(async (functionCall: { name: string; arguments?: string }): Promise<AIActionResult> => {
     const actionName = functionCall.name;
     const params = JSON.parse(functionCall.arguments || "{}");
 
-    console.log(`Executing action: ${actionName}`, params);
+    // Action execution logging would be handled by proper logging service
 
     const result = await actionRegistry.executeAction(actionName, params, {
       user,

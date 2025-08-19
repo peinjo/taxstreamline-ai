@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { cleanupAuthState } from "@/lib/auth/authUtils";
+import { logError } from "@/lib/errorHandler";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,15 +18,14 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   
-  // Add logging to debug auth state
+  // Component lifecycle tracking for debugging
   useEffect(() => {
-    console.log("Login component mounted, checking session");
+    // Login component mounted - session check handled by AuthProvider
   }, []);
   
-  // Track auth state changes
+  // Handle authentication state changes
   useEffect(() => {
     if (user) {
-      console.log("Auth state changed in Login component:", "SIGNED_IN", user.email);
       navigate("/dashboard");
     }
   }, [user, navigate]);
@@ -47,18 +47,19 @@ const Login = () => {
         throw new Error("Please enter both email and password");
       }
 
-      console.log("Attempting login with email:", email);
+      // Login attempt - handled by AuthProvider
       await signIn(email, password);
       // Navigation will happen automatically via auth state change
       
-    } catch (error: any) {
-      console.error("Login error:", error);
+    } catch (error: unknown) {
+      const loginError = error as Error;
+      logError(loginError, "Login form submission");
       
       // Provide more user-friendly error messages
       let errorMessage = "Failed to log in";
-      if (error.message?.toLowerCase().includes("invalid login credentials")) {
+      if (loginError.message?.toLowerCase().includes("invalid login credentials")) {
         errorMessage = "Invalid email or password";
-      } else if (error.message?.toLowerCase().includes("email not confirmed")) {
+      } else if (loginError.message?.toLowerCase().includes("email not confirmed")) {
         errorMessage = "Please confirm your email address before logging in";
       }
       

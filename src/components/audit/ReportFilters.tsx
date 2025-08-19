@@ -10,13 +10,15 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
+interface ReportFiltersData {
+  year: number;
+  taxType: string;
+  status: string;
+}
+
 interface FiltersProps {
-  filters: {
-    year: number;
-    taxType: string;
-    status: string;
-  };
-  onFilterChange: (filters: any) => void;
+  filters: ReportFiltersData;
+  onFilterChange: (filters: ReportFiltersData) => void;
 }
 
 export const ReportFilters = ({ filters, onFilterChange }: FiltersProps) => {

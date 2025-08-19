@@ -10,6 +10,7 @@ import {
   YearFilter,
   useChartData,
 } from "./chart-components";
+import { DrillDownItem, ChartDataPoint } from "@/types/chart";
 
 interface Props {
   data: TaxReport[];
@@ -19,7 +20,7 @@ export const TaxCharts = ({ data }: Props) => {
   const [activeChart, setActiveChart] = useState<"year" | "type" | "status" | "trends">("year");
   const [chartType, setChartType] = useState<"bar" | "pie" | "line" | "area">("bar");
   const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [drillDownData, setDrillDownData] = useState<any[] | null>(null);
+  const [drillDownData, setDrillDownData] = useState<DrillDownItem[] | null>(null);
   const [drillDownTitle, setDrillDownTitle] = useState<string>("");
   
   const {
@@ -32,7 +33,7 @@ export const TaxCharts = ({ data }: Props) => {
   } = useChartData(data, selectedYear);
 
   // Handle drill down on chart click
-  const handlePieClick = (data: any, index: number) => {
+  const handlePieClick = (data: ChartDataPoint, index: number) => {
     const clickedItem = data.name;
     const detailedData = filteredData.filter(item => 
       activeChart === "type" ? item.tax_type === clickedItem.toLowerCase() : 
@@ -40,7 +41,7 @@ export const TaxCharts = ({ data }: Props) => {
       true
     );
     
-    const processedData = detailedData.reduce((acc: any[], curr) => {
+    const processedData = detailedData.reduce((acc: DrillDownItem[], curr) => {
       const key = activeChart === "type" ? curr.status :
                 activeChart === "status" ? curr.tax_type :
                 curr.tax_year.toString();

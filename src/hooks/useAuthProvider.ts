@@ -4,6 +4,7 @@ import type { User, Session } from "@supabase/supabase-js";
 import type { AppRole } from "@/types";
 import { toast } from "sonner";
 import { ensureUserProfile, fetchUserRole, signInWithEmail, signUpWithEmail, signOutUser } from "@/lib/auth/authUtils";
+import { logError } from "@/lib/errorHandler";
 
 export interface AuthState {
   user: User | null;
@@ -26,11 +27,11 @@ export function useAuthProvider(): AuthState & AuthActions {
 
   // Initialize auth and listen for changes
   useEffect(() => {
-    console.log("AuthProvider initializing...");
+    // Initialize AuthProvider
     
     // Set up auth state change listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      console.log("Auth state changed:", event);
+      // Auth state change handled
       
       if (currentSession) {
         setSession(currentSession);
@@ -96,12 +97,13 @@ export function useAuthProvider(): AuthState & AuthActions {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      console.log("Signing in with email:", email);
+      // Log authentication attempt for debugging
       await signInWithEmail(email, password);
       // Session will be handled by onAuthStateChange
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Failed to sign in");
+    } catch (error: unknown) {
+      const authError = error as Error;
+      logError(authError, "Authentication - signIn");
+      toast.error(authError.message || "Failed to sign in");
       // Important: Set loading to false in case of error
       setLoading(false);
       throw error;

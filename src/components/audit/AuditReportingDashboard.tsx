@@ -38,11 +38,11 @@ export const AuditReportingDashboard = () => {
   });
 
   const handleExport = (format: "pdf" | "excel") => {
-    // Implementation for export functionality will be added later
+    // Export functionality implementation
     toast(`Starting export as ${format}...`, {
       description: "Your export will be ready shortly.",
     });
-    console.log(`Exporting as ${format}...`);
+    // Export processing would happen here
   };
 
   return (
