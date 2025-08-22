@@ -2,6 +2,7 @@
 import { AIAction } from "@/types/aiAssistant";
 import { supabase } from "@/integrations/supabase/client";
 import { subDays, subMonths, format, startOfMonth, endOfMonth } from "date-fns";
+import { AnalysisResult, AnalysisOpportunity, AnalysisRisk } from "@/types/analytics";
 
 export const analyticsActions: AIAction[] = [
   {
@@ -47,7 +48,13 @@ export const analyticsActions: AIAction[] = [
           new Date(item.created_at) >= startDate
         ) || [];
 
-        let analysis: any = {};
+        let analysis: AnalysisResult = {
+          taxLiability: 0,
+          complianceScore: 0,
+          riskLevel: 'medium',
+          recommendations: [],
+          trends: []
+        };
 
         switch (metric) {
           case "completion_rate":
@@ -389,13 +396,13 @@ export const analyticsActions: AIAction[] = [
 ];
 
 // Helper functions
-function generateComplianceInsights(analysis: any, metric: string): string[] {
+function generateComplianceInsights(analysis: AnalysisResult, metric: string): string[] {
   const insights = [];
   
   if (metric === "completion_rate") {
-    if (parseFloat(analysis.completion_rate) > 80) {
+    if (parseFloat(String(analysis.completion_rate || 0)) > 80) {
       insights.push("Excellent compliance performance! Keep up the good work.");
-    } else if (parseFloat(analysis.completion_rate) > 60) {
+    } else if (parseFloat(String(analysis.completion_rate || 0)) > 60) {
       insights.push("Good compliance rate, but there's room for improvement.");
     } else {
       insights.push("Compliance rate needs attention. Consider setting up automated reminders.");
@@ -411,7 +418,7 @@ function calculateVariance(values: number[]): number {
   return Math.sqrt(squaredDiffs.reduce((sum, val) => sum + val, 0) / values.length);
 }
 
-function generateTaxRecommendations(opportunities: any[]): string[] {
+function generateTaxRecommendations(opportunities: AnalysisOpportunity[]): string[] {
   const recommendations = [];
   
   if (opportunities.some(opp => opp.type === "deduction_review")) {
@@ -425,7 +432,7 @@ function generateTaxRecommendations(opportunities: any[]): string[] {
   return recommendations;
 }
 
-function generateRiskRecommendations(risks: any[], riskTolerance: string): string[] {
+function generateRiskRecommendations(risks: AnalysisRisk[], riskTolerance: string): string[] {
   const recommendations = [];
   
   const highRisks = risks.filter(risk => risk.severity === "high");

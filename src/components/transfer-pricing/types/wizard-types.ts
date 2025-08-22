@@ -124,7 +124,7 @@ export interface StepValidation {
 export interface ValidationRule {
   field: string;
   rule: 'required' | 'minLength' | 'maxLength' | 'pattern' | 'custom';
-  value?: any;
+  value?: unknown;
   message: string;
-  validator?: (value: any, data: any) => boolean;
+  validator?: (value: unknown, data: Record<string, unknown>) => boolean;
 }

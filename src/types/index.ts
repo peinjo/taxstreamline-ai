@@ -19,3 +19,6 @@ export type {
   TaxCalculation,
   TaxFiling
 } from './tax';
+export * from './workflow';
+export * from './analytics';
+export * from './integration';

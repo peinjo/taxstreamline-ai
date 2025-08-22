@@ -24,7 +24,7 @@ export class BaseActionRegistry {
     }));
   }
 
-  async executeAction(name: string, params: any, context: AIActionContext): Promise<AIActionResult> {
+  async executeAction(name: string, params: Record<string, unknown>, context: AIActionContext): Promise<AIActionResult> {
     const action = this.getAction(name);
     if (!action) {
       return {

@@ -36,7 +36,7 @@ const STEP_VALIDATIONS: Record<number, StepValidation> = {
         field: 'controlledTransactions',
         rule: 'custom',
         message: 'At least one controlled transaction is required',
-        validator: (value: any[]) => value && value.length > 0
+        validator: (value: unknown[]) => value && value.length > 0
       }
     ]
   },
@@ -49,19 +49,19 @@ const STEP_VALIDATIONS: Record<number, StepValidation> = {
         field: 'functions',
         rule: 'custom',
         message: 'At least two significant functions must be documented for OECD compliance',
-        validator: (value: any[]) => value && value.length >= 2
+        validator: (value: unknown[]) => value && value.length >= 2
       },
       {
         field: 'assets',
         rule: 'custom',
         message: 'Key assets should be documented',
-        validator: (value: any[]) => value && value.length >= 1
+        validator: (value: unknown[]) => value && value.length >= 1
       },
       {
         field: 'risks',
         rule: 'custom',
         message: 'Risk analysis is required for OECD BEPS Action 13',
-        validator: (value: any[]) => value && value.length >= 1
+        validator: (value: unknown[]) => value && value.length >= 1
       }
     ]
   },
@@ -74,7 +74,7 @@ const STEP_VALIDATIONS: Record<number, StepValidation> = {
         field: 'pricingMethods',
         rule: 'custom',
         message: 'At least one pricing method analysis is required',
-        validator: (value: Record<string, any>) => value && Object.keys(value).length > 0
+        validator: (value: unknown) => value && typeof value === 'object' && value !== null && Object.keys(value).length > 0
       }
     ]
   },
@@ -99,7 +99,7 @@ const OECD_THRESHOLDS = {
 };
 
 export function useOECDValidation() {
-  const validateField = (field: string, value: any, rules: ValidationRule[]): string[] => {
+  const validateField = (field: string, value: unknown, rules: ValidationRule[]): string[] => {
     const errors: string[] = [];
     
     const fieldRules = rules.filter(rule => rule.field === field);
@@ -112,17 +112,17 @@ export function useOECDValidation() {
           }
           break;
         case 'minLength':
-          if (typeof value === 'string' && value.length < rule.value) {
+          if (typeof value === 'string' && typeof rule.value === 'number' && value.length < rule.value) {
             errors.push(rule.message);
           }
           break;
         case 'maxLength':
-          if (typeof value === 'string' && value.length > rule.value) {
+          if (typeof value === 'string' && typeof rule.value === 'number' && value.length > rule.value) {
             errors.push(rule.message);
           }
           break;
         case 'pattern':
-          if (typeof value === 'string' && rule.value && !rule.value.test(value)) {
+          if (typeof value === 'string' && rule.value instanceof RegExp && !rule.value.test(value)) {
             errors.push(rule.message);
           }
           break;
@@ -146,25 +146,25 @@ export function useOECDValidation() {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    let stepData: any;
+    let stepData: Record<string, unknown>;
     switch (stepId) {
       case 1:
-        stepData = data.entityDetails;
+        stepData = data.entityDetails as unknown as Record<string, unknown>;
         break;
       case 2:
         stepData = { controlledTransactions: data.controlledTransactions };
         break;
       case 3:
-        stepData = data.functionalAnalysis;
+        stepData = data.functionalAnalysis as unknown as Record<string, unknown>;
         break;
       case 4:
-        stepData = data.economicAnalysis;
+        stepData = data.economicAnalysis as unknown as Record<string, unknown>;
         break;
       case 5:
-        stepData = data.oecdCompliance;
+        stepData = data.oecdCompliance as unknown as Record<string, unknown>;
         break;
       case 6:
-        stepData = data;
+        stepData = data as unknown as Record<string, unknown>;
         break;
       default:
         stepData = {};

@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, Download, FileSpreadsheet, DollarSign, TrendingUp, BarChart3, Info } from 'lucide-react';
+import { toast } from 'sonner';
 import { FinancialDataUpload } from './FinancialDataUpload';
 import { CurrencyConverter } from './CurrencyConverter';
 import { DataValidation } from './DataValidation';
@@ -35,13 +36,11 @@ export function FinancialDataIntegration({ entityId }: FinancialDataIntegrationP
   });
 
   const exportFinancialData = () => {
-    // TODO: Implement export functionality
-    console.log('Exporting financial data...');
+    toast.info('Financial data export feature will be available soon');
   };
 
   const downloadTemplate = () => {
-    // TODO: Implement template download
-    console.log('Downloading template...');
+    toast.info('Template download feature will be available soon');
   };
 
   return (

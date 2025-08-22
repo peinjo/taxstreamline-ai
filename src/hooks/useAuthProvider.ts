@@ -65,7 +65,7 @@ export function useAuthProvider(): AuthState & AuthActions {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (initialSession) {
-          console.log("Initial session found:", initialSession.user.email);
+          logError(new Error("Session initialized"), `Session for user: ${initialSession.user.email}`);
           setSession(initialSession);
           setUser(initialSession.user);
           

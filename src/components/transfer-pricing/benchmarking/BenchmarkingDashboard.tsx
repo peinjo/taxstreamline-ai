@@ -56,8 +56,27 @@ export function BenchmarkingDashboard() {
   };
 
   const exportToExcel = () => {
-    // TODO: Implement Excel export functionality
-    toast.info('Excel export functionality coming soon');
+    const exportData = benchmarks.map(b => ({
+      Name: b.comparable_name,
+      Country: b.country,
+      Industry: b.industry || 'N/A',
+      'Reliability Score': b.reliability_score || 0,
+      'Created Date': new Date(b.created_at || '').toLocaleDateString()
+    }));
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + Object.keys(exportData[0]).join(",") + "\n"
+      + exportData.map(row => Object.values(row).join(",")).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "benchmark_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Benchmark data exported to CSV');
   };
 
   const getReliabilityColor = (score: number) => {

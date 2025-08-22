@@ -63,9 +63,9 @@ export function useCalendarEventsMutations() {
     mutationFn: async (eventData: Partial<CalendarEvent> & { id: number }) => {
       const { id, ...updateData } = eventData;
       
-      const cleanUpdateData: any = {};
+      const cleanUpdateData: Record<string, unknown> = {};
       Object.entries(updateData).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value !== undefined && key !== 'id') {
           cleanUpdateData[key] = value;
         }
       });
