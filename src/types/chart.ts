@@ -1,5 +1,7 @@
 export interface ChartDataPoint {
-  name: string;
+  name?: string | number;
+  month?: string;
+  year?: number;
   value: number;
   color?: string;
   fill?: string;

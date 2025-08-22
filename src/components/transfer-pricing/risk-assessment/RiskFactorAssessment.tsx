@@ -237,13 +237,13 @@ export function RiskFactorAssessment({ entities, transactions, assessments }: Ri
         // Check if any entity has unusually high margins (simplified)
         return entities.some(e => {
           const financialData = e.financial_data || {};
-          return (financialData.operating_margin || 0) > 30; // 30% threshold
+          return Number(financialData.operating_margin || 0) > 30; // 30% threshold
         });
       
       case 'econ_loss_making_entities':
         return entities.some(e => {
           const financialData = e.financial_data || {};
-          return (financialData.net_profit || 0) < 0;
+          return Number(financialData.net_profit || 0) < 0;
         });
       
       case 'econ_intangible_complexity':

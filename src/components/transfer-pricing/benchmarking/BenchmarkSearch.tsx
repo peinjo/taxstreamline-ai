@@ -232,7 +232,7 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
                           <div>
                             <span className="text-muted-foreground">Revenue: </span>
                             <span className="font-medium">
-                              {formatFinancialValue(benchmark.financial_data.revenue, 'currency')}
+                              {formatFinancialValue(Number(benchmark.financial_data.revenue), 'currency')}
                             </span>
                           </div>
                         )}
@@ -240,7 +240,7 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
                           <div>
                             <span className="text-muted-foreground">ROA: </span>
                             <span className="font-medium">
-                              {formatFinancialValue(benchmark.financial_data.roa, 'percentage')}
+                              {formatFinancialValue(Number(benchmark.financial_data.roa), 'percentage')}
                             </span>
                           </div>
                         )}
@@ -248,7 +248,7 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
                           <div>
                             <span className="text-muted-foreground">ROS: </span>
                             <span className="font-medium">
-                              {formatFinancialValue(benchmark.financial_data.ros, 'percentage')}
+                              {formatFinancialValue(Number(benchmark.financial_data.ros), 'percentage')}
                             </span>
                           </div>
                         )}
@@ -256,7 +256,7 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
                           <div>
                             <span className="text-muted-foreground">Op. Margin: </span>
                             <span className="font-medium">
-                              {formatFinancialValue(benchmark.financial_data.operating_margin, 'percentage')}
+                              {formatFinancialValue(Number(benchmark.financial_data.operating_margin), 'percentage')}
                             </span>
                           </div>
                         )}

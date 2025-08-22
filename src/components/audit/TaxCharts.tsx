@@ -36,8 +36,8 @@ export const TaxCharts = ({ data }: Props) => {
   const handlePieClick = (data: ChartDataPoint, index: number) => {
     const clickedItem = data.name;
     const detailedData = filteredData.filter(item => 
-      activeChart === "type" ? item.tax_type === clickedItem.toLowerCase() : 
-      activeChart === "status" ? item.status === clickedItem.toLowerCase() : 
+      activeChart === "type" ? item.tax_type === String(clickedItem).toLowerCase() : 
+      activeChart === "status" ? item.status === String(clickedItem).toLowerCase() : 
       true
     );
     

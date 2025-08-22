@@ -110,7 +110,7 @@ export function OECDCompliantDocumentWizard() {
       await createDocument({
         title: `Transfer Pricing Documentation - ${wizardData.entityDetails.companyName}`,
         type: 'local',
-        content: wizardData,
+        content: JSON.stringify(wizardData),
         status: 'draft',
         compliance_status: 'compliant',
         risk_level: completeValidation.riskLevel || 'medium'

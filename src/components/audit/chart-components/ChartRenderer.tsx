@@ -19,12 +19,13 @@ import {
   Area,
 } from "recharts";
 import { formatCurrency, CHART_COLORS } from "./utils";
+import { ChartDataPoint } from "@/types/chart";
 
 interface ChartRendererProps {
-  chartData: any[];
+  chartData: ChartDataPoint[];
   chartType: "bar" | "pie" | "line" | "area";
   title: string;
-  onItemClick: (data: any, index: number) => void;
+  onItemClick: (data: ChartDataPoint, index: number) => void;
 }
 
 export const ChartRenderer: React.FC<ChartRendererProps> = ({
@@ -36,7 +37,19 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   const [activePieIndex, setActivePieIndex] = useState<number | undefined>(undefined);
 
   // Handle pie chart active sector
-  const renderActiveShape = (props: any) => {
+  const renderActiveShape = (props: {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    startAngle: number;
+    endAngle: number;
+    fill: string;
+    payload: ChartDataPoint;
+    percent: number;
+    value: number;
+  }) => {
     const RADIAN = Math.PI / 180;
     const { cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, fill, payload, percent, value } = props;
     const sin = Math.sin(-RADIAN * midAngle);
@@ -105,7 +118,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
               onMouseEnter={(_, index) => setActivePieIndex(index)}
               animationDuration={1000}
             >
-              {chartData.map((entry: any, index: number) => (
+              {chartData.map((entry: ChartDataPoint, index: number) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={CHART_COLORS[index % CHART_COLORS.length]}

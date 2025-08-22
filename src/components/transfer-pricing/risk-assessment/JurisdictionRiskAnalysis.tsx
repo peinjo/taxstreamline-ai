@@ -151,7 +151,7 @@ export function JurisdictionRiskAnalysis({ entities, transactions }: Jurisdictio
         let riskScore = jurisdictionInfo?.base_risk || 50;
         
         // Adjust risk based on entity complexity
-        if ((entity.financial_data?.revenue || 0) > 100000000) riskScore += 10; // >$100M
+        if (Number(entity.financial_data?.revenue || 0) > 100000000) riskScore += 10; // >$100M
         if (entity.entity_type === 'parent') riskScore += 5;
         
         jurisdictionMap.set(countryCode, {

@@ -38,8 +38,8 @@ export interface TPEntity {
   country_code: string;
   tax_id?: string;
   business_description?: string;
-  functional_analysis: Record<string, any>;
-  financial_data: Record<string, any>;
+  functional_analysis: Record<string, unknown>;
+  financial_data: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -53,7 +53,7 @@ export interface TPTransaction {
   amount?: number;
   currency: string;
   pricing_method?: PricingMethod;
-  arm_length_range: Record<string, any>;
+  arm_length_range: Record<string, unknown>;
   documentation_status: string;
   created_at: string;
   updated_at: string;
@@ -66,8 +66,8 @@ export interface TPBenchmark {
   comparable_name: string;
   country: string;
   industry?: string;
-  financial_data: Record<string, any>;
-  search_criteria: Record<string, any>;
+  financial_data: Record<string, unknown>;
+  search_criteria: Record<string, unknown>;
   reliability_score: number;
   created_at: string;
 }
@@ -91,7 +91,7 @@ export interface TPRiskAssessment {
   entity_id?: string;
   transaction_id?: string;
   risk_level: TPRiskLevel;
-  risk_factors: Record<string, any>;
+  risk_factors: Record<string, unknown>;
   recommendations?: string;
   assessment_date: string;
   created_at: string;
@@ -103,7 +103,7 @@ export interface TPTemplate {
   template_type: string;
   jurisdiction: string;
   version: string;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -114,7 +114,7 @@ export interface TPDocument {
   title: string;
   type: DocumentType;
   status: DocumentStatus;
-  content: any;
+  content: string | Record<string, unknown>;
   company_id?: string;
   created_by: string;
   created_at: string;
@@ -140,5 +140,24 @@ export interface TPDashboardMetrics {
     description: string;
     timestamp: string;
   }>;
+}
+
+// AI Generator types for SmartDocumentGenerator
+export interface EntityData {
+  id: string;
+  name: string;
+  country_code: string;
+}
+
+export interface TransactionData {
+  id: string;
+  description: string;
+  transaction_type: string;
+}
+
+export interface DocumentData {
+  id: string;
+  title: string;
+  type: string;
 }
 

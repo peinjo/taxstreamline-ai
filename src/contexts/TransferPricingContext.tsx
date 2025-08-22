@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TPDocument, TPEntity, TPTransaction, TPDeadline, DocumentType } from "@/types/transfer-pricing";
+import { logError } from "@/lib/errorHandler";
 
 interface TransferPricingContextType {
   documents: TPDocument[];
@@ -72,7 +73,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         title: doc.title,
         type: doc.type as 'master' | 'local' | 'supporting',
         status: mapDatabaseStatusToDocumentStatus(doc.status),
-        content: doc.content,
+        content: typeof doc.content === 'string' ? doc.content : JSON.stringify(doc.content || ''),
         company_id: doc.company_id,
         created_by: doc.created_by,
         created_at: doc.created_at,
@@ -87,9 +88,10 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       }));
 
       setDocuments(typedDocuments);
-    } catch (error: any) {
-      console.error("Error fetching documents:", error);
-      toast.error(error.message);
+    } catch (error) {
+      const err = error as Error;
+      logError(err, "TransferPricingContext.fetchDocuments");
+      toast.error(err.message || "Failed to fetch documents");
     } finally {
       setLoading(false);
     }
@@ -203,7 +205,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         title: document.title,
         type: mapDocumentTypeToDatabase((document.type || 'local') as DocumentType),
         status: mapDocumentStatusToDatabase(document.status || 'draft'),
-        content: document.content,
+        content: typeof document.content === 'string' ? document.content : JSON.stringify(document.content || ''),
         company_id: document.company_id,
         created_by: user.id,
         version: 1,
@@ -227,7 +229,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         title: data.title,
         type: data.type as 'master' | 'local' | 'supporting',
         status: mapDatabaseStatusToDocumentStatus(data.status),
-        content: data.content,
+        content: typeof data.content === 'string' ? data.content : JSON.stringify(data.content || ''),
         company_id: data.company_id,
         created_by: data.created_by,
         created_at: data.created_at,
@@ -256,7 +258,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         title: updates.title,
         type: updates.type ? mapDocumentTypeToDatabase(updates.type as DocumentType) : undefined,
         status: updates.status ? mapDocumentStatusToDatabase(updates.status) : undefined,
-        content: updates.content,
+        content: typeof updates.content === 'string' ? updates.content : JSON.stringify(updates.content || ''),
         company_id: updates.company_id,
         version: updates.version,
         entity_id: updates.entity_id,
@@ -316,8 +318,8 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
         tax_id: entity.tax_id,
         business_description: entity.business_description,
         user_id: user.id,
-        functional_analysis: entity.functional_analysis || {},
-        financial_data: entity.financial_data || {},
+        functional_analysis: entity.functional_analysis as any || {},
+        financial_data: entity.financial_data as any || {},
       };
 
       const { data, error } = await supabase
@@ -347,7 +349,11 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
     try {
       const { error } = await supabase
         .from('tp_entities')
-        .update(updates)
+      .update({
+        ...updates,
+        functional_analysis: updates.functional_analysis as any,
+        financial_data: updates.financial_data as any,
+      })
         .eq('id', id);
 
       if (error) throw error;

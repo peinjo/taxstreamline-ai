@@ -11,7 +11,7 @@ export const useChartData = (data: TaxReport[], selectedYear: string) => {
 
   // Process data for year-over-year trends
   const lineChartData = useMemo(() => {
-    return filteredData.reduce((acc: any[], curr) => {
+    return filteredData.reduce((acc: Array<{year: number; amount: number}>, curr) => {
       const year = curr.tax_year;
       const existingEntry = acc.find((entry) => entry.year === year);
       if (existingEntry) {
@@ -25,7 +25,7 @@ export const useChartData = (data: TaxReport[], selectedYear: string) => {
 
   // Process data for tax type breakdown
   const pieChartData = useMemo(() => {
-    return filteredData.reduce((acc: any[], curr) => {
+    return filteredData.reduce((acc: Array<{name: string; value: number}>, curr) => {
       const existingEntry = acc.find((entry) => entry.name === curr.tax_type);
       if (existingEntry) {
         existingEntry.value += Number(curr.amount || 0);
@@ -41,7 +41,7 @@ export const useChartData = (data: TaxReport[], selectedYear: string) => {
 
   // Process data for status breakdown chart
   const statusChartData = useMemo(() => {
-    return filteredData.reduce((acc: any[], curr) => {
+    return filteredData.reduce((acc: Array<{name: string; value: number}>, curr) => {
       const existingEntry = acc.find((entry) => entry.name === curr.status);
       if (existingEntry) {
         existingEntry.value += Number(curr.amount || 0);
@@ -57,7 +57,7 @@ export const useChartData = (data: TaxReport[], selectedYear: string) => {
 
   // Process data for monthly trends
   const monthlyTrendsData = useMemo(() => {
-    const monthsData = filteredData.reduce((acc: any, curr) => {
+    const monthsData = filteredData.reduce((acc: Record<string, {month: string; value: number}>, curr) => {
       if (!curr.created_at) return acc;
       
       const date = new Date(curr.created_at);
@@ -74,7 +74,7 @@ export const useChartData = (data: TaxReport[], selectedYear: string) => {
       return acc;
     }, {});
     
-    return Object.values(monthsData).sort((a: any, b: any) => {
+    return Object.values(monthsData).sort((a: {month: string; value: number}, b: {month: string; value: number}) => {
       const dateA = new Date(a.month);
       const dateB = new Date(b.month);
       return dateA.getTime() - dateB.getTime();

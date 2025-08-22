@@ -11,13 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wand2, FileText, Download, Copy, RefreshCw, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { EntityData, TransactionData, DocumentData } from '@/types/transfer-pricing';
 
 interface GenerationRequest {
   type: 'narrative' | 'analysis' | 'compliance_check' | 'benchmark_summary';
   entityId?: string;
   transactionId?: string;
   documentId?: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 interface GeneratedContent {
@@ -36,9 +37,9 @@ export function SmartDocumentGenerator() {
   });
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [entities, setEntities] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [entities, setEntities] = useState<EntityData[]>([]);
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [documents, setDocuments] = useState<DocumentData[]>([]);
 
   React.useEffect(() => {
     loadData();
@@ -263,7 +264,7 @@ Reliability Assessment: HIGH
                   <div>
                     <Label htmlFor="narrative-type">Narrative Type</Label>
                     <Select
-                      value={generationRequest.parameters.narrativeType || ''}
+                      value={String(generationRequest.parameters.narrativeType || '')}
                       onValueChange={(value) => 
                         setGenerationRequest(prev => ({
                           ...prev,
@@ -310,7 +311,7 @@ Reliability Assessment: HIGH
                     <Input
                       id="industry-context"
                       placeholder="e.g., Technology, Manufacturing"
-                      value={generationRequest.parameters.industryContext || ''}
+                      value={String(generationRequest.parameters.industryContext || '')}
                       onChange={(e) => 
                         setGenerationRequest(prev => ({
                           ...prev,
@@ -325,7 +326,7 @@ Reliability Assessment: HIGH
                   <div>
                     <Label htmlFor="analysis-type">Analysis Type</Label>
                     <Select
-                      value={generationRequest.parameters.analysisType || ''}
+                      value={String(generationRequest.parameters.analysisType || '')}
                       onValueChange={(value) => 
                         setGenerationRequest(prev => ({
                           ...prev,
@@ -396,7 +397,7 @@ Reliability Assessment: HIGH
                 <Textarea
                   id="additional-context"
                   placeholder="Provide any additional context or requirements..."
-                  value={generationRequest.parameters.additionalContext || ''}
+                  value={String(generationRequest.parameters.additionalContext || '')}
                   onChange={(e) => 
                     setGenerationRequest(prev => ({
                       ...prev,
