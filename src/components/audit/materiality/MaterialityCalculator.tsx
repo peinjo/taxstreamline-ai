@@ -14,6 +14,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { MaterialityCalculation } from "@/types";
 import { toast } from "@/components/ui/use-toast";
+import { logError } from "@/lib/errorHandler";
 
 // Import local components and utilities
 import { MaterialityForm } from "./MaterialityForm";
@@ -38,7 +39,7 @@ export const MaterialityCalculator = () => {
   const results = calculateMateriality(formData);
 
   // Update form field handler
-  const handleFormChange = (field: keyof MaterialityFormData, value: any) => {
+  const handleFormChange = (field: keyof MaterialityFormData, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -81,7 +82,7 @@ export const MaterialityCalculator = () => {
       queryClient.invalidateQueries({ queryKey: ['materiality-calculations'] });
     },
     onError: (error) => {
-      console.error("Save error:", error);
+      logError(error as Error, "MaterialityCalculator.handleSave");
       toast({
         variant: "destructive",
         title: "Error saving calculation",

@@ -38,6 +38,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InternalControl } from "@/types";
 import { format } from "date-fns";
+import { logError } from "@/lib/errorHandler";
 
 export const InternalControlsMonitor = () => {
   const [isNewControlOpen, setIsNewControlOpen] = useState<boolean>(false);
@@ -103,7 +104,7 @@ export const InternalControlsMonitor = () => {
       });
     },
     onError: (error) => {
-      console.error("Create error:", error);
+      logError(error as Error, "InternalControlsMonitor.handleCreate");
       toast({
         variant: "destructive",
         title: "Error creating internal control",

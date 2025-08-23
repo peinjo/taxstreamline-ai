@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
+import { logError } from "@/lib/errorHandler";
 
 export const formatDate = (dateString?: string): string => {
   if (!dateString) return "N/A";
@@ -127,7 +128,7 @@ export const exportToPDF = (sortedData: TaxReport[]): void => {
     doc.save("tax-report-summary.pdf");
     toast.success("PDF exported successfully");
   } catch (error) {
-    console.error("Error exporting to PDF:", error);
+    logError(error as Error, "TaxSummaryUtils.exportToPDF");
     toast.error("Failed to export PDF");
   }
 };
@@ -172,7 +173,7 @@ export const exportToExcel = (sortedData: TaxReport[]): void => {
     XLSX.writeFile(wb, "tax-report-summary.xlsx");
     toast.success("Excel exported successfully");
   } catch (error) {
-    console.error("Error exporting to Excel:", error);
+    logError(error as Error, "TaxSummaryUtils.exportToExcel");
     toast.error("Failed to export Excel");
   }
 };

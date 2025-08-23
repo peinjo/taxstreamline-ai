@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { AuditTable } from "@/components/audit/AuditTable";
 import { ReportFilters } from "@/components/audit/ReportFilters";
+import { logError } from "@/lib/errorHandler";
 
 export const AuditLogsTab = () => {
   const [filters, setFilters] = useState({
@@ -37,7 +38,7 @@ export const AuditLogsTab = () => {
       await refetch();
       toast.success("Audit logs refreshed");
     } catch (error) {
-      console.error("Error refreshing audit logs:", error);
+      logError(error as Error, "AuditLogsTab.refreshLogs");
     }
   };
 

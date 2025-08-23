@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logError } from "@/lib/errorHandler";
 
 export interface DashboardFilters {
   year: number;
@@ -98,7 +99,7 @@ export const useDashboardData = () => {
       await refetch();
       toast.success("Data refreshed successfully");
     } catch (error) {
-      console.error("Error refreshing data:", error);
+      logError(error as Error, "useDashboardData.refreshData");
     } finally {
       setIsRefreshing(false);
     }

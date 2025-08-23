@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TaxReport } from "@/types/tax";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { logError } from "@/lib/errorHandler";
 
 interface TaxSummaryParams {
   searchQuery?: string;
@@ -64,7 +65,7 @@ export const useTaxSummary = ({
     queryFn: fetchTaxReports,
     meta: {
       onError: (error: Error) => {
-        console.error("Error fetching tax reports:", error);
+        logError(error as Error, "useTaxSummary.fetchTaxSummary");
         toast.error("Failed to fetch tax reports");
       }
     },

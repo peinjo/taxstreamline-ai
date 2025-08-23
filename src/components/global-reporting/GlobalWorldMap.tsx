@@ -4,9 +4,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Globe, MapPin, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 
+interface DeadlineItem {
+  id: number;
+  title: string;
+  due_date: string;
+  status: string;
+  country: string;
+  priority: string;
+  tax_type: string;
+  created_at: string;
+}
+
+interface ComplianceItem {
+  id: number;
+  title: string;
+  requirement_type: string;
+  status: string;
+  country: string;
+  frequency: string;
+  description: string;
+  next_due_date: string;
+  created_at: string;
+}
+
 interface GlobalWorldMapProps {
-  deadlines: any[];
-  compliance: any[];
+  deadlines: DeadlineItem[];
+  compliance: ComplianceItem[];
   countries: string[];
 }
 

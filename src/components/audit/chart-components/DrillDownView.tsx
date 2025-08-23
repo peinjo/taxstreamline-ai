@@ -2,9 +2,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChartRenderer } from "./ChartRenderer";
+import { DrillDownItem } from "@/types/chart";
 
 interface DrillDownViewProps {
-  drillDownData: any[] | null;
+  drillDownData: DrillDownItem[] | null;
   drillDownTitle: string;
   resetDrillDown: () => void;
   chartType: "bar" | "pie" | "line" | "area";

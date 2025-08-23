@@ -4,10 +4,44 @@ import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { TrendingUp, Globe, AlertTriangle, CheckCircle } from "lucide-react";
 
+interface DeadlineItem {
+  id: number;
+  title: string;
+  due_date: string;
+  status: string;
+  country: string;
+  priority: string;
+  tax_type: string;
+  created_at: string;
+}
+
+interface ReportItem {
+  id: number;
+  tax_type: string;
+  status: string;
+  country: string;
+  amount: number;
+  tax_year: number;
+  created_at: string;
+  user_id: string;
+}
+
+interface ComplianceItem {
+  id: number;
+  title: string;
+  requirement_type: string;
+  status: string;
+  country: string;
+  frequency: string;
+  description: string;
+  next_due_date: string;
+  created_at: string;
+}
+
 interface GlobalAnalyticsProps {
-  deadlines: any[];
-  reports: any[];
-  compliance: any[];
+  deadlines: DeadlineItem[];
+  reports: ReportItem[];
+  compliance: ComplianceItem[];
   countries: string[];
 }
 
@@ -37,14 +71,15 @@ export function GlobalAnalytics({ deadlines, reports, compliance, countries }: G
     };
   });
 
-  const taxTypeData = reports.reduce((acc: any[], report) => {
-    const existing = acc.find(item => item.type === report.tax_type);
+  const taxTypeData = reports.reduce((acc: Array<{name: string; value: number; count: number; amount: number}>, report) => {
+    const existing = acc.find(item => item.name === report.tax_type);
     if (existing) {
       existing.count += 1;
       existing.amount += report.amount;
     } else {
       acc.push({
-        type: report.tax_type,
+        name: report.tax_type,
+        value: 1,
         count: 1,
         amount: report.amount
       });

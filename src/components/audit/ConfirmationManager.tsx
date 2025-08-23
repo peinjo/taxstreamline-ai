@@ -43,6 +43,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { ConfirmationRequest } from "@/types";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { logError } from "@/lib/errorHandler";
 
 export const ConfirmationManager = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -114,7 +115,7 @@ export const ConfirmationManager = () => {
       });
     },
     onError: (error) => {
-      console.error("Create error:", error);
+      logError(error as Error, "ConfirmationManager.handleCreate");
       toast({
         variant: "destructive",
         title: "Error creating confirmation request",

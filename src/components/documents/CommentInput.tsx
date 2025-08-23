@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { MessageSquarePlus } from "lucide-react";
+import { logError } from "@/lib/errorHandler";
 
 export const CommentInput = ({ documentId }: { documentId: string }) => {
   const [content, setContent] = useState("");
@@ -31,7 +32,7 @@ export const CommentInput = ({ documentId }: { documentId: string }) => {
         description: "Your comment has been added successfully.",
       });
     } catch (error) {
-      console.error("Error adding comment:", error);
+      logError(error as Error, "CommentInput.handleSubmit");
       toast({
         title: "Error",
         description: "Failed to add comment. Please try again.",

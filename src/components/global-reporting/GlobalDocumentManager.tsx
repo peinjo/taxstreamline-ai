@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Upload, Download, FileText, Filter } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "@/lib/errorHandler";
 
 interface GlobalDocumentManagerProps {
   selectedCountry: string;
@@ -77,7 +78,7 @@ export function GlobalDocumentManager({ selectedCountry, countries }: GlobalDocu
       toast.success("Document uploaded successfully");
       refetch();
     } catch (error) {
-      console.error("Upload error:", error);
+      logError(error as Error, "GlobalDocumentManager.handleUpload");
       toast.error("Failed to upload document");
     }
   };

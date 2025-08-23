@@ -10,7 +10,7 @@ import { MaterialityFormData, MaterialityResults } from "./types";
 interface MaterialityFormProps {
   formData: MaterialityFormData;
   results: MaterialityResults;
-  onChange: (field: keyof MaterialityFormData, value: any) => void;
+  onChange: (field: keyof MaterialityFormData, value: unknown) => void;
 }
 
 export function MaterialityForm({ formData, results, onChange }: MaterialityFormProps) {

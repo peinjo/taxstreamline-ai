@@ -10,9 +10,20 @@ import { Progress } from "@/components/ui/progress";
 import { FileText, Plus, CheckCircle, Clock, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
+interface DeadlineItem {
+  id: number;
+  title: string;
+  due_date: string;
+  status: string;
+  country: string;
+  priority: string;
+  tax_type: string;
+  created_at: string;
+}
+
 interface GlobalFormWorkflowsProps {
   countries: string[];
-  deadlines: any[];
+  deadlines: DeadlineItem[];
 }
 
 export function GlobalFormWorkflows({ countries, deadlines }: GlobalFormWorkflowsProps) {

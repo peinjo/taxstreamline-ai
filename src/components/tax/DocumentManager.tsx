@@ -83,9 +83,8 @@ export function DocumentManager() {
 
   const handleUpdateTags = async (id: number, tags: string[]) => {
     try {
-      // We need to cast the update object to any to avoid TypeScript error
-      // since the database schema includes tags but the TypeScript type might not be updated
-      const updateObject: any = { tags };
+      // Use any type for the update object since the database schema may include tags
+      const updateObject = { tags } as unknown;
       
       const { error } = await supabase
         .from("document_metadata")

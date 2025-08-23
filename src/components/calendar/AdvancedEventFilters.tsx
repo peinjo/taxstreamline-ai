@@ -41,7 +41,7 @@ export function AdvancedEventFilters({ onSearchChange, onFilterChange, onSortCha
     onSearchChange(value);
   };
 
-  const handleFilterChange = (key: keyof FilterState, value: any) => {
+  const handleFilterChange = (key: keyof FilterState, value: unknown) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFilterChange(newFilters);

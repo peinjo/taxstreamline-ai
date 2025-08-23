@@ -6,7 +6,7 @@ import { FilterState } from "./AdvancedEventFilters";
 
 interface FilterControlsProps {
   filters: FilterState;
-  onFilterChange: (key: keyof FilterState, value: any) => void;
+  onFilterChange: (key: keyof FilterState, value: unknown) => void;
   onSortChange: (sort: string) => void;
 }
 
