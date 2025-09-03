@@ -5,6 +5,7 @@ import type { AppRole } from "@/types";
 import { toast } from "sonner";
 import { ensureUserProfile, fetchUserRole, signInWithEmail, signUpWithEmail, signOutUser } from "@/lib/auth/authUtils";
 import { logError } from "@/lib/errorHandler";
+import { logger } from "@/lib/logging/logger";
 
 export interface AuthState {
   user: User | null;
@@ -46,7 +47,7 @@ export function useAuthProvider(): AuthState & AuthActions {
               setUserRole(role);
             }, 0);
           } catch (error) {
-            console.error("Error fetching user role:", error);
+            logger.error("Error fetching user role", error as Error, { userId: currentSession.user.id });
           }
         }
       } else {
@@ -65,7 +66,10 @@ export function useAuthProvider(): AuthState & AuthActions {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (initialSession) {
-          logError(new Error("Session initialized"), `Session for user: ${initialSession.user.email}`);
+          logger.info("Session initialized", { 
+            userId: initialSession.user.id, 
+            email: initialSession.user.email 
+          });
           setSession(initialSession);
           setUser(initialSession.user);
           
@@ -79,7 +83,7 @@ export function useAuthProvider(): AuthState & AuthActions {
           }
         }
       } catch (error) {
-        console.error("Error in auth initialization:", error);
+        logger.error("Error in auth initialization", error as Error);
       } finally {
         // Always complete loading even if there's an error
         setLoading(false);
@@ -117,7 +121,7 @@ export function useAuthProvider(): AuthState & AuthActions {
       // Important: Don't keep loading true forever
       setLoading(false);
     } catch (error: any) {
-      console.error("Signup error:", error);
+      logger.error("Signup error", error, { email });
       toast.error(error.message || "Failed to sign up");
       // Important: Set loading to false in case of error
       setLoading(false);
@@ -131,7 +135,7 @@ export function useAuthProvider(): AuthState & AuthActions {
       await signOutUser();
       // Session will be cleared by onAuthStateChange
     } catch (error: any) {
-      console.error("Signout error:", error);
+      logger.error("Signout error", error);
       toast.error(error.message || "Failed to sign out");
       // Important: Set loading to false in case of error
       setLoading(false);

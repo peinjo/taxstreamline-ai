@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { logError } from '@/lib/errorHandler';
+import { logger } from '@/lib/logging/logger';
 
 interface Props {
   children: ReactNode;
@@ -26,6 +27,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logError(error, `ErrorBoundary: ${errorInfo.componentStack}`);
+    logger.error('Component error caught by boundary', error, {
+      componentStack: errorInfo.componentStack,
+      errorBoundary: 'ErrorBoundary',
+    });
   }
 
   private handleRetry = () => {
