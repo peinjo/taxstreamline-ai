@@ -121,27 +121,22 @@ export function BenchmarkUpload({ onBenchmarkAdded }: BenchmarkUploadProps) {
 
     setFileUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const { benchmarkDataService } = await import('@/services/benchmarkDataProcessing');
+      const result = await benchmarkDataService.processFile(file);
       
-      // Simulate file processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (result.errors.length > 0) {
+        console.warn('File processing warnings:', result.errors);
+      }
       
-      // Add to benchmark list
-      const newBenchmark = {
-        id: Date.now().toString(),
-        name: file.name.replace(/\.[^/.]+$/, ""),
-        source: 'User Upload',
-        industry: 'Auto-detected',
-        geography: 'Multiple',
-        comparables: Math.floor(Math.random() * 50) + 10,
-        reliability: Math.floor(Math.random() * 40) + 60,
-        uploadDate: new Date().toISOString().split('T')[0]
-      };
-      
-      onBenchmarkAdded();
-      toast.success('Benchmark data uploaded successfully');
+      if (result.data.length > 0) {
+        await benchmarkDataService.saveBenchmarkData(result.data);
+        toast.success(`Successfully processed ${result.processed} benchmark records`);
+        onBenchmarkAdded();
+      } else {
+        toast.error('No valid benchmark data found in file');
+      }
     } catch (error) {
+      console.error('File processing error:', error);
       toast.error('Failed to process file');
     } finally {
       setFileUploading(false);
