@@ -6,7 +6,7 @@ import { actionRegistry } from "@/services/aiActionRegistry";
 import { ConversationMessage, AIActionResult } from "@/types/aiAssistant";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
-import OpenAI from "openai";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useAIAssistant() {
   const [messages, setMessages] = useState<ConversationMessage[]>([
@@ -39,10 +39,7 @@ Try commands like:
   const navigate = useNavigate();
   const location = useLocation();
 
-  const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true,
-  });
+  // AI operations now handled via secure edge function
 
   const executeAction = useCallback(async (functionCall: { name: string; arguments?: string }): Promise<AIActionResult> => {
     const actionName = functionCall.name;
@@ -145,14 +142,37 @@ Guidelines:
         { role: "user" as const, content: userMessage }
       ];
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: conversationHistory,
-        functions: actionRegistry.getFunctionDefinitions(),
-        function_call: "auto",
-        temperature: 0.7,
-        max_tokens: 1500
+      // Call secure AI edge function instead of direct OpenAI
+      const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-operations', {
+        body: {
+          action: 'chat',
+          payload: {
+            messages: conversationHistory,
+            context: {
+              currentPath: location.pathname,
+              userRole: user?.role || 'user'
+            }
+          }
+        }
       });
+
+      if (aiError) {
+        throw new Error(`AI service error: ${aiError.message}`);
+      }
+
+      if (!aiResponse.success) {
+        throw new Error(aiResponse.error || 'AI service failed');
+      }
+
+      // Mock the OpenAI response format for compatibility
+      const response = {
+        choices: [{
+          message: {
+            content: aiResponse.response,
+            function_call: null // Functions handled separately in edge function
+          }
+        }]
+      };
 
       const choice = response.choices[0];
       

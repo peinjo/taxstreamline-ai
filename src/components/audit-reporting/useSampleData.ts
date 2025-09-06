@@ -1,9 +1,11 @@
 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export const useSampleData = () => {
+  const { user } = useAuth();
   // Check if tax reports exist
   const { data: taxReports } = useQuery({
     queryKey: ["tax-reports-check"],
@@ -78,14 +80,15 @@ export const useSampleData = () => {
         .select("*")
         .limit(1);
         
-      if (!existingMetrics?.length) {
+      if (!existingMetrics?.length && user?.id) {
         await supabase
           .from("dashboard_metrics")
           .insert([{
             upcoming_deadlines: 4,
             active_clients: 28,
             documents_pending: 12,
-            compliance_alerts: 3
+            compliance_alerts: 3,
+            user_id: user.id
           }]);
       }
       

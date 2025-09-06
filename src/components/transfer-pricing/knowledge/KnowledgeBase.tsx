@@ -215,7 +215,9 @@ export function KnowledgeBase() {
                     <span>Jurisdiction: {selectedArticle?.jurisdiction}</span>
                   </div>
                   <div className="prose max-w-none">
-                    <div dangerouslySetInnerHTML={{ __html: selectedArticle?.content.replace(/\n/g, '<br>') || '' }} />
+                    <div className="whitespace-pre-wrap">
+                      {selectedArticle?.content || ''}
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2 pt-4 border-t">
                     {selectedArticle?.tags.map(tag => (
