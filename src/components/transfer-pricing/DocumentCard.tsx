@@ -107,7 +107,8 @@ export function DocumentCard({ doc, onEdit, onTitleChange, onDelete }: DocumentC
               <p className="text-sm text-gray-500">Last modified: {doc.modified}</p>
               {doc.content && (
                 <div className="mt-2 text-sm text-gray-600 line-clamp-3">
-                  {doc.content.replace(/<[^>]*>/g, '').substring(0, 150)}...
+                  {doc.content.replace(/<[^>]*>/g, '').substring(0, 150)}
+                  {doc.content.length > 150 && '...'}
                 </div>
               )}
             </div>

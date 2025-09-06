@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ErrorProvider } from "./contexts/ErrorContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { useContentSecurityPolicy } from "./hooks/useContentSecurityPolicy";
 import { routes } from "./config/routes";
 
 const queryClient = new QueryClient({
@@ -77,6 +78,9 @@ const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App: React.FC = () => {
+  // Apply Content Security Policy
+  useContentSecurityPolicy();
+
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
