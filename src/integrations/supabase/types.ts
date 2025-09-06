@@ -367,7 +367,7 @@ export type Database = {
           documents_pending: number
           id: number
           upcoming_deadlines: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           active_clients?: number
@@ -376,7 +376,7 @@ export type Database = {
           documents_pending?: number
           id?: never
           upcoming_deadlines?: number
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           active_clients?: number
@@ -385,7 +385,7 @@ export type Database = {
           documents_pending?: number
           id?: never
           upcoming_deadlines?: number
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2216,8 +2216,16 @@ export type Database = {
         }
         Returns: string
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role: {
         Args: { required_role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
+      has_tp_role: {
+        Args: { required_role: string }
         Returns: boolean
       }
       increment_kb_view_count: {
