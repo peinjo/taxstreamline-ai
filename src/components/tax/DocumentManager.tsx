@@ -10,7 +10,7 @@ import { DocumentUploadSection } from "./components/DocumentUploadSection";
 import { DocumentSearch } from "./components/DocumentSearch";
 import { useDocumentFiltering } from "./hooks/useDocumentFiltering";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
-import { secureStorage } from "@/utils/secureStorage";
+import { secureStorage } from "@/lib/security/secureStorage";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw } from "lucide-react";

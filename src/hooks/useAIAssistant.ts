@@ -124,9 +124,7 @@ Guidelines:
     setIsLoading(true);
 
     try {
-      if (!import.meta.env.VITE_OPENAI_API_KEY) {
-        throw new Error("OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your environment variables.");
-      }
+      // OpenAI operations now handled securely via edge function
 
       // Build conversation history with context
       const conversationHistory = [

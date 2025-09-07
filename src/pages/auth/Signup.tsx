@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,14 +7,18 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { validateInput, signupSchema } from "@/lib/validation/schemas";
+import { checkAuthRateLimit } from "@/lib/security/rateLimiter";
+import { auditLogger } from "@/lib/security/auditLogger";
 
 const Signup = () => {
   const navigate = useNavigate();
   const { signUp, loading: authLoading, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null); // Fix type for error
+  const [error, setError] = useState<Error | null>(null);
 
   const logError = (error: any, source: string) => {
     console.error(`${source} error:`, error);
@@ -51,13 +54,17 @@ const Signup = () => {
     setError(null); // Clear previous errors
 
     try {
-      // Input validation
-      if (!email || !password) {
-        throw new Error("Please fill in all fields");
+      // Validate input data  
+      const validation = validateInput(signupSchema, { email, password, confirmPassword });
+      if (!validation.success) {
+        throw new Error(validation.error);
       }
 
-      if (password.length < 6) {
-        throw new Error("Password must be at least 6 characters long");
+      // Check rate limiting
+      const rateLimit = checkAuthRateLimit(email, 'signup');
+      if (!rateLimit.allowed) {
+        const minutes = Math.ceil(rateLimit.timeUntilReset / 1000 / 60);
+        throw new Error(`Too many signup attempts. Please try again in ${minutes} minute(s).`);
       }
 
       // Begin signup process
@@ -120,6 +127,21 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a password"
+                required
+                className="w-full"
+                disabled={loading || authLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+                Confirm Password
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
                 required
                 className="w-full"
                 disabled={loading || authLoading}

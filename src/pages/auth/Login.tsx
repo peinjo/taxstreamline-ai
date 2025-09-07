@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { cleanupAuthState } from "@/lib/auth/authUtils";
 import { logError } from "@/lib/errorHandler";
+import { validateInput, loginSchema } from "@/lib/validation/schemas";
+import { checkAuthRateLimit } from "@/lib/security/rateLimiter";
+import { auditLogger } from "@/lib/security/auditLogger";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,6 +37,29 @@ const Login = () => {
     
     // Prevent multiple submission attempts
     if (loading || authLoading) return;
+
+    // Validate input data
+    const validation = validateInput(loginSchema, { email, password });
+    if (!validation.success) {
+      setAuthError(validation.error);
+      toast.error(validation.error);
+      return;
+    }
+
+    // Check rate limiting
+    const rateLimit = checkAuthRateLimit(email, 'login');
+    if (!rateLimit.allowed) {
+      const minutes = Math.ceil(rateLimit.timeUntilReset / 1000 / 60);
+      const errorMessage = `Too many login attempts. Please try again in ${minutes} minute(s).`;
+      setAuthError(errorMessage);
+      toast.error(errorMessage);
+      await auditLogger.logSuspiciousActivity({
+        event: 'rate_limit_exceeded',
+        email,
+        action: 'login'
+      });
+      return;
+    }
     
     // Clean up auth state before signing in
     cleanupAuthState();
@@ -43,17 +68,18 @@ const Login = () => {
     setAuthError(null);
     
     try {
-      if (!email || !password) {
-        throw new Error("Please enter both email and password");
-      }
-
       // Login attempt - handled by AuthProvider
       await signIn(email, password);
+      // Log successful authentication
+      await auditLogger.logAuthSuccess('pending', email);
       // Navigation will happen automatically via auth state change
       
     } catch (error: unknown) {
       const loginError = error as Error;
       logError(loginError, "Login form submission");
+      
+      // Log failed authentication attempt
+      await auditLogger.logAuthFailure(email, loginError.message);
       
       // Provide more user-friendly error messages
       let errorMessage = "Failed to log in";
