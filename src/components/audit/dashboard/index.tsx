@@ -1,10 +1,10 @@
 
 import React from "react";
 import { useDashboardData } from "./useDashboardData";
-import { DashboardHeader } from "./DashboardHeader";
-import { FilterToolbar } from "./FilterToolbar";
+import { AccessibleDashboardHeader } from "./AccessibleDashboardHeader";
+import { AccessibleFilterToolbar } from "./AccessibleFilterToolbar";
 import { SummaryMetrics } from "../SummaryMetrics";
-import { MetricsLoader } from "./MetricsLoader";
+import { LoadingStateManager } from "@/components/common/LoadingStateManager";
 import { DashboardTabs } from "./DashboardTabs";
 
 export const AuditDashboard = () => {
@@ -22,27 +22,31 @@ export const AuditDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader 
+      <AccessibleDashboardHeader 
         isRefreshing={isRefreshing}
         onRefresh={handleRefresh}
+        onExport={handleExport}
       />
 
-      <FilterToolbar 
+      <AccessibleFilterToolbar 
         filters={filters}
         onFilterChange={setFilters}
         onExport={handleExport}
       />
 
-      {isLoadingMetrics ? (
-        <MetricsLoader />
-      ) : (
+      <LoadingStateManager
+        isLoading={isLoadingMetrics}
+        isError={false}
+        isEmpty={false}
+        skeletonRows={4}
+      >
         <SummaryMetrics metrics={metrics || {
           totalLiability: 0,
           filingCount: 0,
           pendingPayments: 0,
           complianceRate: 0
         }} />
-      )}
+      </LoadingStateManager>
 
       <DashboardTabs 
         reports={reports}

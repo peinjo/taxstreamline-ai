@@ -1,11 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { WizardNavigation } from './WizardNavigation';
+import { WizardProgress } from './WizardProgress';
+import { WizardValidationAlerts } from './WizardValidationAlerts';
 import { useTransferPricing } from '@/contexts/TransferPricingContext';
+import { useAccessibility } from '@/hooks/useAccessibility';
 import { EntityDetailsStep } from './steps/EntityDetailsStep';
 import { ControlledTransactionsStep } from './steps/ControlledTransactionsStep';
 import { FunctionalAnalysisStep } from './steps/FunctionalAnalysisStep';
@@ -26,6 +26,7 @@ const WIZARD_STEPS = [
 
 export function OECDCompliantDocumentWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const { announce } = useAccessibility({ announceChanges: true });
   const [wizardData, setWizardData] = useState<DocumentWizardData>({
     entityDetails: {
       companyName: '',
@@ -90,12 +91,14 @@ export function OECDCompliantDocumentWizard() {
   const handleNext = () => {
     if (canProceedToNext() && currentStep < WIZARD_STEPS.length) {
       setCurrentStep(currentStep + 1);
+      announce(`Moved to step ${currentStep + 1}: ${WIZARD_STEPS[currentStep].title}`);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      announce(`Moved back to step ${currentStep - 1}: ${WIZARD_STEPS[currentStep - 2].title}`);
     }
   };
 
@@ -179,127 +182,46 @@ export function OECDCompliantDocumentWizard() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header with Progress */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">OECD Compliant Transfer Pricing Documentation</CardTitle>
-              <p className="text-muted-foreground mt-1">
-                Create comprehensive transfer pricing documentation following OECD BEPS Action 13 guidelines
-              </p>
-            </div>
-            <Badge variant="outline" className="px-3 py-1">
-              Step {currentStep} of {WIZARD_STEPS.length}
-            </Badge>
-          </div>
-          
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Overall Progress</span>
-              <span>{Math.round(getOverallProgress())}%</span>
-            </div>
-            <Progress value={getOverallProgress()} className="h-2" />
-          </div>
-        </CardHeader>
-      </Card>
+      <WizardProgress
+        currentStep={currentStep}
+        totalSteps={WIZARD_STEPS.length}
+        progress={getOverallProgress()}
+        title="OECD Compliant Transfer Pricing Documentation"
+        description="Create comprehensive transfer pricing documentation following OECD BEPS Action 13 guidelines"
+      />
 
-      {/* Step Navigation */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center justify-between space-x-4 overflow-x-auto">
-            {WIZARD_STEPS.map((step, index) => {
-              const validation = getStepValidation(step.id);
-              const isActive = currentStep === step.id;
-              const isCompleted = validation.isValid;
-              const hasWarnings = validation.warnings.length > 0;
-
-              return (
-                <div
-                  key={step.id}
-                  className={`flex flex-col items-center space-y-2 min-w-0 flex-1 ${
-                    isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'
-                  }`}
-                >
-                  <div className={`relative w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                    isActive 
-                      ? 'border-primary bg-primary text-primary-foreground' 
-                      : isCompleted 
-                        ? 'border-green-600 bg-green-600 text-white'
-                        : hasWarnings
-                          ? 'border-yellow-500 bg-yellow-50'
-                          : 'border-muted-foreground bg-background'
-                  }`}>
-                    {isCompleted ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : hasWarnings ? (
-                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                    ) : (
-                      <span className="text-sm font-medium">{step.id}</span>
-                    )}
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium truncate">{step.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{step.description}</p>
-                  </div>
-                  {index < WIZARD_STEPS.length - 1 && (
-                    <div className="absolute top-5 left-full w-full h-0.5 bg-border transform translate-x-2" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <WizardNavigation
+            steps={WIZARD_STEPS}
+            currentStep={currentStep}
+            getStepValidation={getStepValidation}
+          />
         </CardContent>
       </Card>
 
-      {/* Validation Alerts */}
-      {currentStepValidation.errors.length > 0 && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            Please fix the following errors before proceeding:
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              {currentStepValidation.errors.map((error, index) => (
-                <li key={index} className="text-sm">{error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
+      <WizardValidationAlerts validation={currentStepValidation} />
 
-      {currentStepValidation.warnings.length > 0 && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Recommendations:</strong>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              {currentStepValidation.warnings.map((warning, index) => (
-                <li key={index} className="text-sm">{warning}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Step Content */}
       <Card>
         <CardHeader>
           <CardTitle>{WIZARD_STEPS[currentStep - 1].title}</CardTitle>
           <p className="text-muted-foreground">{WIZARD_STEPS[currentStep - 1].description}</p>
         </CardHeader>
         <CardContent>
-          {renderStepContent()}
+          <main role="main" aria-label={`Step ${currentStep}: ${WIZARD_STEPS[currentStep - 1].title}`}>
+            {renderStepContent()}
+          </main>
         </CardContent>
       </Card>
 
-      {/* Navigation */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex justify-between">
+          <nav className="flex justify-between" role="navigation" aria-label="Wizard navigation">
             <Button
               variant="outline"
               onClick={handleBack}
               disabled={currentStep === 1}
+              aria-label={currentStep === 1 ? "Previous step (disabled - first step)" : "Go to previous step"}
             >
               Previous
             </Button>
@@ -310,6 +232,7 @@ export function OECDCompliantDocumentWizard() {
                   onClick={handleSubmit}
                   disabled={!validateComplete(wizardData).isValid}
                   className="min-w-32"
+                  aria-label={!validateComplete(wizardData).isValid ? "Generate document (disabled - validation errors)" : "Generate transfer pricing document"}
                 >
                   Generate Document
                 </Button>
@@ -318,12 +241,13 @@ export function OECDCompliantDocumentWizard() {
                   onClick={handleNext}
                   disabled={!canProceedToNext()}
                   className="min-w-32"
+                  aria-label={!canProceedToNext() ? "Next step (disabled - validation errors)" : "Go to next step"}
                 >
                   Next
                 </Button>
               )}
             </div>
-          </div>
+          </nav>
         </CardContent>
       </Card>
     </div>
