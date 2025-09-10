@@ -29,6 +29,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
           variant="outline"
           onClick={() => onExport("pdf")}
           className="gap-2"
+          disabled={!filters}
         >
           <FileDown className="h-4 w-4" />
           Export PDF
@@ -37,6 +38,7 @@ export const FilterToolbar: React.FC<FilterToolbarProps> = ({
           variant="outline"
           onClick={() => onExport("excel")}
           className="gap-2"
+          disabled={!filters}
         >
           <FileDown className="h-4 w-4" />
           Export Excel

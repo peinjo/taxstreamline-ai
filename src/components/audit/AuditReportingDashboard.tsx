@@ -37,12 +37,41 @@ export const AuditReportingDashboard = () => {
     },
   });
 
-  const handleExport = (format: "pdf" | "excel") => {
-    // Export functionality implementation
-    toast(`Starting export as ${format}...`, {
-      description: "Your export will be ready shortly.",
-    });
-    // Export processing would happen here
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async (format: "pdf" | "excel") => {
+    if (!reports || reports.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+    
+    try {
+      const { exportData } = await import("@/services/exportService");
+      
+      const totalAmount = reports.reduce((sum, report) => sum + Number(report.amount || 0), 0);
+      const paidAmount = reports.filter(r => r.status === 'paid').reduce((sum, report) => sum + Number(report.amount || 0), 0);
+      
+      await exportData(
+        reports,
+        format,
+        {
+          title: "Audit Reporting Dashboard",
+          filename: `audit-reports-${format}-${new Date().toISOString().split('T')[0]}`,
+          summaryData: {
+            "Total Tax Amount": totalAmount,
+            "Paid Amount": paidAmount,
+            "Pending Amount": totalAmount - paidAmount,
+            "Total Reports": reports.length,
+            "Filter Year": filters.year,
+            "Tax Type Filter": filters.taxType === 'all' ? 'All Types' : filters.taxType,
+            "Status Filter": filters.status === 'all' ? 'All Statuses' : filters.status
+          }
+        },
+        setIsExporting
+      );
+    } catch (error) {
+      toast.error(`Failed to export ${format.toUpperCase()}`);
+    }
   };
 
   return (
@@ -54,18 +83,20 @@ export const AuditReportingDashboard = () => {
             <Button
               variant="outline"
               onClick={() => handleExport("pdf")}
+              disabled={isExporting || isLoading}
               className="gap-2"
             >
               <FileDown className="h-4 w-4" />
-              Export PDF
+              {isExporting ? "Exporting..." : "Export PDF"}
             </Button>
             <Button
               variant="outline"
               onClick={() => handleExport("excel")}
+              disabled={isExporting || isLoading}
               className="gap-2"
             >
               <FileDown className="h-4 w-4" />
-              Export Excel
+              {isExporting ? "Exporting..." : "Export Excel"}
             </Button>
           </div>
         </div>

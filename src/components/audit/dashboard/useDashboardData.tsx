@@ -105,13 +105,38 @@ export const useDashboardData = () => {
     }
   };
 
-  const handleExport = (format: "pdf" | "excel") => {
+  const handleExport = async (format: "pdf" | "excel") => {
     if (!reports || reports.length === 0) {
       toast.error("No data to export");
       return;
     }
     
-    toast.success(`Exporting ${format.toUpperCase()} report`);
+    try {
+      const { exportData } = await import("@/services/exportService");
+      
+      const totalAmount = reports.reduce((sum, report) => sum + Number(report.amount || 0), 0);
+      const paidAmount = reports.filter(r => r.status === 'paid').reduce((sum, report) => sum + Number(report.amount || 0), 0);
+      
+      await exportData(
+        reports,
+        format,
+        {
+          title: "Tax Reports Dashboard",
+          filename: `tax-reports-${format}-${new Date().toISOString().split('T')[0]}`,
+          summaryData: {
+            "Total Tax Amount": totalAmount,
+            "Paid Amount": paidAmount,
+            "Pending Amount": totalAmount - paidAmount,
+            "Total Reports": reports.length,
+            "Year Range": `${Math.min(...reports.map(r => r.tax_year))} - ${Math.max(...reports.map(r => r.tax_year))}`
+          }
+        },
+        setIsRefreshing
+      );
+    } catch (error) {
+      logError(error as Error, "useDashboardData.handleExport");
+      toast.error(`Failed to export ${format.toUpperCase()}`);
+    }
   };
 
   return {
