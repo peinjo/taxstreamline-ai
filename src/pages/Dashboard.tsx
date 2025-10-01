@@ -11,6 +11,7 @@ import { TaskManagement } from "@/components/tasks/TaskManagement";
 import { useDashboardMetrics, useRecentActivities, useUpcomingDeadlines } from "@/hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { SampleDataButton } from "@/components/dashboard/SampleDataButton";
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
@@ -95,16 +96,19 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            Welcome back, {firstName}
-            {userRole === "admin" && (
-              <span className="ml-2 text-sm text-muted-foreground">(Admin)</span>
-            )}
-          </h1>
-          <p className="text-muted-foreground">
-            Here's what's happening with your clients today.
-          </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-semibold">
+              Welcome back, {firstName}
+              {userRole === "admin" && (
+                <span className="ml-2 text-sm text-muted-foreground">(Admin)</span>
+              )}
+            </h1>
+            <p className="text-muted-foreground">
+              Here's what's happening with your clients today.
+            </p>
+          </div>
+          {(!metrics || metrics.upcoming_deadlines === 0) && <SampleDataButton />}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
