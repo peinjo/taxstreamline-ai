@@ -11,6 +11,9 @@ import { ErrorProvider } from "./contexts/ErrorContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useContentSecurityPolicy } from "./hooks/useContentSecurityPolicy";
 import { routes } from "./config/routes";
+import { OnboardingProvider } from "@/contexts/OnboardingContext";
+import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+import { QuickActionsButton } from "@/components/common/QuickActionsButton";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,12 +90,15 @@ const App: React.FC = () => {
         <AuthProvider>
           <ErrorProvider>
             <NotificationProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                <Routes>
-                  {routes.map((route) => {
+              <OnboardingProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <OnboardingWizard />
+                  <QuickActionsButton />
+                  <BrowserRouter>
+                  <Routes>
+                    {routes.map((route) => {
                     // Handle the index route
                     if (route.path === "/") {
                       return (
@@ -118,10 +124,11 @@ const App: React.FC = () => {
                         }
                       />
                     );
-                  })}
-                </Routes>
-                </BrowserRouter>
-              </TooltipProvider>
+                    })}
+                  </Routes>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </OnboardingProvider>
             </NotificationProvider>
           </ErrorProvider>
         </AuthProvider>

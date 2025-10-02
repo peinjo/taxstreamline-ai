@@ -1,8 +1,7 @@
-
 import React from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Users, FileText, AlertOctagon } from "lucide-react";
+import { Calendar, Users, FileText, AlertOctagon, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,9 +11,12 @@ import { useDashboardMetrics, useRecentActivities, useUpcomingDeadlines } from "
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { SampleDataButton } from "@/components/dashboard/SampleDataButton";
+import { EmptyState } from "@/components/common/EmptyState";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
+  const navigate = useNavigate();
 
   // Fetch metrics from the database
   const { 
@@ -66,6 +68,13 @@ const Dashboard = () => {
 
   const firstName = profile?.full_name?.split(" ")[0] || "User";
 
+  const hasNoData = !metrics || (
+    metrics.active_clients === 0 &&
+    metrics.upcoming_deadlines === 0 &&
+    metrics.documents_pending === 0 &&
+    metrics.compliance_alerts === 0
+  );
+
   const metricItems = [
     {
       title: "Upcoming Deadlines",
@@ -108,8 +117,21 @@ const Dashboard = () => {
               Here's what's happening with your clients today.
             </p>
           </div>
-          {(!metrics || metrics.upcoming_deadlines === 0) && <SampleDataButton />}
+          {hasNoData && <SampleDataButton />}
         </div>
+
+        {hasNoData ? (
+          <EmptyState
+            icon={TrendingUp}
+            title="Welcome to Your Dashboard"
+            description="Start by loading sample data or creating your first tax calculation to see your metrics and insights here."
+            actionLabel="Calculate Tax"
+            onAction={() => navigate("/tax")}
+            secondaryActionLabel="View Calendar"
+            onSecondaryAction={() => navigate("/calendar")}
+          />
+        ) : (
+          <>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {metricItems.map((metric) => (
@@ -139,6 +161,8 @@ const Dashboard = () => {
           <TaskManagement />
           <TeamWorkspace />
         </div>
+        </>
+        )}
       </div>
     </DashboardLayout>
   );

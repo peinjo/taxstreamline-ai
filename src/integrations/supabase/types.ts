@@ -2139,6 +2139,9 @@ export type Database = {
           full_name: string
           id: number
           job_title: string | null
+          onboarding_completed: boolean | null
+          onboarding_skipped: boolean | null
+          onboarding_step: number | null
           phone_number: string | null
           user_id: string
         }
@@ -2152,6 +2155,9 @@ export type Database = {
           full_name: string
           id?: never
           job_title?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_skipped?: boolean | null
+          onboarding_step?: number | null
           phone_number?: string | null
           user_id: string
         }
@@ -2165,6 +2171,9 @@ export type Database = {
           full_name?: string
           id?: never
           job_title?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_skipped?: boolean | null
+          onboarding_step?: number | null
           phone_number?: string | null
           user_id?: string
         }
