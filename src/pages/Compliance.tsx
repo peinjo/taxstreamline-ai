@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ClipboardCheck } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { ComplianceFilters } from "@/components/compliance/ComplianceFilters";
 import { ComplianceStats } from "@/components/compliance/ComplianceStats";
@@ -9,6 +9,7 @@ import { ComplianceItemCard } from "@/components/compliance/ComplianceItemCard";
 import { CreateComplianceDialog } from "@/components/compliance/CreateComplianceDialog";
 import { useCompliance } from "@/hooks/useCompliance";
 import { ComplianceItem } from "@/types/compliance";
+import { EmptyState } from "@/components/common/EmptyState";
 
 const ComplianceTracker = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -90,12 +91,22 @@ const ComplianceTracker = () => {
             onFiltersChange={setFilters}
           />
 
-          {complianceItems.length === 0 ? (
+          {complianceItems.length === 0 && !searchTerm && !filters.country && !filters.status ? (
+            <EmptyState
+              icon={ClipboardCheck}
+              title="No compliance items yet"
+              description="Start tracking your compliance requirements by creating your first item. Monitor deadlines, statuses, and ensure you stay compliant across all jurisdictions."
+              actionLabel="Create Compliance Item"
+              onAction={() => setShowCreateDialog(true)}
+            />
+          ) : complianceItems.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">No compliance items found</p>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create your first compliance item
+              <p className="text-gray-500 mb-4">No compliance items match your filters</p>
+              <Button variant="outline" onClick={() => {
+                setSearchTerm("");
+                setFilters({ country: "", status: "", priority: "", requirement_type: "", frequency: "" });
+              }}>
+                Clear Filters
               </Button>
             </div>
           ) : (

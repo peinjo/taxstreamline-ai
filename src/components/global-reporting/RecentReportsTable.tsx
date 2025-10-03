@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyReportsState } from "./EmptyReportsState";
 
 interface Report {
   id: number;
@@ -98,9 +99,7 @@ export function RecentReportsTable({ reports, isLoading }: RecentReportsTablePro
       <CardContent>
         <div className="space-y-4">
           {reports.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No recent reports found
-            </div>
+            <EmptyReportsState />
           ) : (
             reports.map((report) => (
               <div

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarIcon, Trash2, Edit, Clock, MapPin, AlertCircle, Repeat } from "lucide-react";
 import { format } from "date-fns";
 import { CalendarEvent, EVENT_CATEGORIES, EVENT_PRIORITIES } from "@/types/calendar";
+import { EmptyState } from "@/components/common/EmptyState";
 
 interface EventsListProps {
   events: CalendarEvent[];
@@ -126,9 +127,16 @@ export function EventsList({
               </div>
             </div>
           ))}
-          {events.length === 0 && (
+          {events.length === 0 && !date && !searchTerm && (
+            <EmptyState
+              icon={CalendarIcon}
+              title="No events yet"
+              description="Start organizing your schedule by creating your first calendar event. Track meetings, deadlines, and important dates all in one place."
+            />
+          )}
+          {events.length === 0 && (date || searchTerm) && (
             <p className="text-center text-gray-500">
-              {date ? "No events for this date" : "No events found"}
+              {date ? "No events for this date" : "No events found matching your search"}
             </p>
           )}
         </div>

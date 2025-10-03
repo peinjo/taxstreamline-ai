@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Globe, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyDeadlinesState } from "./EmptyDeadlinesState";
 
 interface Deadline {
   id: number;
@@ -80,9 +81,7 @@ export function UpcomingDeadlinesTable({ deadlines, isLoading }: UpcomingDeadlin
       <CardContent>
         <div className="space-y-4">
           {deadlines.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No upcoming deadlines found
-            </div>
+            <EmptyDeadlinesState />
           ) : (
             deadlines.map((deadline) => {
               const daysUntil = getDaysUntilDue(deadline.due_date);
