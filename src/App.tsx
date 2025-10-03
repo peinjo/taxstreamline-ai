@@ -95,37 +95,37 @@ const App: React.FC = () => {
                   <Toaster />
                   <Sonner />
                   <OnboardingWizard />
-                  <QuickActionsButton />
                   <BrowserRouter>
-                  <Routes>
-                    {routes.map((route) => {
-                    // Handle the index route
-                    if (route.path === "/") {
+                    <QuickActionsButton />
+                    <Routes>
+                      {routes.map((route) => {
+                      // Handle the index route
+                      if (route.path === "/") {
+                        return (
+                          <Route
+                            key={route.path}
+                            path={route.path}
+                            element={route.element}
+                          />
+                        );
+                      }
+                      
+                      // Handle all other routes with appropriate protection
                       return (
                         <Route
                           key={route.path}
                           path={route.path}
-                          element={route.element}
+                          element={
+                            route.isProtected ? (
+                              <ProtectedRoute>{route.element}</ProtectedRoute>
+                            ) : (
+                              <PublicAuthRoute>{route.element}</PublicAuthRoute>
+                            )
+                          }
                         />
                       );
-                    }
-                    
-                    // Handle all other routes with appropriate protection
-                    return (
-                      <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                          route.isProtected ? (
-                            <ProtectedRoute>{route.element}</ProtectedRoute>
-                          ) : (
-                            <PublicAuthRoute>{route.element}</PublicAuthRoute>
-                          )
-                        }
-                      />
-                    );
-                    })}
-                  </Routes>
+                      })}
+                    </Routes>
                   </BrowserRouter>
                 </TooltipProvider>
               </OnboardingProvider>
