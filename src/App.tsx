@@ -14,6 +14,8 @@ import { routes } from "./config/routes";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { QuickActionsButton } from "@/components/common/QuickActionsButton";
+import { CommandPalette } from "@/components/common/CommandPalette";
+import { useGlobalKeyboardShortcuts } from "@/hooks/useGlobalKeyboardShortcuts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -80,6 +82,47 @@ const PublicAuthRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Inner component to use hooks within Router context
+const AppContent: React.FC = () => {
+  useGlobalKeyboardShortcuts();
+
+  return (
+    <>
+      <CommandPalette />
+      <QuickActionsButton />
+      <Routes>
+        {routes.map((route) => {
+          // Handle the index route
+          if (route.path === "/") {
+            return (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={route.element}
+              />
+            );
+          }
+          
+          // Handle all other routes with appropriate protection
+          return (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                route.isProtected ? (
+                  <ProtectedRoute>{route.element}</ProtectedRoute>
+                ) : (
+                  <PublicAuthRoute>{route.element}</PublicAuthRoute>
+                )
+              }
+            />
+          );
+        })}
+      </Routes>
+    </>
+  );
+};
+
 const App: React.FC = () => {
   // Apply Content Security Policy
   useContentSecurityPolicy();
@@ -96,36 +139,7 @@ const App: React.FC = () => {
                   <Sonner />
                   <OnboardingWizard />
                   <BrowserRouter>
-                    <QuickActionsButton />
-                    <Routes>
-                      {routes.map((route) => {
-                      // Handle the index route
-                      if (route.path === "/") {
-                        return (
-                          <Route
-                            key={route.path}
-                            path={route.path}
-                            element={route.element}
-                          />
-                        );
-                      }
-                      
-                      // Handle all other routes with appropriate protection
-                      return (
-                        <Route
-                          key={route.path}
-                          path={route.path}
-                          element={
-                            route.isProtected ? (
-                              <ProtectedRoute>{route.element}</ProtectedRoute>
-                            ) : (
-                              <PublicAuthRoute>{route.element}</PublicAuthRoute>
-                            )
-                          }
-                        />
-                      );
-                      })}
-                    </Routes>
+                    <AppContent />
                   </BrowserRouter>
                 </TooltipProvider>
               </OnboardingProvider>
