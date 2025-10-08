@@ -12,6 +12,7 @@ import AIAssistant from "@/pages/AIAssistant";
 import Notifications from "@/pages/Notifications";
 import TaxWebApp from "@/pages/TaxWebApp";
 import AuditReporting from "@/pages/AuditReporting";
+import Settings from "@/pages/Settings";
 
 interface RouteConfig {
   path: string;
@@ -86,6 +87,11 @@ export const routes: RouteConfig[] = [
   {
     path: "/notifications",
     element: <Notifications />,
+    isProtected: true,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
     isProtected: true,
   },
 ];

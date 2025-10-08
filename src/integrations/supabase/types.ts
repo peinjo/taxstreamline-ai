@@ -2134,8 +2134,11 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           company: string | null
+          compliance_alerts_enabled: boolean | null
           created_at: string
           date_of_birth: string | null
+          deadline_reminder_days: number[] | null
+          email_notifications_enabled: boolean | null
           full_name: string
           id: number
           job_title: string | null
@@ -2143,6 +2146,7 @@ export type Database = {
           onboarding_skipped: boolean | null
           onboarding_step: number | null
           phone_number: string | null
+          report_status_updates_enabled: boolean | null
           user_id: string
         }
         Insert: {
@@ -2150,8 +2154,11 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
+          compliance_alerts_enabled?: boolean | null
           created_at?: string
           date_of_birth?: string | null
+          deadline_reminder_days?: number[] | null
+          email_notifications_enabled?: boolean | null
           full_name: string
           id?: never
           job_title?: string | null
@@ -2159,6 +2166,7 @@ export type Database = {
           onboarding_skipped?: boolean | null
           onboarding_step?: number | null
           phone_number?: string | null
+          report_status_updates_enabled?: boolean | null
           user_id: string
         }
         Update: {
@@ -2166,8 +2174,11 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           company?: string | null
+          compliance_alerts_enabled?: boolean | null
           created_at?: string
           date_of_birth?: string | null
+          deadline_reminder_days?: number[] | null
+          email_notifications_enabled?: boolean | null
           full_name?: string
           id?: never
           job_title?: string | null
@@ -2175,6 +2186,7 @@ export type Database = {
           onboarding_skipped?: boolean | null
           onboarding_step?: number | null
           phone_number?: string | null
+          report_status_updates_enabled?: boolean | null
           user_id?: string
         }
         Relationships: []
