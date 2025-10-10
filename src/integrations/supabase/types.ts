@@ -2139,6 +2139,7 @@ export type Database = {
           date_of_birth: string | null
           deadline_reminder_days: number[] | null
           email_notifications_enabled: boolean | null
+          feature_usage_stats: Json | null
           full_name: string
           id: number
           job_title: string | null
@@ -2147,6 +2148,7 @@ export type Database = {
           onboarding_step: number | null
           phone_number: string | null
           report_status_updates_enabled: boolean | null
+          unlocked_features: Json | null
           user_id: string
         }
         Insert: {
@@ -2159,6 +2161,7 @@ export type Database = {
           date_of_birth?: string | null
           deadline_reminder_days?: number[] | null
           email_notifications_enabled?: boolean | null
+          feature_usage_stats?: Json | null
           full_name: string
           id?: never
           job_title?: string | null
@@ -2167,6 +2170,7 @@ export type Database = {
           onboarding_step?: number | null
           phone_number?: string | null
           report_status_updates_enabled?: boolean | null
+          unlocked_features?: Json | null
           user_id: string
         }
         Update: {
@@ -2179,6 +2183,7 @@ export type Database = {
           date_of_birth?: string | null
           deadline_reminder_days?: number[] | null
           email_notifications_enabled?: boolean | null
+          feature_usage_stats?: Json | null
           full_name?: string
           id?: never
           job_title?: string | null
@@ -2187,6 +2192,7 @@ export type Database = {
           onboarding_step?: number | null
           phone_number?: string | null
           report_status_updates_enabled?: boolean | null
+          unlocked_features?: Json | null
           user_id?: string
         }
         Relationships: []

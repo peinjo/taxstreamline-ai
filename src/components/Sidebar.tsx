@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useFeatureUnlock } from "@/hooks/useFeatureUnlock";
+import { FeatureAnnouncement, useFeatureAnnouncement } from "@/components/common/FeatureAnnouncement";
 import SidebarHeader from "./sidebar/SidebarHeader";
 import SidebarNavigation from "./sidebar/SidebarNavigation";
 import SidebarFooter from "./sidebar/SidebarFooter";
@@ -20,13 +22,22 @@ import SidebarFooter from "./sidebar/SidebarFooter";
 const Sidebar = () => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isFeatureUnlocked, getUnlockProgress } = useFeatureUnlock();
+  const { currentFeature, dismissAnnouncement } = useFeatureAnnouncement();
 
   const menuItems = [
     { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
     { icon: UserRound, text: "Personal Info", path: "/auth/personal-info" },
     { icon: Calculator, text: "Tax Web App", path: "/tax-web-app" },
     { icon: ChartBar, text: "Audit & Reporting", path: "/audit-reporting" },
-    { icon: FileText, text: "Transfer Pricing", path: "/transfer-pricing" },
+    { 
+      icon: FileText, 
+      text: "Transfer Pricing", 
+      path: "/transfer-pricing",
+      featureKey: 'transfer_pricing' as const,
+      locked: !isFeatureUnlocked('transfer_pricing'),
+      progress: getUnlockProgress('transfer_pricing'),
+    },
     { icon: Globe, text: "Global Reporting", path: "/global-reporting" },
     { icon: Calendar, text: "Calendar", path: "/calendar" },
     { icon: ShieldCheck, text: "Compliance", path: "/compliance" },
@@ -48,16 +59,25 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 flex h-screen w-64 flex-col bg-sidebar">
-      <SidebarHeader />
-      <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto">
-        <SidebarNavigation menuItems={menuItems} />
-        <SidebarFooter 
-          bottomMenuItems={bottomMenuItems} 
-          onLogout={handleLogout}
-        />
+    <>
+      <div className="fixed left-0 top-0 flex h-screen w-64 flex-col bg-sidebar">
+        <SidebarHeader />
+        <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto">
+          <SidebarNavigation menuItems={menuItems} />
+          <SidebarFooter 
+            bottomMenuItems={bottomMenuItems} 
+            onLogout={handleLogout}
+          />
+        </div>
       </div>
-    </div>
+      
+      {currentFeature && (
+        <FeatureAnnouncement 
+          featureKey={currentFeature} 
+          onDismiss={dismissAnnouncement} 
+        />
+      )}
+    </>
   );
 };
 
