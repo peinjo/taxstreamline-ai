@@ -10,7 +10,11 @@ export type FeatureKey =
   | 'bulk_operations'
   | 'ai_assistant_premium'
   | 'custom_reports'
-  | 'integrations';
+  | 'integrations'
+  | 'compliance_tracker'
+  | 'team_collaboration'
+  | 'calendar_advanced'
+  | 'audit_reporting';
 
 export interface FeatureConfig {
   key: FeatureKey;
@@ -37,26 +41,50 @@ export const FEATURE_CONFIGS: Record<FeatureKey, FeatureConfig> = {
     unlockCriteria: { type: 'count', metrics: {} },
     benefits: ['Tax calculators', 'Document storage', 'Calendar'],
   },
+  // Core features - unlocked by default
   transfer_pricing: {
     key: 'transfer_pricing',
     name: 'Transfer Pricing',
     description: 'Advanced transfer pricing documentation and analysis',
-    unlockCriteria: { 
-      type: 'count', 
-      metrics: { tax_reports: 5 } 
-    },
+    unlockCriteria: { type: 'count', metrics: {} },
     benefits: ['TP Documentation', 'Benchmarking', 'Risk Assessment'],
   },
   advanced_analytics: {
     key: 'advanced_analytics',
     name: 'Advanced Analytics',
     description: 'Deep insights and custom reporting',
-    unlockCriteria: { 
-      type: 'count', 
-      metrics: { transactions: 10 } 
-    },
+    unlockCriteria: { type: 'count', metrics: {} },
     benefits: ['Custom dashboards', 'Trend analysis', 'Forecasting'],
   },
+  compliance_tracker: {
+    key: 'compliance_tracker',
+    name: 'Compliance Tracker',
+    description: 'Track compliance requirements',
+    unlockCriteria: { type: 'count', metrics: {} },
+    benefits: ['Compliance tracking', 'Deadline alerts', 'Requirements'],
+  },
+  team_collaboration: {
+    key: 'team_collaboration',
+    name: 'Team Collaboration',
+    description: 'Work with your team',
+    unlockCriteria: { type: 'count', metrics: {} },
+    benefits: ['Team workspace', 'Shared tasks', 'Messaging'],
+  },
+  calendar_advanced: {
+    key: 'calendar_advanced',
+    name: 'Calendar',
+    description: 'Manage deadlines and events',
+    unlockCriteria: { type: 'count', metrics: {} },
+    benefits: ['Event management', 'Reminders', 'Recurring events'],
+  },
+  audit_reporting: {
+    key: 'audit_reporting',
+    name: 'Audit & Reporting',
+    description: 'Comprehensive audit tools',
+    unlockCriteria: { type: 'count', metrics: {} },
+    benefits: ['Audit trails', 'Reports', 'Controls monitoring'],
+  },
+  // Premium features - require unlocking
   bulk_operations: {
     key: 'bulk_operations',
     name: 'Bulk Operations',
@@ -108,7 +136,15 @@ interface FeatureUnlockState {
 export const useFeatureUnlock = () => {
   const { user } = useAuth();
   const [state, setState] = useState<FeatureUnlockState>({
-    unlockedFeatures: { basic: true },
+    unlockedFeatures: { 
+      basic: true,
+      transfer_pricing: true,
+      advanced_analytics: true,
+      compliance_tracker: true,
+      team_collaboration: true,
+      calendar_advanced: true,
+      audit_reporting: true
+    },
     usageStats: {},
     loading: true,
   });
@@ -128,7 +164,15 @@ export const useFeatureUnlock = () => {
         if (error) throw error;
 
         setState({
-          unlockedFeatures: (data?.unlocked_features as Partial<Record<FeatureKey, boolean>>) || { basic: true },
+          unlockedFeatures: (data?.unlocked_features as Partial<Record<FeatureKey, boolean>>) || { 
+            basic: true,
+            transfer_pricing: true,
+            advanced_analytics: true,
+            compliance_tracker: true,
+            team_collaboration: true,
+            calendar_advanced: true,
+            audit_reporting: true
+          },
           usageStats: (data?.feature_usage_stats as Record<string, number>) || {},
           loading: false,
         });
