@@ -10,6 +10,7 @@ import {
   UserRound,
   Calculator,
   ChartBar,
+  Upload,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -41,6 +42,14 @@ const Sidebar = () => {
     { icon: Globe, text: "Global Reporting", path: "/global-reporting" },
     { icon: Calendar, text: "Calendar", path: "/calendar" },
     { icon: ShieldCheck, text: "Compliance", path: "/compliance" },
+    { 
+      icon: Upload, 
+      text: "Bulk Operations", 
+      path: "/bulk-operations",
+      featureKey: 'bulk_operations' as const,
+      locked: !isFeatureUnlocked('bulk_operations'),
+      progress: getUnlockProgress('bulk_operations'),
+    },
     { icon: Bot, text: "AI Assistant", path: "/ai-assistant" },
   ];
 

@@ -678,6 +678,54 @@ export type Database = {
         }
         Relationships: []
       }
+      import_history: {
+        Row: {
+          can_rollback: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          errors: Json | null
+          failed_records: number
+          file_name: string
+          id: string
+          import_type: string
+          rolled_back_at: string | null
+          status: string
+          successful_records: number
+          total_records: number
+          user_id: string
+        }
+        Insert: {
+          can_rollback?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          errors?: Json | null
+          failed_records?: number
+          file_name: string
+          id?: string
+          import_type: string
+          rolled_back_at?: string | null
+          status?: string
+          successful_records?: number
+          total_records?: number
+          user_id: string
+        }
+        Update: {
+          can_rollback?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          errors?: Json | null
+          failed_records?: number
+          file_name?: string
+          id?: string
+          import_type?: string
+          rolled_back_at?: string | null
+          status?: string
+          successful_records?: number
+          total_records?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       internal_controls: {
         Row: {
           control_description: string
