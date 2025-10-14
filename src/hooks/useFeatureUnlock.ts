@@ -84,17 +84,14 @@ export const FEATURE_CONFIGS: Record<FeatureKey, FeatureConfig> = {
     unlockCriteria: { type: 'count', metrics: {} },
     benefits: ['Audit trails', 'Reports', 'Controls monitoring'],
   },
-  // Premium features - require unlocking
   bulk_operations: {
     key: 'bulk_operations',
     name: 'Bulk Operations',
     description: 'Import/export large datasets',
-    unlockCriteria: { 
-      type: 'count', 
-      metrics: { documents: 20 } 
-    },
+    unlockCriteria: { type: 'count', metrics: {} },
     benefits: ['CSV Import', 'Excel Export', 'Batch Processing'],
   },
+  // Premium features - require unlocking
   ai_assistant_premium: {
     key: 'ai_assistant_premium',
     name: 'AI Assistant Premium',
@@ -143,7 +140,8 @@ export const useFeatureUnlock = () => {
       compliance_tracker: true,
       team_collaboration: true,
       calendar_advanced: true,
-      audit_reporting: true
+      audit_reporting: true,
+      bulk_operations: true
     },
     usageStats: {},
     loading: true,
@@ -171,7 +169,8 @@ export const useFeatureUnlock = () => {
             compliance_tracker: true,
             team_collaboration: true,
             calendar_advanced: true,
-            audit_reporting: true
+            audit_reporting: true,
+            bulk_operations: true
           },
           usageStats: (data?.feature_usage_stats as Record<string, number>) || {},
           loading: false,
