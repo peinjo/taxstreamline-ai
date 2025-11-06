@@ -3,7 +3,6 @@ import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -16,27 +15,6 @@ import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { QuickActionsButton } from "@/components/common/QuickActionsButton";
 import { CommandPalette } from "@/components/common/CommandPalette";
 import { useGlobalKeyboardShortcuts } from "@/hooks/useGlobalKeyboardShortcuts";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
-      retry: (failureCount: number, error: any) => {
-        // Don't retry on 4xx errors
-        if (error?.status >= 400 && error?.status < 500) {
-          return false;
-        }
-        return failureCount < 2;
-      },
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
 
 // Simplified Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -128,26 +106,24 @@ const App: React.FC = () => {
   useContentSecurityPolicy();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <AuthProvider>
-          <ErrorProvider>
-            <NotificationProvider>
-              <OnboardingProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <OnboardingWizard />
-                  <BrowserRouter>
-                    <AppContent />
-                  </BrowserRouter>
-                </TooltipProvider>
-              </OnboardingProvider>
-            </NotificationProvider>
-          </ErrorProvider>
-        </AuthProvider>
-      </ErrorBoundary>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ErrorProvider>
+          <NotificationProvider>
+            <OnboardingProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <OnboardingWizard />
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </TooltipProvider>
+            </OnboardingProvider>
+          </NotificationProvider>
+        </ErrorProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 };
 

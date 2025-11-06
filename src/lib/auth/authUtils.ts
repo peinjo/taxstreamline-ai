@@ -16,8 +16,9 @@ export const ensureUserProfile = async (userId: string, email?: string | null) =
       .maybeSingle();
     
     if (checkError) {
-      console.error("Error checking user profile:", checkError);
-      return;
+      const error = new Error(`Failed to check user profile: ${checkError.message}`);
+      toast.error("Unable to verify user profile");
+      throw error;
     }
     
     if (!existingProfile) {
@@ -31,16 +32,21 @@ export const ensureUserProfile = async (userId: string, email?: string | null) =
         .insert({
           user_id: userId,
           full_name: defaultName,
+          email: email || null,
+          display_name: defaultName,
           address: "Please update your address",
           date_of_birth: new Date().toISOString().split('T')[0]
         });
       
       if (insertError) {
-        console.error("Error creating default profile:", insertError);
+        const error = new Error(`Failed to create user profile: ${insertError.message}`);
+        toast.error("Unable to create user profile");
+        throw error;
       }
     }
   } catch (error) {
-    console.error("Error in ensureUserProfile:", error);
+    // Re-throw for caller to handle
+    throw error instanceof Error ? error : new Error("Unknown error in ensureUserProfile");
   }
 };
 
@@ -56,28 +62,28 @@ export const fetchUserRole = async (userId: string): Promise<AppRole> => {
       .maybeSingle();
 
     if (error) {
-      return 'user';
+      toast.error("Unable to fetch user role");
+      throw new Error(`Failed to fetch user role: ${error.message}`);
     }
     
     if (data) {
       return data.role;
     } else {
-      try {
-        // Create default role if it doesn't exist
-        const { error: insertError } = await supabase
-          .from("user_roles")
-          .insert({ user_id: userId, role: 'user' });
-          
-        if (insertError) {
-          console.error("Error creating default user role:", insertError);
-        }
-      } catch (err) {
-        console.error("Error creating default user role:", err);
+      // Create default role if it doesn't exist
+      const { error: insertError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: 'user' });
+        
+      if (insertError) {
+        toast.error("Unable to create user role");
+        throw new Error(`Failed to create default user role: ${insertError.message}`);
       }
       
       return 'user';
     }
   } catch (error) {
+    // If any error occurs, return default 'user' role as fallback
+    // but log the error for monitoring
     console.error("Error in fetchUserRole:", error);
     return 'user';
   }
@@ -159,21 +165,27 @@ export const signOutUser = async () => {
  * This helps prevent auth state conflicts
  */
 export const cleanupAuthState = () => {
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  
-  // Also check sessionStorage if in use
   try {
-    Object.keys(sessionStorage || {}).forEach((key) => {
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
+        localStorage.removeItem(key);
       }
     });
-  } catch (e) {
-    // Ignore sessionStorage errors
+    
+    // Also check sessionStorage if in use
+    try {
+      Object.keys(sessionStorage || {}).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch (e) {
+      // sessionStorage might not be available in some environments
+      console.warn("Could not clear sessionStorage:", e);
+    }
+  } catch (error) {
+    // Log but don't throw - cleanup is best effort
+    console.error("Error during auth state cleanup:", error);
   }
 };
