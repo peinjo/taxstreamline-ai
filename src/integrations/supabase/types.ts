@@ -1405,7 +1405,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           new_values: Json | null
           old_values: Json | null
@@ -1418,7 +1418,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           new_values?: Json | null
           old_values?: Json | null
@@ -1431,7 +1431,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           new_values?: Json | null
           old_values?: Json | null
@@ -2186,6 +2186,8 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           deadline_reminder_days: number[] | null
+          display_name: string | null
+          email: string | null
           email_notifications_enabled: boolean | null
           feature_usage_stats: Json | null
           full_name: string
@@ -2208,6 +2210,8 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           deadline_reminder_days?: number[] | null
+          display_name?: string | null
+          email?: string | null
           email_notifications_enabled?: boolean | null
           feature_usage_stats?: Json | null
           full_name: string
@@ -2230,6 +2234,8 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           deadline_reminder_days?: number[] | null
+          display_name?: string | null
+          email?: string | null
           email_notifications_enabled?: boolean | null
           feature_usage_stats?: Json | null
           full_name?: string
@@ -2291,18 +2297,12 @@ export type Database = {
         }
         Returns: string
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_current_user_role: { Args: never; Returns: string }
       has_role: {
         Args: { required_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
-      has_tp_role: {
-        Args: { required_role: string }
-        Returns: boolean
-      }
+      has_tp_role: { Args: { required_role: string }; Returns: boolean }
       increment_kb_view_count: {
         Args: { article_id: string }
         Returns: undefined
