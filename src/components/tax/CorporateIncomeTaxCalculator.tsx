@@ -10,6 +10,7 @@ import {
   saveTaxCalculation,
 } from "@/services/taxCalculator";
 import type { CorporateIncomeTaxInput } from "@/types/tax";
+import { logger } from "@/lib/logging/logger";
 
 export const CorporateIncomeTaxCalculator = () => {
   const { toast } = useToast();
@@ -26,7 +27,7 @@ export const CorporateIncomeTaxCalculator = () => {
     retry: 2,
     meta: {
       onError: (error: Error) => {
-        console.error("Error fetching tax rates:", error);
+        logger.error("Error fetching tax rates", error as Error, { component: 'CorporateIncomeTaxCalculator', category: 'corporate_income' });
         toast({
           title: "Error",
           description: "Failed to fetch tax rates. Please try again later.",
@@ -72,7 +73,7 @@ export const CorporateIncomeTaxCalculator = () => {
         description: `Corporate Income Tax: $${calculation.taxAmount.toFixed(2)}`,
       });
     } catch (error) {
-      console.error("Calculation error:", error);
+      logger.error("Calculation error", error as Error, { component: 'CorporateIncomeTaxCalculator', inputs });
       toast({
         title: "Error",
         description: "Failed to calculate tax",

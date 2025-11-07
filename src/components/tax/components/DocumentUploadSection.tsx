@@ -5,6 +5,7 @@ import { Tag } from "lucide-react";
 import { DocumentUploadForm } from "./DocumentUploadForm";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logging/logger";
 
 interface DocumentUploadSectionProps {
   onUploadComplete: () => void;
@@ -56,7 +57,7 @@ export function DocumentUploadSection({ onUploadComplete }: DocumentUploadSectio
       setDocumentTags(""); // Reset tags field after upload
       onUploadComplete();
     } catch (error) {
-      console.error("Upload error:", error);
+      logger.error("Upload error", error as Error, { component: 'DocumentUploadSection', selectedType, selectedYear });
       toast.error("Failed to upload document");
     } finally {
       setUploading(false);

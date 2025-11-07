@@ -11,6 +11,7 @@ import { Building2, Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import { TPEntity, TPEntityType } from '@/types/transfer-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface EntityManagementProps {
   onEntitySelect?: (entity: TPEntity) => void;
@@ -55,7 +56,7 @@ const EntityManagement: React.FC<EntityManagementProps> = ({ onEntitySelect }) =
       
       setEntities(typedEntities);
     } catch (error) {
-      console.error('Error fetching entities:', error);
+      logger.error('Error fetching entities', error as Error, { component: 'EntityManagement' });
       toast.error('Failed to load entities');
     } finally {
       setLoading(false);
@@ -105,7 +106,7 @@ const EntityManagement: React.FC<EntityManagementProps> = ({ onEntitySelect }) =
       });
       fetchEntities();
     } catch (error) {
-      console.error('Error saving entity:', error);
+      logger.error('Error saving entity', error as Error, { component: 'EntityManagement', editingEntity: !!editingEntity });
       toast.error('Failed to save entity');
     }
   };
@@ -123,7 +124,7 @@ const EntityManagement: React.FC<EntityManagementProps> = ({ onEntitySelect }) =
       toast.success('Entity deleted successfully');
       fetchEntities();
     } catch (error) {
-      console.error('Error deleting entity:', error);
+      logger.error('Error deleting entity', error as Error, { component: 'EntityManagement', entityId });
       toast.error('Failed to delete entity');
     }
   };

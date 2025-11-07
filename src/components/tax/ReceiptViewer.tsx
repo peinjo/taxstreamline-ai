@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { logger } from "@/lib/logging/logger";
 
 interface ReceiptViewerProps {
   open: boolean;
@@ -57,7 +58,7 @@ Status: ${receipt.status.charAt(0).toUpperCase() + receipt.status.slice(1)}
       
       toast.success("Receipt downloaded successfully");
     } catch (error) {
-      console.error("Error downloading receipt:", error);
+      logger.error("Error downloading receipt", error as Error, { component: 'ReceiptViewer', reference: receipt.reference });
       toast.error("Failed to download receipt");
     }
   };

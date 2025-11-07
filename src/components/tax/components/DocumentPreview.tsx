@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DocumentMetadata } from "@/types/documents";
 import { toast } from "sonner";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
+import { logger } from "@/lib/logging/logger";
 
 interface DocumentPreviewProps {
   document: DocumentMetadata | null;
@@ -32,7 +33,7 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
         
         setPreviewUrl(data?.signedUrl || null);
       } catch (error) {
-        console.error("Error fetching document URL:", error);
+        logger.error("Error fetching document URL", error as Error, { component: 'DocumentPreview', documentId: document.id });
         toast.error("Failed to load document preview");
       } finally {
         setLoading(false);
@@ -86,7 +87,7 @@ export function DocumentPreview({ document, onClose }: DocumentPreviewProps) {
       URL.revokeObjectURL(url);
       window.document.body.removeChild(a);
     } catch (error) {
-      console.error("Download error:", error);
+      logger.error("Download error", error as Error, { component: 'DocumentPreview', documentId: document.id });
       toast.error("Failed to download document");
     }
   };

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Send } from "lucide-react";
+import { logger } from "@/lib/logging/logger";
 
 export const MessageInput = ({ teamId }: { teamId: number }) => {
   const [content, setContent] = useState("");
@@ -31,7 +32,7 @@ export const MessageInput = ({ teamId }: { teamId: number }) => {
         description: "Your message has been sent successfully.",
       });
     } catch (error) {
-      console.error("Error sending message:", error);
+      logger.error("Error sending message", error as Error, { component: 'MessageInput', teamId });
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",

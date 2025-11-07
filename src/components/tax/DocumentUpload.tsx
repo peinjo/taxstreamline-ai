@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, File } from "lucide-react";
+import { logger } from "@/lib/logging/logger";
 
 export const DocumentUpload = () => {
   const { user } = useAuth();
@@ -41,7 +42,7 @@ export const DocumentUpload = () => {
         description: "Document uploaded successfully",
       });
     } catch (error) {
-      console.error("Error uploading document:", error);
+      logger.error("Error uploading document", error as Error, { component: 'DocumentUpload', userId: user?.id });
       toast({
         title: "Error",
         description: "Failed to upload document",

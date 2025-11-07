@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logging/logger';
 
 interface CreateTeamDialogProps {
   open: boolean;
@@ -52,7 +53,7 @@ export function CreateTeamDialog({ open, onOpenChange }: CreateTeamDialogProps) 
       onOpenChange(false);
       form.reset();
     } catch (error) {
-      console.error('Error creating team:', error);
+      logger.error('Error creating team', error as Error, { component: 'CreateTeamDialog', userId: user?.id });
       toast.error('Failed to create team');
     }
   };

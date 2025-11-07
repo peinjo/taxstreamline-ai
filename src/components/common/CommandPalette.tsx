@@ -21,6 +21,7 @@ import {
   Search,
 } from 'lucide-react';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { logger } from '@/lib/logging/logger';
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -105,17 +106,17 @@ export function CommandPalette() {
         <CommandSeparator />
 
         <CommandGroup heading="Quick Actions">
-          <CommandItem onSelect={() => handleAction(() => console.log('Create event'))}>
+          <CommandItem onSelect={() => handleAction(() => logger.debug('Create event action triggered', { action: 'createEvent', component: 'CommandPalette' }))}>
             <Plus className="mr-2 h-4 w-4" />
             <span>Create Event</span>
             <span className="ml-auto text-xs text-muted-foreground">⌘N E</span>
           </CommandItem>
-          <CommandItem onSelect={() => handleAction(() => console.log('New compliance'))}>
+          <CommandItem onSelect={() => handleAction(() => logger.debug('New compliance action triggered', { action: 'newCompliance', component: 'CommandPalette' }))}>
             <Plus className="mr-2 h-4 w-4" />
             <span>New Compliance Item</span>
             <span className="ml-auto text-xs text-muted-foreground">⌘N C</span>
           </CommandItem>
-          <CommandItem onSelect={() => handleAction(() => console.log('New document'))}>
+          <CommandItem onSelect={() => handleAction(() => logger.debug('New document action triggered', { action: 'newDocument', component: 'CommandPalette' }))}>
             <Plus className="mr-2 h-4 w-4" />
             <span>New Document</span>
             <span className="ml-auto text-xs text-muted-foreground">⌘N D</span>
@@ -125,7 +126,7 @@ export function CommandPalette() {
         <CommandSeparator />
 
         <CommandGroup heading="Search">
-          <CommandItem onSelect={() => handleAction(() => console.log('Search'))}>
+          <CommandItem onSelect={() => handleAction(() => logger.debug('Search action triggered', { action: 'search', component: 'CommandPalette' }))}>
             <Search className="mr-2 h-4 w-4" />
             <span>Search Everything</span>
             <span className="ml-auto text-xs text-muted-foreground">⌘/</span>

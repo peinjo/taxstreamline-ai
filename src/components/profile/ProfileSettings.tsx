@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ProfileFormFields } from "./ProfileFormFields";
 import { toast } from "sonner";
+import { logger } from "@/lib/logging/logger";
 
 export function ProfileSettings() {
   const { user } = useAuth();
@@ -47,7 +48,7 @@ export function ProfileSettings() {
 
       toast.success("Profile updated successfully");
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Error updating profile", error as Error, { component: 'ProfileSettings', userId: user?.id });
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);

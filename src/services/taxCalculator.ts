@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { TaxRate, TaxCalculationResult } from "@/types/tax";
+import { logger } from "@/lib/logging/logger";
 
 export const calculateIndustryTax = (
   inputs: Record<string, number>,
@@ -36,18 +37,18 @@ export const fetchTaxRates = async (category: string): Promise<TaxRate[]> => {
       .eq("category", category);
 
     if (error) {
-      console.error("Error fetching tax rates:", error);
+      logger.error("Error fetching tax rates", error as Error, { category });
       throw error;
     }
 
     if (!data) {
-      console.warn(`No tax rates found for category: ${category}`);
+      logger.warn(`No tax rates found for category: ${category}`, { category });
       return [];
     }
 
     return data;
   } catch (error) {
-    console.error("Failed to fetch tax rates:", error);
+    logger.error("Failed to fetch tax rates", error as Error, { category });
     throw error;
   }
 };

@@ -14,6 +14,7 @@ import { secureStorage } from "@/lib/security/secureStorage";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw } from "lucide-react";
+import { logger } from "@/lib/logging/logger";
 
 export function DocumentManager() {
   const [selectedDocument, setSelectedDocument] = useState<DocumentMetadata | null>(null);
@@ -37,7 +38,7 @@ export function DocumentManager() {
       // Save encrypted copy locally for offline access
       const docsForStorage = data as DocumentMetadata[];
       secureStorage.setItem('cached_tax_documents', docsForStorage)
-        .catch(err => console.error('Failed to cache documents locally:', err));
+        .catch(err => logger.error('Failed to cache documents locally', err as Error, { component: 'DocumentManager' }));
         
       return docsForStorage;
     },
@@ -76,7 +77,7 @@ export function DocumentManager() {
       toast.success("Document deleted successfully");
       refetch();
     } catch (error) {
-      console.error("Delete error:", error);
+      logger.error("Delete error", error as Error, { component: 'DocumentManager', documentId: id });
       toast.error("Failed to delete document");
     }
   };
@@ -96,7 +97,7 @@ export function DocumentManager() {
       toast.success("Tags updated successfully");
       refetch();
     } catch (error) {
-      console.error("Error updating tags:", error);
+      logger.error("Error updating tags", error as Error, { component: 'DocumentManager', documentId: id });
       toast.error("Failed to update tags");
     }
   };

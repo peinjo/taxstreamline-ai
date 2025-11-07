@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { logger } from "@/lib/logging/logger";
 
 interface TaxTemplateProps {
   searchQuery: string;
@@ -61,7 +62,7 @@ export function TaxTemplates({ searchQuery }: TaxTemplateProps) {
 
       toast.success("Template uploaded successfully");
     } catch (error) {
-      console.error("Upload error:", error);
+      logger.error("Upload error", error as Error, { component: 'TaxTemplates', type });
       toast.error("Failed to upload template");
     }
   };
@@ -83,7 +84,7 @@ export function TaxTemplates({ searchQuery }: TaxTemplateProps) {
       URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error("Download error:", error);
+      logger.error("Download error", error as Error, { component: 'TaxTemplates', filePath });
       toast.error("Failed to download template");
     }
   };

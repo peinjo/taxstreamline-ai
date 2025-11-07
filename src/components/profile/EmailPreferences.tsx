@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Mail, Bell, FileText, Calendar } from "lucide-react";
+import { logger } from "@/lib/logging/logger";
 
 interface EmailPreferences {
   email_notifications_enabled: boolean;
@@ -51,7 +52,7 @@ export function EmailPreferences() {
         });
       }
     } catch (error) {
-      console.error("Error loading email preferences:", error);
+      logger.error("Error loading email preferences", error as Error, { component: 'EmailPreferences', userId: user.id });
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ export function EmailPreferences() {
       setPreferences((prev) => ({ ...prev, ...updates }));
       toast.success("Email preferences updated");
     } catch (error) {
-      console.error("Error saving preferences:", error);
+      logger.error("Error saving preferences", error as Error, { component: 'EmailPreferences', userId: user.id, updates });
       toast.error("Failed to update preferences");
     } finally {
       setSaving(false);

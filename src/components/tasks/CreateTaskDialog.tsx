@@ -24,6 +24,7 @@ import { Calendar as CalendarIcon, Plus } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logging/logger";
 
 interface CreateTaskDialogProps {
   isOpen: boolean;
@@ -64,7 +65,7 @@ export const CreateTaskDialog = ({
       onOpenChange(false);
       onTaskCreated();
     } catch (error) {
-      console.error("Error creating task:", error);
+      logger.error("Error creating task", error as Error, { component: 'CreateTaskDialog', userId: user?.id });
       toast({
         title: "Error",
         description: "Failed to create task",

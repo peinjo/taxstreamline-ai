@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Database, TrendingUp } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { logger } from "@/lib/logging/logger";
 
 export const SampleDataPopulator = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -90,7 +91,7 @@ export const SampleDataPopulator = () => {
       toast.success("Sample data created successfully!");
       setTimeout(() => window.location.reload(), 1500);
     } catch (error: any) {
-      console.error("Error creating sample data:", error);
+      logger.error("Error creating sample data", error as Error, { component: 'SampleDataPopulator' });
       toast.error(`Failed to create sample data: ${error.message}`);
     } finally {
       setIsLoading(false);
