@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, BookOpen, FileText, HelpCircle, PlayCircle, Award, Star, Eye, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface KnowledgeBaseArticle {
   id: string;
@@ -86,7 +87,7 @@ export function KnowledgeBase() {
 
       setArticles(mockArticles);
     } catch (error) {
-      console.error('Error fetching articles:', error);
+      logger.error('Error fetching articles', error as Error, { component: 'KnowledgeBase' });
       toast.error('Failed to load knowledge base articles');
     } finally {
       setLoading(false);
@@ -102,7 +103,7 @@ export function KnowledgeBase() {
           : article
       ));
     } catch (error) {
-      console.error('Error incrementing view count:', error);
+      logger.error('Error incrementing view count', error as Error, { component: 'KnowledgeBase', articleId });
     }
   };
 

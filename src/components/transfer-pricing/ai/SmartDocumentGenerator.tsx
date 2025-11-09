@@ -7,6 +7,7 @@ import { GeneratedContentDisplay } from './GeneratedContentDisplay';
 import { aiContentService } from '@/services/aiContentGeneration';
 import { useOptimizedQuery } from '@/hooks/useOptimizedQueries';
 import { queryKeys } from '@/lib/performance/queryOptimization';
+import { logger } from '@/lib/logging/logger';
 
 interface GenerationRequest {
   type: 'narrative' | 'analysis' | 'compliance_check' | 'benchmark_summary';
@@ -65,7 +66,7 @@ export function SmartDocumentGenerator() {
       setGeneratedContent(content);
       toast.success('Content generated successfully');
     } catch (error) {
-      console.error('Error generating content:', error);
+      logger.error('Error generating content', error as Error, { component: 'SmartDocumentGenerator', requestType: generationRequest.type });
       toast.error('Failed to generate content');
     } finally {
       setIsGenerating(false);

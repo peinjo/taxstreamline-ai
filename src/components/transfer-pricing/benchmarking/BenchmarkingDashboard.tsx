@@ -11,6 +11,7 @@ import { StatisticalAnalysis } from './StatisticalAnalysis';
 import { TPBenchmark } from '@/types/transfer-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 export function BenchmarkingDashboard() {
   const [benchmarks, setBenchmarks] = useState<TPBenchmark[]>([]);
@@ -38,7 +39,7 @@ export function BenchmarkingDashboard() {
 
       setBenchmarks(typedData);
     } catch (error) {
-      console.error('Error fetching benchmarks:', error);
+      logger.error('Error fetching benchmarks', error as Error, { component: 'BenchmarkingDashboard' });
       toast.error('Failed to load benchmarks');
     } finally {
       setLoading(false);

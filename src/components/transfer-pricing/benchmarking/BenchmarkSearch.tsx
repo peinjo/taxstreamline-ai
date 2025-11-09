@@ -10,6 +10,7 @@ import { Search, Filter, Trash2, Eye, BarChart3 } from 'lucide-react';
 import { TPBenchmark } from '@/types/transfer-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface BenchmarkSearchProps {
   benchmarks: TPBenchmark[];
@@ -79,7 +80,7 @@ export function BenchmarkSearch({ benchmarks, onBenchmarkDeleted }: BenchmarkSea
 
       onBenchmarkDeleted(id);
     } catch (error) {
-      console.error('Error deleting benchmark:', error);
+      logger.error('Error deleting benchmark', error as Error, { component: 'BenchmarkSearch', benchmarkId: id });
       toast.error('Failed to delete benchmark');
     }
   };

@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, FileSpreadsheet, Plus, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface BenchmarkUploadProps {
   onBenchmarkAdded: () => void;
@@ -103,7 +104,7 @@ export function BenchmarkUpload({ onBenchmarkAdded }: BenchmarkUploadProps) {
 
       onBenchmarkAdded();
     } catch (error) {
-      console.error('Error adding benchmark:', error);
+      logger.error('Error adding benchmark', error as Error, { component: 'BenchmarkUpload', companyName: form.comparable_name });
       toast.error('Failed to add benchmark data');
     } finally {
       setLoading(false);
@@ -125,7 +126,7 @@ export function BenchmarkUpload({ onBenchmarkAdded }: BenchmarkUploadProps) {
       const result = await benchmarkDataService.processFile(file);
       
       if (result.errors.length > 0) {
-        console.warn('File processing warnings:', result.errors);
+        logger.warn('File processing warnings', { component: 'BenchmarkUpload', fileName: file.name, errors: result.errors });
       }
       
       if (result.data.length > 0) {
@@ -136,7 +137,7 @@ export function BenchmarkUpload({ onBenchmarkAdded }: BenchmarkUploadProps) {
         toast.error('No valid benchmark data found in file');
       }
     } catch (error) {
-      console.error('File processing error:', error);
+      logger.error('File processing error', error as Error, { component: 'BenchmarkUpload', fileName: file.name });
       toast.error('Failed to process file');
     } finally {
       setFileUploading(false);

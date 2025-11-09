@@ -8,6 +8,7 @@ import { Calendar, Bell, CheckCircle, AlertTriangle, Clock, Plus } from 'lucide-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { TPDeadline, TPComplianceStatus } from '@/types/transfer-pricing';
+import { logger } from '@/lib/logging/logger';
 
 interface ComplianceMetrics {
   totalDeadlines: number;
@@ -109,7 +110,7 @@ export function AutomatedComplianceTracker() {
       setJurisdictions(jurisdictionSummaries);
 
     } catch (error) {
-      console.error('Error fetching compliance data:', error);
+      logger.error('Error fetching compliance data', error as Error, { component: 'AutomatedComplianceTracker', timeframe: selectedTimeframe });
       toast.error('Failed to load compliance data');
     } finally {
       setLoading(false);
@@ -137,7 +138,7 @@ export function AutomatedComplianceTracker() {
 
       toast.success('Calendar event created for deadline reminder');
     } catch (error) {
-      console.error('Error creating calendar event:', error);
+      logger.error('Error creating calendar event', error as Error, { component: 'AutomatedComplianceTracker', deadlineId: deadline.id });
       toast.error('Failed to create calendar event');
     }
   };
@@ -157,7 +158,7 @@ export function AutomatedComplianceTracker() {
       toast.success('Deadline marked as completed');
       fetchComplianceData();
     } catch (error) {
-      console.error('Error updating deadline:', error);
+      logger.error('Error updating deadline', error as Error, { component: 'AutomatedComplianceTracker', deadlineId });
       toast.error('Failed to update deadline status');
     }
   };

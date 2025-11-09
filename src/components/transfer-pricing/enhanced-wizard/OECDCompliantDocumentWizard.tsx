@@ -14,6 +14,7 @@ import { OECDComplianceStep } from './steps/OECDComplianceStep';
 import { ReviewAndValidationStep } from './steps/ReviewAndValidationStep';
 import { useOECDValidation } from '../hooks/useOECDValidation';
 import type { DocumentWizardData, ValidationResult } from '../types/wizard-types';
+import { logger } from '@/lib/logging/logger';
 
 const WIZARD_STEPS = [
   { id: 1, title: 'Entity Details', description: 'Company information and structure' },
@@ -119,7 +120,7 @@ export function OECDCompliantDocumentWizard() {
         risk_level: completeValidation.riskLevel || 'medium'
       });
     } catch (error) {
-      console.error('Error creating document:', error);
+      logger.error('Error creating document', error as Error, { component: 'OECDCompliantDocumentWizard' });
     }
   };
 

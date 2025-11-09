@@ -13,6 +13,7 @@ import { RiskMitigationPlan } from './RiskMitigationPlan';
 import { TPRiskAssessment, TPEntity, TPTransaction } from '@/types/transfer-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface RiskAssessmentEngineProps {
   entityId?: string;
@@ -97,7 +98,7 @@ export function RiskAssessmentEngine({ entityId, transactionId }: RiskAssessment
       }
 
     } catch (error) {
-      console.error('Error fetching data:', error);
+      logger.error('Error fetching data', error as Error, { component: 'RiskAssessmentEngine' });
       toast.error('Failed to load risk assessment data');
     } finally {
       setLoading(false);

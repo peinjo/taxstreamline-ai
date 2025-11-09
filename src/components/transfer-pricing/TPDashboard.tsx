@@ -19,6 +19,7 @@ import {
 import { TPDashboardMetrics, TPDeadline, TPRiskAssessment } from '@/types/transfer-pricing';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface TPDashboardProps {
   onCreateDocument: () => void;
@@ -109,7 +110,7 @@ const TPDashboard: React.FC<TPDashboardProps> = ({
       
       setRiskAssessments(typedRisks);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      logger.error('Error fetching dashboard data', error as Error, { component: 'TPDashboard' });
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);

@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import mammoth from 'mammoth';
+import { logger } from "@/lib/logging/logger";
 
 interface FileUploaderProps {
   onFileUpload: (file: File, type: "master" | "local") => void;
@@ -46,7 +47,7 @@ export function FileUploader({ onFileUpload }: FileUploaderProps) {
           toast.success("File uploaded successfully");
         }
       } catch (error) {
-        console.error("Error reading file:", error);
+        logger.error("Error reading file", error as Error, { component: 'FileUploader', fileName: file.name, fileType: file.type });
         toast.error("Error reading file. Please ensure it's a valid document.");
       }
 

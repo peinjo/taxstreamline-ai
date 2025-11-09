@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Download, Upload, FileX, Globe, Building, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface CbCREntity {
   id: string;
@@ -113,7 +114,7 @@ export function CountryByCountryReporting() {
       });
 
     } catch (error) {
-      console.error('Error fetching CbCR data:', error);
+      logger.error('Error fetching CbCR data', error as Error, { component: 'CountryByCountryReporting', year: selectedYear });
       toast.error('Failed to load Country-by-Country data');
     } finally {
       setLoading(false);
@@ -134,7 +135,7 @@ export function CountryByCountryReporting() {
       URL.revokeObjectURL(url);
       toast.success('CbC Report exported in OECD XML format');
     } catch (error) {
-      console.error('Error exporting XML:', error);
+      logger.error('Error exporting XML', error as Error, { component: 'CountryByCountryReporting', year: selectedYear });
       toast.error('Failed to export XML file');
     }
   };
@@ -177,7 +178,7 @@ export function CountryByCountryReporting() {
       URL.revokeObjectURL(url);
       toast.success('CbC Report exported to Excel format');
     } catch (error) {
-      console.error('Error exporting Excel:', error);
+      logger.error('Error exporting Excel', error as Error, { component: 'CountryByCountryReporting', year: selectedYear });
       toast.error('Failed to export Excel file');
     }
   };

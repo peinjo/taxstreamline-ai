@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Crown, Shield, Database, Zap, Settings, FileText, AlertTriangle, CheckCircle, XCircle, Activity } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface AuditItem {
   id: string;
@@ -87,7 +88,7 @@ export function PremiumFeatures() {
         connection_config: item.connection_config as Record<string, any>
       })));
     } catch (error) {
-      console.error('Error fetching premium data:', error);
+      logger.error('Error fetching premium data', error as Error, { component: 'PremiumFeatures' });
       toast.error('Failed to load premium features data');
     } finally {
       setLoading(false);
@@ -117,7 +118,7 @@ export function PremiumFeatures() {
       toast.success('Audit item created successfully');
       fetchPremiumData();
     } catch (error) {
-      console.error('Error creating audit item:', error);
+      logger.error('Error creating audit item', error as Error, { component: 'PremiumFeatures' });
       toast.error('Failed to create audit item');
     }
   };

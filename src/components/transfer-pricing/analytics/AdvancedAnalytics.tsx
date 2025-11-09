@@ -8,6 +8,7 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Cartesia
 import { TrendingUp, TrendingDown, Target, AlertTriangle, Activity, BarChart3, PieChart as PieChartIcon, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface AnalyticsData {
   id: string;
@@ -54,7 +55,7 @@ export function AdvancedAnalytics() {
         insights: item.insights as Record<string, any>
       })));
     } catch (error) {
-      console.error('Error fetching analytics data:', error);
+      logger.error('Error fetching analytics data', error as Error, { component: 'AdvancedAnalytics' });
       toast.error('Failed to load analytics data');
     } finally {
       setLoading(false);
@@ -75,7 +76,7 @@ export function AdvancedAnalytics() {
 
       setTrendData(Array.isArray(data) ? (data as unknown as TrendData[]) : []);
     } catch (error) {
-      console.error('Error fetching trend data:', error);
+      logger.error('Error fetching trend data', error as Error, { component: 'AdvancedAnalytics', period: selectedPeriod });
       toast.error('Failed to load trend data');
     }
   };
