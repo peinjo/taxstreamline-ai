@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Filter, Download, Eye, Shield, Activity, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface AuditLogEntry {
   id: string;
@@ -90,7 +91,7 @@ export function AuditLogViewer({ resourceType, resourceId }: AuditLogViewerProps
 
       setAuditLogs(logsWithEmails);
     } catch (error) {
-      console.error('Error fetching audit logs:', error);
+      logger.error('Error fetching audit logs', error as Error, { component: 'AuditLogViewer', resourceType, resourceId });
       toast.error('Failed to load audit logs');
     } finally {
       setLoading(false);
@@ -123,7 +124,7 @@ export function AuditLogViewer({ resourceType, resourceId }: AuditLogViewerProps
       
       toast.success('Audit logs exported');
     } catch (error) {
-      console.error('Error exporting audit logs:', error);
+      logger.error('Error exporting audit logs', error as Error, { component: 'AuditLogViewer' });
       toast.error('Failed to export audit logs');
     }
   };

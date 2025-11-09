@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { Link, Share2, Eye, Download, MessageSquare, Calendar, Users, Settings, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface ClientAccess {
   id: string;
@@ -81,7 +82,7 @@ export function ClientPortal() {
 
       setClientAccess(accessWithDetails);
     } catch (error) {
-      console.error('Error fetching client access:', error);
+      logger.error('Error fetching client access', error as Error, { component: 'ClientPortal' });
       toast.error('Failed to load client access');
     }
   };
@@ -106,7 +107,7 @@ export function ClientPortal() {
 
       setDocumentShares(sharesWithDetails);
     } catch (error) {
-      console.error('Error fetching document shares:', error);
+      logger.error('Error fetching document shares', error as Error, { component: 'ClientPortal' });
       toast.error('Failed to load document shares');
     } finally {
       setLoading(false);
@@ -144,7 +145,7 @@ export function ClientPortal() {
       setExpiryDays('30');
       fetchClientAccess();
     } catch (error) {
-      console.error('Error granting client access:', error);
+      logger.error('Error granting client access', error as Error, { component: 'ClientPortal', clientEmail: newClientEmail, documentId: selectedDocumentId });
       toast.error('Failed to grant client access');
     }
   };
@@ -186,7 +187,7 @@ export function ClientPortal() {
       setShareExpiryDays('7');
       fetchDocumentShares();
     } catch (error) {
-      console.error('Error creating share link:', error);
+      logger.error('Error creating share link', error as Error, { component: 'ClientPortal', documentId: selectedDocumentId });
       toast.error('Failed to create share link');
     }
   };
@@ -203,7 +204,7 @@ export function ClientPortal() {
       toast.success('Client access revoked');
       fetchClientAccess();
     } catch (error) {
-      console.error('Error revoking access:', error);
+      logger.error('Error revoking access', error as Error, { component: 'ClientPortal', accessId });
       toast.error('Failed to revoke access');
     }
   };
@@ -220,7 +221,7 @@ export function ClientPortal() {
       toast.success('Share link revoked');
       fetchDocumentShares();
     } catch (error) {
-      console.error('Error revoking share link:', error);
+      logger.error('Error revoking share link', error as Error, { component: 'ClientPortal', shareId });
       toast.error('Failed to revoke share link');
     }
   };

@@ -9,7 +9,7 @@
 
 ---
 
-## ✅ COMPLETED FILES (25 files)
+## ✅ COMPLETED FILES (30 files)
 
 ### Services Layer (5/5) ✅
 1. ✅ `src/services/taxCalculator.ts` - Replaced console.error & console.warn with logger
@@ -42,20 +42,25 @@
 20. ✅ `src/components/tax/FilingHistory.tsx` - Need to process
 21. ✅ `src/components/tax/PaymentHistory.tsx` - Need to process
 
-### Transfer Pricing (4/15) ✅
+### Transfer Pricing (9/15) ✅
 22. ✅ `src/components/transfer-pricing/EntityManagement.tsx` - Replaced console.error (3 instances)
 23. ✅ `src/components/transfer-pricing/FileUploader.tsx` - Need to process
 24. ✅ `src/components/transfer-pricing/TPDashboard.tsx` - Need to process
 25. ✅ `src/components/transfer-pricing/ai/SmartDocumentGenerator.tsx` - Need to process
+26. ✅ `src/components/transfer-pricing/collaboration/DocumentComments.tsx` - Replaced console.error (3 instances)
+27. ✅ `src/components/transfer-pricing/collaboration/UserRoleManager.tsx` - Replaced console.error (4 instances)
+28. ✅ `src/components/transfer-pricing/collaboration/AuditLogViewer.tsx` - Replaced console.error (2 instances)
+29. ✅ `src/components/transfer-pricing/collaboration/ApprovalWorkflow.tsx` - Replaced console.error (4 instances)
+30. ✅ `src/components/transfer-pricing/collaboration/ClientPortal.tsx` - Replaced console.error (5 instances)
 
 ### Teams (1/1) ✅
-26. ✅ `src/components/teams/CreateTeamDialog.tsx` - Replaced console.error
+31. ✅ `src/components/teams/CreateTeamDialog.tsx` - Replaced console.error
 
 ---
 
-## ⏳ REMAINING FILES (31+ files)
+## ⏳ REMAINING FILES (26 files)
 
-### Transfer Pricing Components (11 files)
+### Transfer Pricing Components (6 files)
 - `src/components/transfer-pricing/FileUploader.tsx`
 - `src/components/transfer-pricing/TPDashboard.tsx`
 - `src/components/transfer-pricing/ai/SmartDocumentGenerator.tsx`
@@ -63,11 +68,6 @@
 - `src/components/transfer-pricing/benchmarking/BenchmarkSearch.tsx`
 - `src/components/transfer-pricing/benchmarking/BenchmarkUpload.tsx` (2 instances + 1 warn)
 - `src/components/transfer-pricing/benchmarking/BenchmarkingDashboard.tsx`
-- `src/components/transfer-pricing/collaboration/ApprovalWorkflow.tsx` (4 instances)
-- `src/components/transfer-pricing/collaboration/AuditLogViewer.tsx` (2 instances)
-- `src/components/transfer-pricing/collaboration/ClientPortal.tsx` (5 instances)
-- `src/components/transfer-pricing/collaboration/DocumentComments.tsx` (3 instances)
-- `src/components/transfer-pricing/collaboration/UserRoleManager.tsx` (4 instances)
 - `src/components/transfer-pricing/compliance/AutomatedComplianceTracker.tsx`
 - `src/components/transfer-pricing/enhanced-wizard/steps/*` (Multiple wizard steps)
 

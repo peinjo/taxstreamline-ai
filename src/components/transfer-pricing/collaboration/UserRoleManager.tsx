@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { UserPlus, Shield, Users, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface UserRole {
   id: string;
@@ -52,7 +53,7 @@ export function UserRoleManager() {
 
       setRoles(rolesWithEmails);
     } catch (error) {
-      console.error('Error fetching user roles:', error);
+      logger.error('Error fetching user roles', error as Error, { component: 'UserRoleManager' });
       toast.error('Failed to load user roles');
     } finally {
       setLoading(false);
@@ -84,7 +85,7 @@ export function UserRoleManager() {
       setNewUserRole('analyst');
       fetchUserRoles();
     } catch (error) {
-      console.error('Error adding user role:', error);
+      logger.error('Error adding user role', error as Error, { component: 'UserRoleManager', userEmail: newUserEmail, role: newUserRole });
       toast.error('Failed to add user role');
     }
   };
@@ -105,7 +106,7 @@ export function UserRoleManager() {
       toast.success('User role updated successfully');
       fetchUserRoles();
     } catch (error) {
-      console.error('Error updating user role:', error);
+      logger.error('Error updating user role', error as Error, { component: 'UserRoleManager', userId, newRole });
       toast.error('Failed to update user role');
     }
   };
@@ -122,7 +123,7 @@ export function UserRoleManager() {
       toast.success('User role removed successfully');
       fetchUserRoles();
     } catch (error) {
-      console.error('Error removing user role:', error);
+      logger.error('Error removing user role', error as Error, { component: 'UserRoleManager', userId });
       toast.error('Failed to remove user role');
     }
   };

@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { CheckCircle, XCircle, Clock, Play, UserCheck, Workflow, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface ApprovalWorkflow {
   id: string;
@@ -94,7 +95,7 @@ export function ApprovalWorkflow({ documentId, canManageWorkflows = false }: App
 
       setWorkflows(workflowsWithSteps);
     } catch (error) {
-      console.error('Error fetching workflows:', error);
+      logger.error('Error fetching workflows', error as Error, { component: 'ApprovalWorkflow', documentId });
       toast.error('Failed to load approval workflows');
     } finally {
       setLoading(false);
@@ -142,7 +143,7 @@ export function ApprovalWorkflow({ documentId, canManageWorkflows = false }: App
       setApprovers([{email: '', role: ''}]);
       fetchWorkflows();
     } catch (error) {
-      console.error('Error creating workflow:', error);
+      logger.error('Error creating workflow', error as Error, { component: 'ApprovalWorkflow', documentId, workflowName: newWorkflowName });
       toast.error('Failed to create approval workflow');
     }
   };
@@ -185,7 +186,7 @@ export function ApprovalWorkflow({ documentId, canManageWorkflows = false }: App
       toast.success('Step approved successfully');
       fetchWorkflows();
     } catch (error) {
-      console.error('Error approving step:', error);
+      logger.error('Error approving step', error as Error, { component: 'ApprovalWorkflow', workflowId, stepId });
       toast.error('Failed to approve step');
     }
   };
@@ -221,7 +222,7 @@ export function ApprovalWorkflow({ documentId, canManageWorkflows = false }: App
       toast.success('Step rejected');
       fetchWorkflows();
     } catch (error) {
-      console.error('Error rejecting step:', error);
+      logger.error('Error rejecting step', error as Error, { component: 'ApprovalWorkflow', workflowId, stepId });
       toast.error('Failed to reject step');
     }
   };

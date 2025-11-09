@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { MessageSquare, Reply, ThumbsUp, ThumbsDown, Clock, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface DocumentComment {
   id: string;
@@ -67,7 +68,7 @@ export function DocumentComments({ documentId, canComment = true }: DocumentComm
     const commentsWithReplies = organizeComments(typedComments);
     setComments(commentsWithReplies);
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      logger.error('Error fetching comments', error as Error, { component: 'DocumentComments', documentId });
       toast.error('Failed to load comments');
     } finally {
       setLoading(false);
@@ -130,7 +131,7 @@ export function DocumentComments({ documentId, canComment = true }: DocumentComm
       setCommentType('comment');
       fetchComments();
     } catch (error) {
-      console.error('Error adding comment:', error);
+      logger.error('Error adding comment', error as Error, { component: 'DocumentComments', documentId, commentType });
       toast.error('Failed to add comment');
     }
   };
@@ -160,7 +161,7 @@ export function DocumentComments({ documentId, canComment = true }: DocumentComm
       setReplyingTo(null);
       fetchComments();
     } catch (error) {
-      console.error('Error adding reply:', error);
+      logger.error('Error adding reply', error as Error, { component: 'DocumentComments', documentId, parentId });
       toast.error('Failed to add reply');
     }
   };
