@@ -9,7 +9,7 @@
 
 ---
 
-## ✅ COMPLETED FILES (41 files)
+## ✅ COMPLETED FILES (47 files)
 
 ### Services Layer (5/5) ✅
 1. ✅ `src/services/taxCalculator.ts` - Replaced console.error & console.warn with logger
@@ -69,13 +69,17 @@
 
 ---
 
-## ⏳ REMAINING FILES (15 files)
+### Hooks (6/6) ✅
+42. ✅ `src/hooks/useCalendarEvents.ts` - No console statements
+43. ✅ `src/hooks/useCompliance.ts` - Replaced console.error (3 instances)
+44. ✅ `src/hooks/useGlobalReportingData.tsx` - Replaced console.error
+45. ✅ `src/hooks/useTaxCalculation.ts` - No console statements
+46. ✅ `src/hooks/useCalendarEventsMutations.ts` - Replaced console.error (3 instances)
+47. ✅ `src/hooks/useCalendarEventsFilters.ts` - No console statements
 
-### Hooks (4 files)
-- `src/hooks/useCalendarEvents.ts`
-- `src/hooks/useCompliance.ts`
-- `src/hooks/useGlobalReportingData.tsx`
-- `src/hooks/useTaxCalculation.ts`
+---
+
+## ⏳ REMAINING FILES (9 files)
 
 ### Contexts (3 files)
 - `src/contexts/AuthContext.tsx`

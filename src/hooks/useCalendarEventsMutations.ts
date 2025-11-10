@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CalendarEvent } from "@/types/calendar";
 import { toast } from "sonner";
 import { isTomorrow } from "date-fns";
+import { logger } from "@/lib/logging/logger";
 
 export function useCalendarEventsMutations() {
   const queryClient = useQueryClient();
@@ -54,7 +55,7 @@ export function useCalendarEventsMutations() {
       }
     },
     onError: (error) => {
-      console.error("Error adding event:", error);
+      logger.error("Error adding event", error as Error, { component: "useCalendarEventsMutations", action: "addEvent" });
       toast.error("Failed to add event. Please try again.");
     },
   });
@@ -85,7 +86,7 @@ export function useCalendarEventsMutations() {
       toast.success("Event updated successfully");
     },
     onError: (error) => {
-      console.error("Error updating event:", error);
+      logger.error("Error updating event", error as Error, { component: "useCalendarEventsMutations", action: "updateEvent" });
       toast.error("Failed to update event. Please try again.");
     },
   });
@@ -104,7 +105,7 @@ export function useCalendarEventsMutations() {
       toast.success("Event removed successfully");
     },
     onError: (error) => {
-      console.error("Error removing event:", error);
+      logger.error("Error removing event", error as Error, { component: "useCalendarEventsMutations", action: "removeEvent" });
       toast.error("Failed to remove event. Please try again.");
     },
   });

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logging/logger";
 
 export interface GlobalFilters {
   country: string;
@@ -163,7 +164,7 @@ export const useGlobalReportingData = () => {
       ]);
       toast.success("Data refreshed successfully");
     } catch (error) {
-      console.error("Error refreshing data:", error);
+      logger.error("Error refreshing data", error as Error, { component: "useGlobalReportingData", action: "handleRefresh" });
       toast.error("Failed to refresh data");
     }
   };

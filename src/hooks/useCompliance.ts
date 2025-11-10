@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { ComplianceItem, ComplianceFilters } from "@/types/compliance";
 import { toast } from "sonner";
+import { logger } from "@/lib/logging/logger";
 
 export function useCompliance() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,7 +72,7 @@ export function useCompliance() {
       toast.success("Compliance item created successfully");
     },
     onError: (error) => {
-      console.error("Error creating compliance item:", error);
+      logger.error("Error creating compliance item", error as Error, { component: "useCompliance", action: "createItem" });
       toast.error("Failed to create compliance item");
     },
   });
@@ -94,7 +95,7 @@ export function useCompliance() {
       toast.success("Compliance item updated successfully");
     },
     onError: (error) => {
-      console.error("Error updating compliance item:", error);
+      logger.error("Error updating compliance item", error as Error, { component: "useCompliance", action: "updateItem" });
       toast.error("Failed to update compliance item");
     },
   });
@@ -114,7 +115,7 @@ export function useCompliance() {
       toast.success("Compliance item deleted successfully");
     },
     onError: (error) => {
-      console.error("Error deleting compliance item:", error);
+      logger.error("Error deleting compliance item", error as Error, { component: "useCompliance", action: "deleteItem" });
       toast.error("Failed to delete compliance item");
     },
   });
