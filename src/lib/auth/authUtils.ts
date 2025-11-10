@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { AppRole } from "@/types";
 import { toast } from "sonner";
+import { logger } from "@/lib/logging/logger";
 
 /**
  * Ensures a user profile exists for the given user ID
@@ -84,7 +85,7 @@ export const fetchUserRole = async (userId: string): Promise<AppRole> => {
   } catch (error) {
     // If any error occurs, return default 'user' role as fallback
     // but log the error for monitoring
-    console.error("Error in fetchUserRole:", error);
+    logger.error("Error in fetchUserRole", error as Error, { context: "authUtils", action: "fetchUserRole", userId });
     return 'user';
   }
 };
@@ -182,10 +183,10 @@ export const cleanupAuthState = () => {
       });
     } catch (e) {
       // sessionStorage might not be available in some environments
-      console.warn("Could not clear sessionStorage:", e);
+      logger.warn("Could not clear sessionStorage", { context: "authUtils", action: "cleanupAuthState", error: e });
     }
   } catch (error) {
     // Log but don't throw - cleanup is best effort
-    console.error("Error during auth state cleanup:", error);
+    logger.error("Error during auth state cleanup", error as Error, { context: "authUtils", action: "cleanupAuthState" });
   }
 };

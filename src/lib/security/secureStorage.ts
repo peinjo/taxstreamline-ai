@@ -4,6 +4,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logging/logger";
 
 export const secureStorage = {
   // Generate a user-specific encryption key derived from auth session
@@ -25,7 +26,7 @@ export const secureStorage = {
         ["encrypt", "decrypt"]
       );
     } catch (error) {
-      console.error('Failed to generate user key:', error);
+      logger.error('Failed to generate user key', error as Error, { context: "secureStorage", action: "generateUserKey" });
       return null;
     }
   },
@@ -52,7 +53,7 @@ export const secureStorage = {
       
       return btoa(String.fromCharCode(...combined));
     } catch (error) {
-      console.error('Encryption failed:', error);
+      logger.error('Encryption failed', error as Error, { context: "secureStorage", action: "encrypt" });
       return null;
     }
   },
@@ -75,7 +76,7 @@ export const secureStorage = {
 
       return JSON.parse(new TextDecoder().decode(decrypted));
     } catch (error) {
-      console.error('Decryption failed:', error);
+      logger.error('Decryption failed', error as Error, { context: "secureStorage", action: "decrypt" });
       return null;
     }
   },
@@ -85,14 +86,14 @@ export const secureStorage = {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) {
-        console.warn('Cannot store secure data: user not authenticated');
+        logger.warn('Cannot store secure data: user not authenticated', { context: "secureStorage", action: "setItem", key });
         return false;
       }
 
       const encrypted = await secureStorage.encrypt(data);
       if (!encrypted) {
         // Fallback to unencrypted storage for non-sensitive data only
-        console.warn('Encryption failed, storing unencrypted');
+        logger.warn('Encryption failed, storing unencrypted', { context: "secureStorage", action: "setItem", key });
         localStorage.setItem(key, JSON.stringify(data));
         return false;
       }
@@ -100,7 +101,7 @@ export const secureStorage = {
       localStorage.setItem(`secure_${session.user.id}_${key}`, encrypted);
       return true;
     } catch (error) {
-      console.error('Secure storage failed:', error);
+      logger.error('Secure storage failed', error as Error, { context: "secureStorage", action: "setItem", key });
       return false;
     }
   },
@@ -125,7 +126,7 @@ export const secureStorage = {
       const decrypted = await secureStorage.decrypt(encryptedData);
       return decrypted !== null ? decrypted : defaultValue;
     } catch (error) {
-      console.error('Secure retrieval failed:', error);
+      logger.error('Secure retrieval failed', error as Error, { context: "secureStorage", action: "getItem", key });
       return defaultValue;
     }
   },
@@ -140,7 +141,7 @@ export const secureStorage = {
       // Also remove any unencrypted fallback
       localStorage.removeItem(key);
     } catch (error) {
-      console.error('Secure removal failed:', error);
+      logger.error('Secure removal failed', error as Error, { context: "secureStorage", action: "removeItem", key });
     }
   },
 
@@ -162,7 +163,7 @@ export const secureStorage = {
 
       keysToRemove.forEach(key => localStorage.removeItem(key));
     } catch (error) {
-      console.error('Secure clear failed:', error);
+      logger.error('Secure clear failed', error as Error, { context: "secureStorage", action: "clearUserData" });
     }
   }
 };
