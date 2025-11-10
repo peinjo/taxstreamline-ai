@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TPDocument, TPEntity, TPTransaction, TPDeadline, DocumentType } from "@/types/transfer-pricing";
 import { logError } from "@/lib/errorHandler";
+import { logger } from "@/lib/logging/logger";
 
 interface TransferPricingContextType {
   documents: TPDocument[];
@@ -147,7 +148,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       
       setEntities(typedEntities);
     } catch (error: any) {
-      console.error("Error fetching entities:", error);
+      logger.error("Error fetching entities", error as Error, { context: "TransferPricingContext", action: "fetchEntities" });
       toast.error(error.message);
     }
   };
@@ -173,7 +174,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       
       setTransactions(typedTransactions);
     } catch (error: any) {
-      console.error("Error fetching transactions:", error);
+      logger.error("Error fetching transactions", error as Error, { context: "TransferPricingContext", action: "fetchTransactions" });
       toast.error(error.message);
     }
   };
@@ -191,7 +192,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       if (error) throw error;
       setDeadlines(data || []);
     } catch (error: any) {
-      console.error("Error fetching deadlines:", error);
+      logger.error("Error fetching deadlines", error as Error, { context: "TransferPricingContext", action: "fetchDeadlines" });
       toast.error(error.message);
     }
   };
@@ -246,7 +247,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       setDocuments(prev => [...prev, typedDocument]);
       return typedDocument;
     } catch (error: any) {
-      console.error("Error creating document:", error);
+      logger.error("Error creating document", error as Error, { context: "TransferPricingContext", action: "createDocument" });
       toast.error(error.message);
       return null;
     }
@@ -284,7 +285,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       toast.success("Document updated successfully");
     } catch (error: any) {
-      console.error("Error updating document:", error);
+      logger.error("Error updating document", error as Error, { context: "TransferPricingContext", action: "updateDocument", documentId: id });
       toast.error(error.message);
     }
   };
@@ -301,7 +302,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       setDocuments(prev => prev.filter(doc => doc.id !== id));
       toast.success("Document deleted successfully");
     } catch (error: any) {
-      console.error("Error deleting document:", error);
+      logger.error("Error deleting document", error as Error, { context: "TransferPricingContext", action: "deleteDocument", documentId: id });
       toast.error(error.message);
     }
   };
@@ -339,7 +340,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       setEntities(prev => [...prev, typedEntity]);
       return typedEntity;
     } catch (error: any) {
-      console.error("Error creating entity:", error);
+      logger.error("Error creating entity", error as Error, { context: "TransferPricingContext", action: "createEntity" });
       toast.error(error.message);
       return null;
     }
@@ -366,7 +367,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
 
       toast.success("Entity updated successfully");
     } catch (error: any) {
-      console.error("Error updating entity:", error);
+      logger.error("Error updating entity", error as Error, { context: "TransferPricingContext", action: "updateEntity", entityId: id });
       toast.error(error.message);
     }
   };
@@ -383,7 +384,7 @@ export const TransferPricingProvider = ({ children }: { children: React.ReactNod
       setEntities(prev => prev.filter(entity => entity.id !== id));
       toast.success("Entity deleted successfully");
     } catch (error: any) {
-      console.error("Error deleting entity:", error);
+      logger.error("Error deleting entity", error as Error, { context: "TransferPricingContext", action: "deleteEntity", entityId: id });
       toast.error(error.message);
     }
   };
