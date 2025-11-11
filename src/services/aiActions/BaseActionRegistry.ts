@@ -1,5 +1,6 @@
 
 import { AIAction, AIActionContext, AIActionResult } from "@/types/aiAssistant";
+import { logger } from "@/lib/logging/logger";
 
 export class BaseActionRegistry {
   private actions: Map<string, AIAction> = new Map();
@@ -36,7 +37,10 @@ export class BaseActionRegistry {
     try {
       return await action.handler(params, context);
     } catch (error) {
-      console.error(`Error executing action ${name}:`, error);
+      logger.error(`Error executing action ${name}`, error as Error, { 
+        action: name, 
+        component: 'BaseActionRegistry' 
+      });
       return {
         success: false,
         message: `Failed to execute ${name}: ${error.message}`
