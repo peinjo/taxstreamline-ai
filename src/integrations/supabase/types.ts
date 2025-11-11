@@ -59,6 +59,54 @@ export type Database = {
         }
         Relationships: []
       }
+      application_logs: {
+        Row: {
+          action: string | null
+          component: string | null
+          context: Json | null
+          created_at: string
+          duration: number | null
+          endpoint: string | null
+          error_message: string | null
+          error_stack: string | null
+          id: string
+          level: string
+          message: string
+          method: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          component?: string | null
+          context?: Json | null
+          created_at?: string
+          duration?: number | null
+          endpoint?: string | null
+          error_message?: string | null
+          error_stack?: string | null
+          id?: string
+          level: string
+          message: string
+          method?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          component?: string | null
+          context?: Json | null
+          created_at?: string
+          duration?: number | null
+          endpoint?: string | null
+          error_message?: string | null
+          error_stack?: string | null
+          id?: string
+          level?: string
+          message?: string
+          method?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       calendar_events: {
         Row: {
           category: string | null
@@ -2289,6 +2337,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      clean_old_logs: { Args: { days_to_keep?: number }; Returns: number }
       create_document_version: {
         Args: {
           p_changes_summary?: string
@@ -2298,6 +2347,10 @@ export type Database = {
         Returns: string
       }
       get_current_user_role: { Args: never; Returns: string }
+      get_log_statistics: {
+        Args: { p_end_date?: string; p_start_date?: string; p_user_id?: string }
+        Returns: Json
+      }
       has_role: {
         Args: { required_role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean

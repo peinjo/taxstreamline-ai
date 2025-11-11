@@ -14,6 +14,7 @@ import TaxWebApp from "@/pages/TaxWebApp";
 import AuditReporting from "@/pages/AuditReporting";
 import Settings from "@/pages/Settings";
 import BulkOperations from "@/pages/BulkOperations";
+import LoggingDashboard from "@/pages/LoggingDashboard";
 
 interface RouteConfig {
   path: string;
@@ -98,6 +99,11 @@ export const routes: RouteConfig[] = [
   {
     path: "/bulk-operations",
     element: <BulkOperations />,
+    isProtected: true,
+  },
+  {
+    path: "/logs",
+    element: <LoggingDashboard />,
     isProtected: true,
   },
 ];

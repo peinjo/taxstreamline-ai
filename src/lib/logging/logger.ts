@@ -1,5 +1,6 @@
 // Enhanced logging system with structured logging and performance tracking
 import React from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LogContext {
   userId?: string;
@@ -21,6 +22,16 @@ interface PerformanceMetrics {
 class Logger {
   private isDevelopment = import.meta.env.DEV;
   private performanceMetrics: Map<string, PerformanceMetrics> = new Map();
+  private logBuffer: any[] = [];
+  private bufferFlushInterval: number = 5000; // Flush every 5 seconds
+  private persistToDatabase: boolean = !import.meta.env.DEV; // Only persist in production
+
+  constructor() {
+    // Start buffer flushing in production
+    if (this.persistToDatabase) {
+      setInterval(() => this.flushLogBuffer(), this.bufferFlushInterval);
+    }
+  }
 
   // Structured logging methods
   info(message: string, context?: LogContext) {
@@ -32,12 +43,11 @@ class Logger {
   }
 
   error(message: string, error?: Error, context?: LogContext) {
-    this.log('ERROR', message, { ...context, error: error?.message, stack: error?.stack });
-    
-    // In production, you could send to external logging service
-    if (!this.isDevelopment && error) {
-      this.sendToExternalService('error', message, error, context);
-    }
+    this.log('ERROR', message, { 
+      ...context, 
+      error_message: error?.message, 
+      error_stack: error?.stack 
+    });
   }
 
   debug(message: string, context?: LogContext) {
@@ -139,13 +149,47 @@ class Logger {
   }
 
   private bufferLog(logEntry: any) {
-    // Implementation for production log buffering
-    // Could send to services like LogRocket, Sentry, etc.
+    if (this.persistToDatabase) {
+      this.logBuffer.push(logEntry);
+      
+      // If buffer gets too large, flush immediately
+      if (this.logBuffer.length >= 50) {
+        this.flushLogBuffer();
+      }
+    }
   }
 
-  private sendToExternalService(level: string, message: string, error: Error, context?: LogContext) {
-    // Implementation for external error reporting
-    // Could integrate with Sentry, Bugsnag, etc.
+  private async flushLogBuffer() {
+    if (this.logBuffer.length === 0) return;
+
+    const logsToFlush = [...this.logBuffer];
+    this.logBuffer = [];
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const formattedLogs = logsToFlush.map(log => ({
+        user_id: user?.id || null,
+        level: log.level,
+        message: log.message,
+        component: log.component || null,
+        action: log.action || null,
+        error_message: log.error_message || null,
+        error_stack: log.error_stack || null,
+        context: log,
+        duration: log.duration || null,
+        endpoint: log.endpoint || null,
+        method: log.method || null,
+        created_at: log.timestamp
+      }));
+
+      await supabase.from('application_logs').insert(formattedLogs);
+    } catch (error) {
+      // Silently fail - don't want logging to break the app
+      if (this.isDevelopment) {
+        console.error('Failed to flush logs:', error);
+      }
+    }
   }
 
   // Utility for measuring function execution time

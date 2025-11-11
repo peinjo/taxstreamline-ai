@@ -11,6 +11,7 @@ import {
   Calculator,
   ChartBar,
   Upload,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -51,6 +52,7 @@ const Sidebar = () => {
       progress: getUnlockProgress('bulk_operations'),
     },
     { icon: Bot, text: "AI Assistant", path: "/ai-assistant" },
+    { icon: Activity, text: "System Logs", path: "/logs" },
   ];
 
   const bottomMenuItems = [
