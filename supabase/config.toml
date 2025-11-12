@@ -2,3 +2,6 @@ project_id = "ukuhdrsywxbuhcytjfog"
 
 [functions.ai-operations]
 verify_jwt = true
+
+[functions.payment-operations]
+verify_jwt = true
