@@ -34,63 +34,20 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
       throw new Error(validation.error);
     }
     const validatedData = validation.data;
-    
-    // Get current user to associate with payment
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData.user;
-    
-    // Initialize payment with Paystack
-    const paystackKey = process.env.PAYSTACK_SECRET_KEY || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
-    
-    if (!paystackKey) {
-      console.error("Paystack API key is not set");
-      throw new Error("Payment service is not properly configured");
-    }
-    
-    const response = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${paystackKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: validatedData.amount * 100, // Paystack expects amount in kobo
-        email: validatedData.email,
-        currency: validatedData.currency,
-        metadata: validatedData.metadata,
-      }),
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to initialize payment");
-    }
+    // Call secure edge function to initialize payment
+    const { data: fnData, error: fnError } = await supabase.functions.invoke(
+      "payment-operations",
+      {
+        body: { action: "initialize", ...validatedData },
+      }
+    );
 
-    const paymentData = await response.json();
+    if (fnError) throw fnError;
 
-    if (!paymentData.status) {
-      throw new Error("Payment gateway returned an invalid response");
-    }
-
-    // Store transaction in Supabase
-    const { data: transaction, error } = await supabase
-      .from("payment_transactions")
-      .insert({
-        amount: validatedData.amount,
-        currency: validatedData.currency,
-        payment_reference: paymentData.data.reference,
-        provider: "paystack",
-        status: "pending",
-        metadata: validatedData.metadata,
-        user_id: user?.id
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { transaction, authorizationUrl: paymentData.data.authorization_url };
+    return fnData as { transaction: any; authorizationUrl: string };
   } catch (error) {
-    console.error("Error initiating payment:", error);
+    // Avoid leaking details in console; errors handled by caller/UI
     throw error;
   }
 };
@@ -98,57 +55,32 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
 export const verifyPayment = async (reference: string): Promise<PaymentTransaction> => {
   try {
     // Validate reference
-    if (!reference || typeof reference !== 'string' || reference.length > 100) {
+    if (!reference || typeof reference !== "string" || reference.length > 100) {
       throw new Error("Invalid payment reference");
     }
-    
-    const paystackKey = process.env.PAYSTACK_SECRET_KEY || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
-    
-    if (!paystackKey) {
-      throw new Error("Payment service is not properly configured");
-    }
-    
-    const response = await fetch(
-      `https://api.paystack.co/transaction/verify/${reference}`,
+
+    const { data: fnData, error: fnError } = await supabase.functions.invoke(
+      "payment-operations",
       {
-        headers: {
-          Authorization: `Bearer ${paystackKey}`,
-        },
+        body: { action: "verify", reference },
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to verify payment");
-    }
+    if (fnError) throw fnError;
 
-    const verificationData = await response.json();
+    const transaction = (fnData as any).transaction as PaymentTransaction;
 
-    // Update transaction status in Supabase
-    const { data: transaction, error } = await supabase
-      .from("payment_transactions")
-      .update({
-        status: verificationData.data.status,
-        metadata: {
-          ...verificationData.data,
-        },
-      })
-      .eq("payment_reference", reference)
-      .select()
-      .single();
-
-    if (error) throw error;
-    
     // Show toast based on payment status
     if (transaction.status === "success" || transaction.status === "successful") {
       toast.success("Payment successful! Thank you for your payment.");
     } else if (transaction.status === "failed") {
       toast.error("Payment failed. Please try again or contact support.");
+    } else if (transaction.status === "pending") {
+      toast.info("Payment is still being processed");
     }
-    
+
     return transaction;
   } catch (error) {
-    console.error("Error verifying payment:", error);
     throw error;
   }
 };
