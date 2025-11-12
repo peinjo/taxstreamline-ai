@@ -1,6 +1,7 @@
-
 import { supabase } from "./supabase/client";
 import { toast } from "sonner";
+import { emailSchema, validateInput } from "@/lib/validation/schemas";
+import { z } from "zod";
 
 interface PaymentInitiationData {
   amount: number;
@@ -8,6 +9,13 @@ interface PaymentInitiationData {
   email: string;
   metadata?: Record<string, any>;
 }
+
+const paymentInitiationSchema = z.object({
+  amount: z.number().min(0.01, "Amount must be at least 0.01").max(10000000, "Amount too large"),
+  currency: z.string().length(3, "Currency must be 3 characters").toUpperCase(),
+  email: emailSchema,
+  metadata: z.record(z.string(), z.any()).optional()
+});
 
 interface PaymentTransaction {
   id: number;
@@ -20,6 +28,13 @@ interface PaymentTransaction {
 
 export const initiatePayment = async (data: PaymentInitiationData) => {
   try {
+    // Validate input data
+    const validation = validateInput(paymentInitiationSchema, data);
+    if (!validation.success) {
+      throw new Error(validation.error);
+    }
+    const validatedData = validation.data;
+    
     // Get current user to associate with payment
     const { data: userData } = await supabase.auth.getUser();
     const user = userData.user;
@@ -39,10 +54,10 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        amount: data.amount * 100, // Paystack expects amount in kobo
-        email: data.email,
-        currency: data.currency,
-        metadata: data.metadata,
+        amount: validatedData.amount * 100, // Paystack expects amount in kobo
+        email: validatedData.email,
+        currency: validatedData.currency,
+        metadata: validatedData.metadata,
       }),
     });
 
@@ -61,12 +76,12 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
     const { data: transaction, error } = await supabase
       .from("payment_transactions")
       .insert({
-        amount: data.amount,
-        currency: data.currency,
+        amount: validatedData.amount,
+        currency: validatedData.currency,
         payment_reference: paymentData.data.reference,
         provider: "paystack",
         status: "pending",
-        metadata: data.metadata,
+        metadata: validatedData.metadata,
         user_id: user?.id
       })
       .select()
@@ -82,6 +97,11 @@ export const initiatePayment = async (data: PaymentInitiationData) => {
 
 export const verifyPayment = async (reference: string): Promise<PaymentTransaction> => {
   try {
+    // Validate reference
+    if (!reference || typeof reference !== 'string' || reference.length > 100) {
+      throw new Error("Invalid payment reference");
+    }
+    
     const paystackKey = process.env.PAYSTACK_SECRET_KEY || import.meta.env.VITE_PAYSTACK_SECRET_KEY;
     
     if (!paystackKey) {
