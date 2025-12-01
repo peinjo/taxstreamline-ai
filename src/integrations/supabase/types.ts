@@ -574,9 +574,12 @@ export type Database = {
           file_size: number
           file_type: Database["public"]["Enums"]["document_type"]
           id: number
+          parent_document_id: number | null
+          tags: string[] | null
           tax_year: number
           updated_at: string
           user_id: string | null
+          version: number | null
         }
         Insert: {
           created_at?: string
@@ -586,9 +589,12 @@ export type Database = {
           file_size: number
           file_type: Database["public"]["Enums"]["document_type"]
           id?: number
+          parent_document_id?: number | null
+          tags?: string[] | null
           tax_year: number
           updated_at?: string
           user_id?: string | null
+          version?: number | null
         }
         Update: {
           created_at?: string
@@ -598,11 +604,22 @@ export type Database = {
           file_size?: number
           file_type?: Database["public"]["Enums"]["document_type"]
           id?: number
+          parent_document_id?: number | null
+          tags?: string[] | null
           tax_year?: number
           updated_at?: string
           user_id?: string | null
+          version?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "document_metadata_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "document_metadata"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       document_versions: {
         Row: {
@@ -644,6 +661,59 @@ export type Database = {
             columns: ["document_id"]
             isOneToOne: false
             referencedRelation: "transfer_pricing_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      filing_packs: {
+        Row: {
+          generated_at: string | null
+          id: string
+          pdf_url: string | null
+          period_end: string
+          period_start: string
+          proof_file_id: number | null
+          proof_uploaded_at: string | null
+          status: string | null
+          submitted_at: string | null
+          summary_data: Json | null
+          tax_type: string
+          user_id: string
+        }
+        Insert: {
+          generated_at?: string | null
+          id?: string
+          pdf_url?: string | null
+          period_end: string
+          period_start: string
+          proof_file_id?: number | null
+          proof_uploaded_at?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          summary_data?: Json | null
+          tax_type: string
+          user_id: string
+        }
+        Update: {
+          generated_at?: string | null
+          id?: string
+          pdf_url?: string | null
+          period_end?: string
+          period_start?: string
+          proof_file_id?: number | null
+          proof_uploaded_at?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          summary_data?: Json | null
+          tax_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "filing_packs_proof_file_id_fkey"
+            columns: ["proof_file_id"]
+            isOneToOne: false
+            referencedRelation: "document_metadata"
             referencedColumns: ["id"]
           },
         ]
@@ -2121,6 +2191,56 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          receipt_file_id: number | null
+          source: string | null
+          type: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          receipt_file_id?: number | null
+          source?: string | null
+          type: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          receipt_file_id?: number | null
+          source?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_receipt_file_id_fkey"
+            columns: ["receipt_file_id"]
+            isOneToOne: false
+            referencedRelation: "document_metadata"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transfer_pricing_documents: {
         Row: {
           approved_at: string | null
@@ -2226,9 +2346,11 @@ export type Database = {
       }
       user_profiles: {
         Row: {
+          accounting_basis: string | null
           address: string
           avatar_url: string | null
           bio: string | null
+          business_name: string | null
           company: string | null
           compliance_alerts_enabled: boolean | null
           created_at: string
@@ -2246,13 +2368,23 @@ export type Database = {
           onboarding_step: number | null
           phone_number: string | null
           report_status_updates_enabled: boolean | null
+          revenue_band: string | null
+          sector: string | null
+          sms_enabled: boolean | null
+          state_of_operation: string | null
+          tin: string | null
           unlocked_features: Json | null
           user_id: string
+          vat_registered: boolean | null
+          whatsapp_enabled: boolean | null
+          whatsapp_number: string | null
         }
         Insert: {
+          accounting_basis?: string | null
           address: string
           avatar_url?: string | null
           bio?: string | null
+          business_name?: string | null
           company?: string | null
           compliance_alerts_enabled?: boolean | null
           created_at?: string
@@ -2270,13 +2402,23 @@ export type Database = {
           onboarding_step?: number | null
           phone_number?: string | null
           report_status_updates_enabled?: boolean | null
+          revenue_band?: string | null
+          sector?: string | null
+          sms_enabled?: boolean | null
+          state_of_operation?: string | null
+          tin?: string | null
           unlocked_features?: Json | null
           user_id: string
+          vat_registered?: boolean | null
+          whatsapp_enabled?: boolean | null
+          whatsapp_number?: string | null
         }
         Update: {
+          accounting_basis?: string | null
           address?: string
           avatar_url?: string | null
           bio?: string | null
+          business_name?: string | null
           company?: string | null
           compliance_alerts_enabled?: boolean | null
           created_at?: string
@@ -2294,8 +2436,16 @@ export type Database = {
           onboarding_step?: number | null
           phone_number?: string | null
           report_status_updates_enabled?: boolean | null
+          revenue_band?: string | null
+          sector?: string | null
+          sms_enabled?: boolean | null
+          state_of_operation?: string | null
+          tin?: string | null
           unlocked_features?: Json | null
           user_id?: string
+          vat_registered?: boolean | null
+          whatsapp_enabled?: boolean | null
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
