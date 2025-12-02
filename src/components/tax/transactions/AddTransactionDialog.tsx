@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Upload, X } from "lucide-react";
 
 interface AddTransactionDialogProps {
   open: boolean;
@@ -46,6 +47,8 @@ export function AddTransactionDialog({ open, onOpenChange }: AddTransactionDialo
     category: "",
     description: "",
   });
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,9 +62,53 @@ export function AddTransactionDialog({ open, onOpenChange }: AddTransactionDialo
     fetchUser();
   }, [navigate]);
 
+  const uploadReceipt = async (): Promise<number | null> => {
+    if (!receiptFile || !userId) return null;
+
+    try {
+      setIsUploading(true);
+      
+      // Upload to storage
+      const fileExt = receiptFile.name.split('.').pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('tax_documents')
+        .upload(fileName, receiptFile);
+
+      if (uploadError) throw uploadError;
+
+      // Create document metadata record
+      const { data: docData, error: docError } = await supabase
+        .from('document_metadata')
+        .insert([{
+          user_id: userId,
+          file_name: receiptFile.name,
+          file_path: fileName,
+          file_type: 'receipt',
+          file_size: receiptFile.size,
+          tax_year: new Date().getFullYear(),
+          description: 'Transaction receipt',
+        }])
+        .select()
+        .single();
+
+      if (docError) throw docError;
+      return docData.id;
+    } catch (error) {
+      console.error('Receipt upload error:', error);
+      toast.error('Failed to upload receipt');
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       if (!userId) throw new Error("User not authenticated");
+      
+      // Upload receipt first if present
+      const receiptFileId = receiptFile ? await uploadReceipt() : null;
       
       const { error } = await supabase.from("transactions").insert([
         {
@@ -71,6 +118,7 @@ export function AddTransactionDialog({ open, onOpenChange }: AddTransactionDialo
           type: data.type,
           category: data.category,
           description: data.description || null,
+          receipt_file_id: receiptFileId,
           source: "manual",
         },
       ]);
@@ -87,6 +135,7 @@ export function AddTransactionDialog({ open, onOpenChange }: AddTransactionDialo
         category: "",
         description: "",
       });
+      setReceiptFile(null);
     },
     onError: (error) => {
       toast.error("Failed to add transaction: " + error.message);
@@ -184,12 +233,47 @@ export function AddTransactionDialog({ open, onOpenChange }: AddTransactionDialo
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="receipt">Receipt (Optional)</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="receipt"
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('receipt')?.click()}
+                className="w-full"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {receiptFile ? receiptFile.name : "Upload Receipt"}
+              </Button>
+              {receiptFile && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setReceiptFile(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Upload invoice, receipt, or proof of payment
+            </p>
+          </div>
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Adding..." : "Add Transaction"}
+            <Button type="submit" disabled={createMutation.isPending || isUploading}>
+              {createMutation.isPending || isUploading ? "Adding..." : "Add Transaction"}
             </Button>
           </div>
         </form>

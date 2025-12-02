@@ -12,16 +12,18 @@ import { PaymentForm } from "@/components/tax/PaymentForm";
 import { PaymentHistory } from "@/components/tax/PaymentHistory";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
-import { LightbulbIcon, Receipt, FileText } from "lucide-react";
+import { LightbulbIcon, Receipt, FileText, LayoutDashboard, BookOpen } from "lucide-react";
 import { TaxPlanner } from "@/components/tax/TaxPlanner";
 import { TaxMetrics } from "@/components/tax/dashboard/TaxMetrics";
 import { TransactionList } from "@/components/tax/transactions/TransactionList";
 import { FilingPackGenerator } from "@/components/tax/filing-pack/FilingPackGenerator";
 import { FilingPackHistory } from "@/components/tax/filing-pack/FilingPackHistory";
+import { TaxEaseDashboard } from "@/components/tax/dashboard/TaxEaseDashboard";
+import { FilingGuideViewer } from "@/components/tax/guides/FilingGuideViewer";
 
 const TaxWebApp = () => {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("calculator");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -44,7 +46,11 @@ const TaxWebApp = () => {
         <TaxMetrics onNavigate={setActiveTab} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+          <TabsList className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-2">
+            <TabsTrigger value="dashboard">
+              <LayoutDashboard className="h-4 w-4 mr-1" />
+              Dashboard
+            </TabsTrigger>
             <TabsTrigger value="calculator">Calculator</TabsTrigger>
             <TabsTrigger value="transactions">
               <Receipt className="h-4 w-4 mr-1" />
@@ -53,6 +59,10 @@ const TaxWebApp = () => {
             <TabsTrigger value="filing-pack">
               <FileText className="h-4 w-4 mr-1" />
               Filing Pack
+            </TabsTrigger>
+            <TabsTrigger value="guides">
+              <BookOpen className="h-4 w-4 mr-1" />
+              Filing Guides
             </TabsTrigger>
             <TabsTrigger value="planning">
               <LightbulbIcon className="h-4 w-4 mr-1" />
@@ -65,6 +75,9 @@ const TaxWebApp = () => {
           </TabsList>
 
           <div className="pt-4">
+            <TabsContent value="dashboard">
+              <TaxEaseDashboard onNavigate={setActiveTab} />
+            </TabsContent>
             <TabsContent value="calculator">
               <TaxCalculator />
             </TabsContent>
@@ -74,6 +87,9 @@ const TaxWebApp = () => {
             <TabsContent value="filing-pack" className="space-y-6">
               <FilingPackGenerator />
               <FilingPackHistory />
+            </TabsContent>
+            <TabsContent value="guides">
+              <FilingGuideViewer />
             </TabsContent>
             <TabsContent value="planning">
               <TaxPlanner />
