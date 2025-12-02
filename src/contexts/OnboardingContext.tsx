@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { BusinessProfileData } from "@/components/onboarding/BusinessProfileStep";
 
 interface OnboardingContextType {
   isOnboarding: boolean;
@@ -13,11 +14,12 @@ interface OnboardingContextType {
   skipOnboarding: () => void;
   completeOnboarding: () => void;
   goToStep: (step: number) => void;
+  saveBusinessProfile: (data: BusinessProfileData) => Promise<void>;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isOnboarding, setIsOnboarding] = useState(false);
@@ -127,6 +129,45 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
   };
 
+  const saveBusinessProfile = async (data: BusinessProfileData) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("user_profiles")
+        .update({
+          business_name: data.businessName,
+          tin: data.tin,
+          sector: data.sector,
+          state_of_operation: data.stateOfOperation,
+          accounting_basis: data.accountingBasis,
+          revenue_band: data.revenueBand,
+          vat_registered: data.vatRegistered,
+          whatsapp_number: data.whatsappNumber,
+          sms_enabled: data.smsEnabled,
+          whatsapp_enabled: data.whatsappEnabled,
+        })
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Profile saved",
+        description: "Your business information has been saved",
+      });
+      
+      nextStep();
+    } catch (error) {
+      console.error("Error saving business profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save business profile",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <OnboardingContext.Provider
       value={{
@@ -140,6 +181,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         skipOnboarding,
         completeOnboarding,
         goToStep,
+        saveBusinessProfile,
       }}
     >
       {children}
