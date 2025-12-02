@@ -6,6 +6,7 @@ import { Plus, Download, Upload, Filter } from "lucide-react";
 import { AddTransactionDialog } from "./AddTransactionDialog";
 import { TransactionTable } from "./TransactionTable";
 import { CSVImport } from "./CSVImport";
+import { TransactionSummary } from "./TransactionSummary";
 import { toast } from "sonner";
 import {
   Select,
@@ -131,26 +132,10 @@ export function TransactionList() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-card p-4 rounded-lg border">
-          <div className="text-sm text-muted-foreground">Total Income</div>
-          <div className="text-2xl font-bold text-green-600">
-            ₦{totals.income.toLocaleString()}
-          </div>
-        </div>
-        <div className="bg-card p-4 rounded-lg border">
-          <div className="text-sm text-muted-foreground">Total Expenses</div>
-          <div className="text-2xl font-bold text-red-600">
-            ₦{totals.expense.toLocaleString()}
-          </div>
-        </div>
-        <div className="bg-card p-4 rounded-lg border">
-          <div className="text-sm text-muted-foreground">Net</div>
-          <div className={`text-2xl font-bold ${totals.income - totals.expense >= 0 ? "text-green-600" : "text-red-600"}`}>
-            ₦{(totals.income - totals.expense).toLocaleString()}
-          </div>
-        </div>
-      </div>
+      <TransactionSummary 
+        transactions={transactions || []}
+        periodLabel="All Time"
+      />
 
       <div className="flex items-center gap-2">
         <Filter className="w-4 h-4 text-muted-foreground" />
