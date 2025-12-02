@@ -1,12 +1,12 @@
 import React from "react";
-import { Calculator, Calendar, FileText, Sparkles } from "lucide-react";
+import { Calculator, Calendar, FileText, Sparkles, Building2 } from "lucide-react";
 
 interface OnboardingStepProps {
   step: number;
   content: string;
 }
 
-const stepIcons = [Sparkles, Calculator, Calendar, FileText];
+const stepIcons = [Sparkles, Building2, Calculator, Calendar, FileText];
 
 export const OnboardingStep: React.FC<OnboardingStepProps> = ({ step, content }) => {
   const Icon = stepIcons[step] || Sparkles;
