@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileText, BookOpen, AlertCircle } from "lucide-react";
+import { FileText, BookOpen, AlertCircle, List, BookText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import ReactMarkdown from "react-markdown";
+import { GuideChecklist } from "./GuideChecklist";
 
 interface TaxGuide {
   id: number;
@@ -18,6 +21,7 @@ interface TaxGuide {
 
 export function FilingGuideViewer() {
   const [selectedCategory, setSelectedCategory] = useState<string>("vat_filing");
+  const [viewMode, setViewMode] = useState<"read" | "checklist">("checklist");
 
   const { data: guides, isLoading } = useQuery({
     queryKey: ["tax-guides"],
@@ -72,13 +76,36 @@ export function FilingGuideViewer() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Alert className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            TaxEase prepares your filing pack — you file directly with FIRS or relevant tax authority.
-            These guides help you complete the filing process.
-          </AlertDescription>
-        </Alert>
+          <div className="flex items-center justify-between mb-4">
+            <Alert className="flex-1 mr-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                TaxEase prepares your filing pack — you file directly with FIRS or relevant tax authority.
+                These guides help you complete the filing process.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="flex items-center gap-1 border rounded-lg p-1">
+              <Toggle
+                pressed={viewMode === "read"}
+                onPressedChange={() => setViewMode("read")}
+                size="sm"
+                aria-label="Read mode"
+              >
+                <BookText className="h-4 w-4 mr-1" />
+                Read
+              </Toggle>
+              <Toggle
+                pressed={viewMode === "checklist"}
+                onPressedChange={() => setViewMode("checklist")}
+                size="sm"
+                aria-label="Checklist mode"
+              >
+                <List className="h-4 w-4 mr-1" />
+                Checklist
+              </Toggle>
+            </div>
+          </div>
 
         <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
           <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full">
@@ -94,8 +121,14 @@ export function FilingGuideViewer() {
             <TabsContent key={category} value={category}>
               <ScrollArea className="h-[600px] w-full rounded-md border p-6">
                 {categorizedGuides?.[category]?.map((guide) => (
-                  <div key={guide.id} className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown>{guide.content}</ReactMarkdown>
+                  <div key={guide.id}>
+                    {viewMode === "checklist" ? (
+                      <GuideChecklist guide={guide} />
+                    ) : (
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{guide.content}</ReactMarkdown>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {!categorizedGuides?.[category]?.length && (
