@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Send } from "lucide-react";
 import { logger } from "@/lib/logging/logger";
+import { messageSchema, validateInput } from "@/lib/validation/schemas";
 
 export const MessageInput = ({ teamId }: { teamId: number }) => {
   const [content, setContent] = useState("");
@@ -15,11 +16,26 @@ export const MessageInput = ({ teamId }: { teamId: number }) => {
   const handleSendMessage = async () => {
     if (!content.trim()) return;
 
+    // Validate input using schema
+    const validation = validateInput(messageSchema, {
+      content: content.trim(),
+      team_id: teamId,
+    });
+
+    if (!validation.success) {
+      toast({
+        title: "Validation Error",
+        description: validation.error,
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.from("messages").insert([
         {
-          content,
-          team_id: teamId,
+          content: validation.data.content,
+          team_id: validation.data.team_id,
           sender_id: user?.id,
         },
       ]);
@@ -48,6 +64,7 @@ export const MessageInput = ({ teamId }: { teamId: number }) => {
         onChange={(e) => setContent(e.target.value)}
         placeholder="Type your message..."
         className="min-h-[80px]"
+        maxLength={1000}
       />
       <Button onClick={handleSendMessage} className="self-end">
         <Send className="h-4 w-4" />
