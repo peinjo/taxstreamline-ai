@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { FileText, Download, Calendar } from "lucide-react";
+import { FileText, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { generateVATFilingPack, saveFilingPackToStorage, FilingPackData } from "@/services/filingPackPDFService";
+import { FilingPackPreview } from "./FilingPackPreview";
 
 interface Transaction {
   date: string;
@@ -22,6 +23,7 @@ export function FilingPackGenerator() {
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
 
   const { data: user } = useQuery({
     queryKey: ["user"],
@@ -220,7 +222,27 @@ export function FilingPackGenerator() {
 
           {periodStart && periodEnd && transactions && transactions.length > 0 && (
             <div className="space-y-4 pt-4 border-t">
-              <h3 className="font-semibold">Period Summary</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Period Summary</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPreview(!showPreview)}
+                  className="text-xs"
+                >
+                  {showPreview ? (
+                    <>
+                      <EyeOff className="h-4 w-4 mr-1" />
+                      Hide Preview
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="h-4 w-4 mr-1" />
+                      Show Preview
+                    </>
+                  )}
+                </Button>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-muted p-3 rounded">
@@ -256,6 +278,25 @@ export function FilingPackGenerator() {
                   </div>
                 </div>
               </div>
+
+              {showPreview && user && (
+                <FilingPackPreview
+                  user={{
+                    fullName: user.profile?.full_name || user.email || "User",
+                    email: user.email || "",
+                    businessName: user.profile?.business_name,
+                    tin: user.profile?.tin,
+                    state: user.profile?.state_of_operation,
+                  }}
+                  periodStart={periodStart}
+                  periodEnd={periodEnd}
+                  transactions={transactions}
+                  totals={totals}
+                  vatOutput={vatOutput}
+                  vatInput={vatInput}
+                  netVat={netVat}
+                />
+              )}
 
               <Button
                 onClick={handleGenerate}
