@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,8 +11,6 @@ import { useContentSecurityPolicy } from "./hooks/useContentSecurityPolicy";
 import { routes } from "./config/routes";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
-import { QuickActionsButton } from "@/components/common/QuickActionsButton";
-import { CommandPalette } from "@/components/common/CommandPalette";
 import { useGlobalKeyboardShortcuts } from "@/hooks/useGlobalKeyboardShortcuts";
 
 // Simplified Protected Route component
@@ -65,10 +62,7 @@ const AppContent: React.FC = () => {
   useGlobalKeyboardShortcuts();
 
   return (
-    <>
-      <CommandPalette />
-      <QuickActionsButton />
-      <Routes>
+    <Routes>
         {routes.map((route) => {
           // Handle the index route
           if (route.path === "/") {
@@ -97,7 +91,6 @@ const AppContent: React.FC = () => {
           );
         })}
       </Routes>
-    </>
   );
 };
 

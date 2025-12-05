@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   CommandDialog,
   CommandEmpty,
@@ -19,15 +19,45 @@ import {
   Calculator,
   Plus,
   Search,
+  Settings,
+  Bell,
+  Users,
+  Upload,
+  BookOpen,
+  History,
+  Receipt,
 } from 'lucide-react';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { logger } from '@/lib/logging/logger';
+import { Badge } from '@/components/ui/badge';
+
+const navigationItems = [
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, shortcut: '⌘D', keywords: ['home', 'main'] },
+  { path: '/calendar', label: 'Calendar', icon: Calendar, shortcut: '⌘C', keywords: ['events', 'schedule', 'deadlines'] },
+  { path: '/compliance', label: 'Compliance', icon: ClipboardList, shortcut: '⌘L', keywords: ['regulatory', 'requirements'] },
+  { path: '/tax', label: 'Tax Reports', icon: Calculator, shortcut: '⌘T', keywords: ['vat', 'income', 'calculation'] },
+  { path: '/global-reporting', label: 'Global Reporting', icon: Globe, shortcut: '⌘G', keywords: ['international', 'countries'] },
+  { path: '/transfer-pricing', label: 'Transfer Pricing', icon: FileText, shortcut: '⌘P', keywords: ['oecd', 'intercompany'] },
+  { path: '/audit-reporting', label: 'Audit Reporting', icon: TrendingUp, shortcut: '⌘A', keywords: ['audit', 'analytics'] },
+  { path: '/settings', label: 'Settings', icon: Settings, shortcut: '⌘,', keywords: ['preferences', 'profile', 'account'] },
+  { path: '/notifications', label: 'Notifications', icon: Bell, shortcut: '⌘N', keywords: ['alerts', 'messages'] },
+];
+
+const quickActions = [
+  { id: 'new-calculation', label: 'New Tax Calculation', icon: Calculator, path: '/tax', keywords: ['calculate', 'vat'] },
+  { id: 'new-event', label: 'Create Calendar Event', icon: Plus, path: '/calendar', keywords: ['schedule', 'deadline'] },
+  { id: 'new-compliance', label: 'Add Compliance Item', icon: ClipboardList, path: '/compliance', keywords: ['regulatory'] },
+  { id: 'upload-document', label: 'Upload Document', icon: Upload, path: '/tax?tab=documents', keywords: ['file', 'receipt'] },
+  { id: 'new-transaction', label: 'Add Transaction', icon: Receipt, path: '/tax?tab=transactions', keywords: ['income', 'expense'] },
+  { id: 'view-guides', label: 'View Tax Guides', icon: BookOpen, path: '/tax?tab=guides', keywords: ['help', 'firs'] },
+];
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Toggle command palette with Ctrl+K
+  // Toggle command palette with Ctrl+K or Cmd+K
   useKeyboardShortcuts([
     {
       key: 'k',
@@ -37,7 +67,7 @@ export function CommandPalette() {
     },
   ]);
 
-  // Close on escape
+  // Close on escape and handle other shortcuts
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -49,88 +79,102 @@ export function CommandPalette() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
+  // Reset search when opening
+  useEffect(() => {
+    if (open) {
+      setSearchQuery('');
+    }
+  }, [open]);
+
   const handleNavigate = (path: string) => {
     navigate(path);
     setOpen(false);
   };
 
-  const handleAction = (action: () => void) => {
-    action();
-    setOpen(false);
-  };
+  // Filter items based on search
+  const filteredNavigation = useMemo(() => {
+    if (!searchQuery) return navigationItems;
+    const query = searchQuery.toLowerCase();
+    return navigationItems.filter(item => 
+      item.label.toLowerCase().includes(query) ||
+      item.keywords.some(k => k.includes(query))
+    );
+  }, [searchQuery]);
+
+  const filteredActions = useMemo(() => {
+    if (!searchQuery) return quickActions;
+    const query = searchQuery.toLowerCase();
+    return quickActions.filter(item => 
+      item.label.toLowerCase().includes(query) ||
+      item.keywords.some(k => k.includes(query))
+    );
+  }, [searchQuery]);
+
+  // Get current page for highlighting
+  const currentPath = location.pathname;
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Type a command or search..." />
+      <CommandInput 
+        placeholder="Search pages, actions, or type a command..." 
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>
+          <div className="py-6 text-center">
+            <Search className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+            <p className="text-sm text-muted-foreground">No results found for "{searchQuery}"</p>
+            <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
+          </div>
+        </CommandEmpty>
         
-        <CommandGroup heading="Navigation">
-          <CommandItem onSelect={() => handleNavigate('/dashboard')}>
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘D</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleNavigate('/calendar')}>
-            <Calendar className="mr-2 h-4 w-4" />
-            <span>Calendar</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘C</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleNavigate('/compliance')}>
-            <ClipboardList className="mr-2 h-4 w-4" />
-            <span>Compliance</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘L</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleNavigate('/tax')}>
-            <Calculator className="mr-2 h-4 w-4" />
-            <span>Tax Reports</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘T</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleNavigate('/global-reporting')}>
-            <Globe className="mr-2 h-4 w-4" />
-            <span>Global Reporting</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘G</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleNavigate('/transfer-pricing')}>
-            <FileText className="mr-2 h-4 w-4" />
-            <span>Transfer Pricing</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘P</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleNavigate('/audit-reporting')}>
-            <TrendingUp className="mr-2 h-4 w-4" />
-            <span>Audit Reporting</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘A</span>
-          </CommandItem>
-        </CommandGroup>
+        {filteredNavigation.length > 0 && (
+          <CommandGroup heading="Navigation">
+            {filteredNavigation.map((item) => (
+              <CommandItem 
+                key={item.path}
+                onSelect={() => handleNavigate(item.path)}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center">
+                  <item.icon className="mr-2 h-4 w-4" />
+                  <span>{item.label}</span>
+                  {currentPath === item.path && (
+                    <Badge variant="secondary" className="ml-2 text-xs">Current</Badge>
+                  )}
+                </div>
+                <span className="text-xs text-muted-foreground">{item.shortcut}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
+        {filteredActions.length > 0 && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Quick Actions">
+              {filteredActions.map((action) => (
+                <CommandItem 
+                  key={action.id}
+                  onSelect={() => handleNavigate(action.path)}
+                  className="flex items-center"
+                >
+                  <action.icon className="mr-2 h-4 w-4 text-primary" />
+                  <span>{action.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
 
         <CommandSeparator />
-
-        <CommandGroup heading="Quick Actions">
-          <CommandItem onSelect={() => handleAction(() => logger.debug('Create event action triggered', { action: 'createEvent', component: 'CommandPalette' }))}>
-            <Plus className="mr-2 h-4 w-4" />
-            <span>Create Event</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘N E</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleAction(() => logger.debug('New compliance action triggered', { action: 'newCompliance', component: 'CommandPalette' }))}>
-            <Plus className="mr-2 h-4 w-4" />
-            <span>New Compliance Item</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘N C</span>
-          </CommandItem>
-          <CommandItem onSelect={() => handleAction(() => logger.debug('New document action triggered', { action: 'newDocument', component: 'CommandPalette' }))}>
-            <Plus className="mr-2 h-4 w-4" />
-            <span>New Document</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘N D</span>
-          </CommandItem>
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Search">
-          <CommandItem onSelect={() => handleAction(() => logger.debug('Search action triggered', { action: 'search', component: 'CommandPalette' }))}>
-            <Search className="mr-2 h-4 w-4" />
-            <span>Search Everything</span>
-            <span className="ml-auto text-xs text-muted-foreground">⌘/</span>
-          </CommandItem>
+        <CommandGroup heading="Tips">
+          <div className="px-2 py-3 text-xs text-muted-foreground">
+            <p>Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">↑</kbd> <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">↓</kbd> to navigate</p>
+            <p className="mt-1">Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Enter</kbd> to select</p>
+            <p className="mt-1">Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Esc</kbd> to close</p>
+          </div>
         </CommandGroup>
       </CommandList>
     </CommandDialog>
