@@ -7,6 +7,7 @@ import { AddTransactionDialog } from "./AddTransactionDialog";
 import { TransactionTable } from "./TransactionTable";
 import { CSVImport } from "./CSVImport";
 import { TransactionSummary } from "./TransactionSummary";
+import { EmptyTransactions } from "@/components/empty-states";
 import { toast } from "sonner";
 import {
   Select,
@@ -107,6 +108,39 @@ export function TransactionList() {
     { income: 0, expense: 0 }
   ) || { income: 0, expense: 0 };
 
+  // Show empty state if no transactions
+  if (!isLoading && (!transactions || transactions.length === 0)) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Income & Expenses</h2>
+            <p className="text-muted-foreground">
+              Track your transactions for accurate tax calculations
+            </p>
+          </div>
+        </div>
+
+        <EmptyTransactions
+          onAddTransaction={() => setIsAddDialogOpen(true)}
+          onImportCSV={() => setIsImportDialogOpen(true)}
+          title="No transactions recorded"
+          description="Track your income and expenses to generate accurate tax calculations and filing packs."
+        />
+
+        <AddTransactionDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+        />
+
+        <CSVImport
+          open={isImportDialogOpen}
+          onOpenChange={setIsImportDialogOpen}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -139,7 +173,7 @@ export function TransactionList() {
 
       <div className="flex items-center gap-2">
         <Filter className="w-4 h-4 text-muted-foreground" />
-        <Select value={typeFilter} onValueChange={(value: any) => setTypeFilter(value)}>
+        <Select value={typeFilter} onValueChange={(value: "all" | "income" | "expense") => setTypeFilter(value)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>

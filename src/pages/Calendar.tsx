@@ -1,10 +1,10 @@
-
 import DashboardLayout from "@/components/DashboardLayout";
 import { EnhancedEventDialog } from "@/components/calendar/EnhancedEventDialog";
 import { AdvancedEventFilters } from "@/components/calendar/AdvancedEventFilters";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { EventsList } from "@/components/calendar/EventsList";
 import { CalendarView } from "@/components/calendar/CalendarView";
+import { EmptyCalendar } from "@/components/empty-states";
 import { useState } from "react";
 import { isSameDay } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,34 +75,47 @@ const Calendar = () => {
     removeEvent(id);
   };
 
+  // Show empty state if no events at all
+  const hasNoEvents = allEvents.length === 0;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <CalendarHeader onAddEvent={() => setDialogOpen(true)} />
 
-        <AdvancedEventFilters
-          onSearchChange={setSearchTerm}
-          onFilterChange={setFilters}
-          onSortChange={setSortBy}
-        />
-
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <EventsList
-            events={date ? selectedDateEvents : events}
-            date={date}
-            searchTerm={searchTerm}
-            onEditEvent={handleEditEvent}
-            onRemoveEvent={handleRemoveEvent}
-            updatePending={updateEventPending}
-            removePending={removeEventPending}
+        {hasNoEvents ? (
+          <EmptyCalendar 
+            onCreateEvent={() => setDialogOpen(true)}
+            title="No events scheduled"
+            description="Stay on top of your tax deadlines, meetings, and important dates by adding events to your calendar."
           />
+        ) : (
+          <>
+            <AdvancedEventFilters
+              onSearchChange={setSearchTerm}
+              onFilterChange={setFilters}
+              onSortChange={setSortBy}
+            />
 
-          <CalendarView
-            date={date}
-            onDateSelect={setDate}
-            events={allEvents}
-          />
-        </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <EventsList
+                events={date ? selectedDateEvents : events}
+                date={date}
+                searchTerm={searchTerm}
+                onEditEvent={handleEditEvent}
+                onRemoveEvent={handleRemoveEvent}
+                updatePending={updateEventPending}
+                removePending={removeEventPending}
+              />
+
+              <CalendarView
+                date={date}
+                onDateSelect={setDate}
+                events={allEvents}
+              />
+            </div>
+          </>
+        )}
 
         <EnhancedEventDialog
           open={dialogOpen}

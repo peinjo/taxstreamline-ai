@@ -10,8 +10,8 @@ export function useDocumentFiltering(documents: DocumentMetadata[] | undefined) 
   // Get unique years from documents for filtering - memoized for performance
   const uniqueYears = useMemo(() => {
     if (!documents) return [];
-    const years = new Set(documents.map(doc => doc.tax_year.toString()));
-    return Array.from(years).sort((a, b) => parseInt(b) - parseInt(a)); // Sort in descending order
+    const years = new Set(documents.map(doc => doc.tax_year));
+    return Array.from(years).sort((a, b) => b - a); // Sort in descending order
   }, [documents]);
 
   // Memoized filter function for better performance

@@ -1,11 +1,15 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+import { EmptyCalculations } from "@/components/empty-states";
 
-export const RecentCalculations = () => {
+interface RecentCalculationsProps {
+  onStartCalculation?: () => void;
+}
+
+export const RecentCalculations = ({ onStartCalculation }: RecentCalculationsProps) => {
   const { data: recentCalculations } = useQuery({
     queryKey: ["recentCalculations"],
     queryFn: async () => {
@@ -20,7 +24,15 @@ export const RecentCalculations = () => {
     },
   });
 
-  if (!recentCalculations?.length) return null;
+  if (!recentCalculations?.length) {
+    return (
+      <EmptyCalculations
+        onCalculate={onStartCalculation}
+        title="No calculations yet"
+        description="Calculate your tax liabilities including VAT, Corporate Income Tax, PAYE, and more with detailed breakdowns."
+      />
+    );
+  }
 
   return (
     <Card className="p-6">
