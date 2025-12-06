@@ -1,8 +1,8 @@
-
-import { FileText, Trash2, Eye, Tag, Plus } from "lucide-react";
+import { FileText, Trash2, Eye, Tag, Plus, History, Activity, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DocumentMetadata } from "@/types/documents";
 import { formatFileSize } from "../utils/document-utils";
 import { useState } from "react";
@@ -14,13 +14,21 @@ interface DocumentListProps {
   onDelete: (id: number, filePath: string) => void;
   onUpdateTags?: (id: number, tags: string[]) => void;
   onViewDocument?: (document: DocumentMetadata) => void;
+  onViewHistory?: (document: DocumentMetadata) => void;
+  onViewAuditLog?: (document: DocumentMetadata) => void;
+  selectedIds?: Set<number>;
+  onToggleSelect?: (id: number) => void;
 }
 
 export function DocumentList({ 
   documents, 
   onDelete, 
   onUpdateTags,
-  onViewDocument 
+  onViewDocument,
+  onViewHistory,
+  onViewAuditLog,
+  selectedIds = new Set(),
+  onToggleSelect
 }: DocumentListProps) {
   const [editingTagsForId, setEditingTagsForId] = useState<number | null>(null);
   const [newTag, setNewTag] = useState<string>("");
@@ -58,10 +66,19 @@ export function DocumentList({
         documents.map((doc) => (
           <div
             key={doc.id}
-            className="flex flex-col rounded-lg border p-4"
+            className={`flex flex-col rounded-lg border p-4 transition-colors ${
+              selectedIds.has(doc.id) ? "bg-primary/5 border-primary" : ""
+            }`}
           >
             <div className={`flex items-start ${isMobile ? "flex-col" : "justify-between"}`}>
               <div className="flex items-start space-x-4">
+                {onToggleSelect && (
+                  <Checkbox
+                    checked={selectedIds.has(doc.id)}
+                    onCheckedChange={() => onToggleSelect(doc.id)}
+                    className="mt-2"
+                  />
+                )}
                 <FileText className="h-8 w-8 text-blue-500 mt-1" />
                 <div className="space-y-1">
                   <p className="font-medium">{doc.file_name}</p>
@@ -146,7 +163,7 @@ export function DocumentList({
                   </div>
                 </div>
               </div>
-              <div className={`flex items-center space-x-2 ${isMobile ? "mt-4 ml-12" : ""}`}>
+              <div className={`flex items-center space-x-1 ${isMobile ? "mt-4 ml-12" : ""}`}>
                 {onViewDocument && (
                   <Button
                     variant="ghost"
@@ -155,6 +172,26 @@ export function DocumentList({
                     title="View document"
                   >
                     <Eye className="h-4 w-4 text-blue-500" />
+                  </Button>
+                )}
+                {onViewHistory && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onViewHistory(doc)}
+                    title="Version history"
+                  >
+                    <History className="h-4 w-4 text-purple-500" />
+                  </Button>
+                )}
+                {onViewAuditLog && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onViewAuditLog(doc)}
+                    title="Activity log"
+                  >
+                    <Activity className="h-4 w-4 text-green-500" />
                   </Button>
                 )}
                 <Button

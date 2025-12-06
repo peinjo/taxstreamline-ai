@@ -530,6 +530,47 @@ export type Database = {
           },
         ]
       }
+      document_audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          document_id: number
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          document_id: number
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          document_id?: number
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_audit_logs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "document_metadata"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_comments: {
         Row: {
           content: string
