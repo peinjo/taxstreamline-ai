@@ -18,10 +18,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="flex items-center border-b bg-card p-4 shadow-sm">
           <img
             src="/lovable-uploads/8f4d9e33-a30b-4278-98bf-b226eb32a5f6.png"
-            alt="TaxPal Logo"
+            alt="TaxEase Logo"
             className="h-8 w-8"
           />
-          <span className="ml-2 text-xl font-semibold">TaxPal</span>
+          <span className="ml-2 text-xl font-semibold">TaxEase</span>
           <span className="ml-auto text-xs text-muted-foreground">
             Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs font-mono">⌘K</kbd> for quick actions
           </span>

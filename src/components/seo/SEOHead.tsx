@@ -20,7 +20,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   structuredData,
   noIndex = false
 }) => {
-  const fullTitle = title.includes('TaxPal') ? title : `${title} | TaxPal - Tax Management Platform`;
+  const fullTitle = title.includes('TaxEase') ? title : `${title} | TaxEase - Tax Management Platform`;
   const trimmedDescription = description.length > 160 
     ? description.substring(0, 157) + '...' 
     : description;
@@ -81,7 +81,7 @@ export const DashboardSEO: React.FC = () => (
     structuredData={{
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "TaxPal Dashboard",
+      "name": "TaxEase Dashboard",
       "description": "Comprehensive tax management and compliance platform",
       "applicationCategory": "BusinessApplication"
     }}
@@ -96,7 +96,7 @@ export const CalculatorSEO: React.FC = () => (
     structuredData={{
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "TaxPal Calculator",
+      "name": "TaxEase Calculator",
       "description": "Nigerian tax calculation tools",
       "applicationCategory": "FinanceApplication"
     }}
@@ -111,7 +111,7 @@ export const AuditSEO: React.FC = () => (
     structuredData={{
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "TaxPal Audit & Reporting",
+      "name": "TaxEase Audit & Reporting",
       "description": "Tax audit and compliance reporting platform",
       "applicationCategory": "BusinessApplication"
     }}
@@ -126,7 +126,7 @@ export const TransferPricingSEO: React.FC = () => (
     structuredData={{
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "TaxPal Transfer Pricing",
+      "name": "TaxEase Transfer Pricing",
       "description": "OECD-compliant transfer pricing documentation platform",
       "applicationCategory": "BusinessApplication"
     }}
