@@ -11,10 +11,10 @@ const Index = () => {
       <div className="container mx-auto px-4 pt-20 pb-16">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            Welcome to TaxPal
+            TaxEase
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Streamline your tax operations with AI-powered insights, comprehensive transfer pricing, and advanced audit reporting
+            Prepare your tax return in minutes. We calculate, prepare, and guide — you file.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/auth/signup">
@@ -73,7 +73,7 @@ const Index = () => {
         <div className="bg-blue-600 rounded-3xl p-8 md:p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-4">Ready to transform your tax management?</h2>
           <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of businesses using TaxPal to streamline their tax operations
+            Join thousands of businesses using TaxEase to streamline their tax operations
           </p>
           <Link to="/auth/signup">
             <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
