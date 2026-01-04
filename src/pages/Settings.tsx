@@ -2,15 +2,16 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSettings } from "@/components/profile/ProfileSettings";
 import { EmailPreferences } from "@/components/profile/EmailPreferences";
-import { User, Mail } from "lucide-react";
+import { NotificationChannelPreferences } from "@/components/profile/NotificationChannelPreferences";
+import { User, Mail, MessageSquare } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 
 export default function Settings() {
   return (
     <>
       <SEOHead 
-        title="Settings - Tax Compliance Platform"
-        description="Manage your account settings, profile information, and email preferences"
+        title="Settings - TaxEase"
+        description="Manage your account settings, profile information, and notification preferences"
       />
       <DashboardLayout>
         <div className="space-y-6">
@@ -27,14 +28,22 @@ export default function Settings() {
                 <User className="h-4 w-4" />
                 Profile
               </TabsTrigger>
+              <TabsTrigger value="channels" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Channels
+              </TabsTrigger>
               <TabsTrigger value="notifications" className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                Email Notifications
+                Email Settings
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
               <ProfileSettings />
+            </TabsContent>
+
+            <TabsContent value="channels" className="space-y-6">
+              <NotificationChannelPreferences />
             </TabsContent>
 
             <TabsContent value="notifications" className="space-y-6">
