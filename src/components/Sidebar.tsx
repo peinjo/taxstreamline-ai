@@ -12,6 +12,7 @@ import {
   ChartBar,
   Upload,
   Activity,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -57,6 +58,7 @@ const Sidebar = () => {
 
   const bottomMenuItems = [
     { icon: Bell, text: "Notifications", path: "/notifications" },
+    { icon: Settings, text: "Settings", path: "/settings" },
   ];
 
   const handleLogout = async () => {
