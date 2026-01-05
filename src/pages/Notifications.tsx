@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell, Calendar, AlertCircle, Filter } from "lucide-react";
+import { Bell, Calendar, AlertCircle, Filter, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/contexts/NotificationContext";
 import {
@@ -14,6 +15,7 @@ import NotificationList from "@/components/ui/notifications/NotificationList";
 import Banner from "@/components/ui/notifications/Banner";
 
 const Notifications = () => {
+  const navigate = useNavigate();
   const { notifications, isLoading } = useNotifications();
   const [filter, setFilter] = useState<string>("all");
 
@@ -45,28 +47,38 @@ const Notifications = () => {
               Manage your notifications, deadlines, and compliance alerts
             </p>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setFilter("all")}>
-                All ({notificationStats.all})
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter("unread")}>
-                Unread ({notificationStats.unread})
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter("deadline")}>
-                Deadlines ({notificationStats.deadline})
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilter("compliance")}>
-                Compliance ({notificationStats.compliance})
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate("/settings?tab=channels")}
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Notification Channels
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setFilter("all")}>
+                  All ({notificationStats.all})
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("unread")}>
+                  Unread ({notificationStats.unread})
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("deadline")}>
+                  Deadlines ({notificationStats.deadline})
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilter("compliance")}>
+                  Compliance ({notificationStats.compliance})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">

@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSettings } from "@/components/profile/ProfileSettings";
@@ -7,6 +8,9 @@ import { User, Mail, MessageSquare } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 
 export default function Settings() {
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "profile";
+
   return (
     <>
       <SEOHead 
@@ -22,7 +26,7 @@ export default function Settings() {
             </p>
           </div>
 
-          <Tabs defaultValue="profile" className="space-y-6">
+          <Tabs defaultValue={defaultTab} className="space-y-6">
             <TabsList>
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
