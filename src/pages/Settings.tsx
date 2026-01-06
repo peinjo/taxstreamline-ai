@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSettings } from "@/components/profile/ProfileSettings";
 import { EmailPreferences } from "@/components/profile/EmailPreferences";
 import { NotificationChannelPreferences } from "@/components/profile/NotificationChannelPreferences";
-import { User, Mail, MessageSquare } from "lucide-react";
+import { HelpSettings } from "@/components/help/HelpSettings";
+import { User, Mail, MessageSquare, HelpCircle } from "lucide-react";
 import { SEOHead } from "@/components/seo/SEOHead";
 
 export default function Settings() {
@@ -40,6 +41,10 @@ export default function Settings() {
                 <Mail className="h-4 w-4" />
                 Email Settings
               </TabsTrigger>
+              <TabsTrigger value="help" className="flex items-center gap-2">
+                <HelpCircle className="h-4 w-4" />
+                Help & Tours
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -52,6 +57,10 @@ export default function Settings() {
 
             <TabsContent value="notifications" className="space-y-6">
               <EmailPreferences />
+            </TabsContent>
+
+            <TabsContent value="help" className="space-y-6">
+              <HelpSettings />
             </TabsContent>
           </Tabs>
         </div>

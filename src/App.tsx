@@ -12,6 +12,10 @@ import { routes } from "./config/routes";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { useGlobalKeyboardShortcuts } from "@/hooks/useGlobalKeyboardShortcuts";
+import { AnalyticsProvider } from "@/contexts/AnalyticsContext";
+import { HelpProvider } from "@/contexts/HelpContext";
+import { HelpButton } from "@/components/help/HelpButton";
+import { HelpCenter } from "@/components/help/HelpCenter";
 
 // Simplified Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -109,7 +113,13 @@ const App: React.FC = () => {
                 <Sonner />
                 <OnboardingWizard />
                 <BrowserRouter>
-                  <AppContent />
+                  <AnalyticsProvider>
+                    <HelpProvider>
+                      <AppContent />
+                      <HelpButton />
+                      <HelpCenter />
+                    </HelpProvider>
+                  </AnalyticsProvider>
                 </BrowserRouter>
               </TooltipProvider>
             </OnboardingProvider>

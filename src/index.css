@@ -93,3 +93,6 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.3);
 }
+
+/* Import driver.js theme styles */
+@import './styles/driver-theme.css';

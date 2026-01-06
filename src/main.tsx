@@ -5,6 +5,14 @@ import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx';
 import './index.css';
 import { logger } from './lib/logging/logger';
+import { initSentry } from './lib/monitoring/sentry';
+import { initPostHog } from './lib/analytics/posthog';
+
+// Initialize Sentry for error tracking (before React renders)
+initSentry();
+
+// Initialize PostHog for analytics
+initPostHog();
 
 // Initialize performance monitoring
 logger.info('Application starting');
