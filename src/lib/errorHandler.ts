@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { captureException, addBreadcrumb } from "@/lib/monitoring/sentry";
 
 interface ErrorLog {
   message: string;
@@ -15,7 +16,12 @@ export const logError = (error: Error, context?: string) => {
   };
 
   console.error(`Error in ${context}:`, errorLog);
-  // Here you could send the error to a logging service
+  
+  // Send to Sentry
+  captureException(error, { context, ...errorLog });
+  
+  // Add breadcrumb for context
+  addBreadcrumb(`Error in ${context}: ${error.message}`, 'error', 'error');
 };
 
 export const showUserFriendlyMessage = (error: Error) => {

@@ -1,6 +1,7 @@
 // Enhanced logging system with structured logging and performance tracking
 import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { addBreadcrumb, captureMessage, captureException } from '@/lib/monitoring/sentry';
 
 interface LogContext {
   userId?: string;
@@ -36,10 +37,14 @@ class Logger {
   // Structured logging methods
   info(message: string, context?: LogContext) {
     this.log('INFO', message, context);
+    // Add Sentry breadcrumb for info logs
+    addBreadcrumb(message, 'log', 'info', context);
   }
 
   warn(message: string, context?: LogContext) {
     this.log('WARN', message, context);
+    // Add Sentry breadcrumb for warnings
+    addBreadcrumb(message, 'log', 'warning', context);
   }
 
   error(message: string, error?: Error, context?: LogContext) {
@@ -48,6 +53,12 @@ class Logger {
       error_message: error?.message, 
       error_stack: error?.stack 
     });
+    // Send error to Sentry
+    if (error) {
+      captureException(error, { message, ...context });
+    } else {
+      captureMessage(message, 'error', context);
+    }
   }
 
   debug(message: string, context?: LogContext) {

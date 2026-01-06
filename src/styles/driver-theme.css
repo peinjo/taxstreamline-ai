@@ -1,0 +1,80 @@
+/* Driver.js custom styles for tours */
+.driver-popover {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.2);
+}
+
+.driver-popover-title {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.driver-popover-description {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.driver-popover-progress-text {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+}
+
+.driver-popover-prev-btn,
+.driver-popover-next-btn {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.driver-popover-prev-btn:hover,
+.driver-popover-next-btn:hover {
+  background-color: hsl(var(--primary) / 0.9);
+}
+
+.driver-popover-prev-btn {
+  background-color: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.driver-popover-prev-btn:hover {
+  background-color: hsl(var(--secondary) / 0.9);
+}
+
+.driver-popover-close-btn {
+  color: hsl(var(--muted-foreground));
+}
+
+.driver-popover-close-btn:hover {
+  color: hsl(var(--foreground));
+}
+
+.driver-popover-arrow {
+  border-color: hsl(var(--border));
+}
+
+.driver-popover-arrow-side-left {
+  border-left-color: hsl(var(--card));
+}
+
+.driver-popover-arrow-side-right {
+  border-right-color: hsl(var(--card));
+}
+
+.driver-popover-arrow-side-top {
+  border-top-color: hsl(var(--card));
+}
+
+.driver-popover-arrow-side-bottom {
+  border-bottom-color: hsl(var(--card));
+}
