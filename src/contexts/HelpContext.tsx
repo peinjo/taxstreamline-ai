@@ -65,11 +65,15 @@ export const HelpProvider: React.FC<HelpProviderProps> = ({ children }) => {
     if (!user) return;
 
     try {
-      // Use local storage as fallback since we may not have the table yet
-      const stored = localStorage.getItem(`tour_progress_${user.id}`);
-      if (stored) {
-        const progress: TourProgress[] = JSON.parse(stored);
-        setCompletedTours(progress.map(p => p.tourId));
+      const { data, error } = await supabase
+        .from('user_help_progress')
+        .select('tour_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      if (data) {
+        setCompletedTours(data.map(p => p.tour_id));
       }
     } catch (error) {
       console.error('Failed to load tour progress:', error);
@@ -80,17 +84,17 @@ export const HelpProvider: React.FC<HelpProviderProps> = ({ children }) => {
     if (!user) return;
 
     try {
-      // Save to local storage
-      const stored = localStorage.getItem(`tour_progress_${user.id}`);
-      const progress: TourProgress[] = stored ? JSON.parse(stored) : [];
-      
-      if (!progress.some(p => p.tourId === tourId)) {
-        progress.push({
-          tourId,
-          completedAt: new Date().toISOString(),
+      const { error } = await supabase
+        .from('user_help_progress')
+        .upsert({
+          user_id: user.id,
+          tour_id: tourId,
+          completed_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,tour_id'
         });
-        localStorage.setItem(`tour_progress_${user.id}`, JSON.stringify(progress));
-      }
+
+      if (error) throw error;
     } catch (error) {
       console.error('Failed to save tour progress:', error);
     }
@@ -170,7 +174,13 @@ export const HelpProvider: React.FC<HelpProviderProps> = ({ children }) => {
     if (!user) return;
 
     try {
-      localStorage.removeItem(`tour_progress_${user.id}`);
+      const { error } = await supabase
+        .from('user_help_progress')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
       setCompletedTours([]);
       toast.success('Tour progress reset', {
         description: 'You can now retake all tours.',
