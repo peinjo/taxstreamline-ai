@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
  * @param options - DOMPurify configuration options
  * @returns Sanitized HTML string
  */
-export function sanitizeHtml(html: string, options?: any): string {
+export function sanitizeHtml(html: string, options?: Record<string, unknown>): string {
   if (!html) return '';
   
   const defaultConfig = {

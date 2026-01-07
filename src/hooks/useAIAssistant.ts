@@ -7,6 +7,7 @@ import { ConversationMessage, AIActionResult } from "@/types/aiAssistant";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logging/logger";
 
 export function useAIAssistant() {
   const [messages, setMessages] = useState<ConversationMessage[]>([
@@ -209,19 +210,20 @@ Guidelines:
         setMessages(prev => [...prev, assistantMessage]);
       }
 
-    } catch (error: any) {
-      console.error("AI Assistant Error:", error);
+    } catch (error) {
+      const err = error as Error & { response?: { status?: number }; message?: string };
+      logger.error("AI Assistant Error", err);
       
       let errorMessage = "I'm sorry, I encountered an error processing your request.";
       
-      if (error.response?.status === 429) {
+      if (err.response?.status === 429) {
         errorMessage = "I'm currently at capacity. Please try again in a moment.";
-      } else if (error.response?.status === 401) {
+      } else if (err.response?.status === 401) {
         errorMessage = "Authentication error. Please check your API configuration.";
-      } else if (error.message?.includes("API key")) {
+      } else if (err.message?.includes("API key")) {
         errorMessage = "OpenAI API key is not configured. Please add your API key to continue.";
-      } else if (error.message) {
-        errorMessage = `Error: ${error.message}`;
+      } else if (err.message) {
+        errorMessage = `Error: ${err.message}`;
       }
 
       const errorResponse: ConversationMessage = {

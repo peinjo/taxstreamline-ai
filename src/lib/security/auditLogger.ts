@@ -20,6 +20,7 @@ export interface AuditEvent {
 class AuditLogger {
   private eventQueue: AuditEvent[] = [];
   private isOnline = navigator.onLine;
+  private flushIntervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     // Listen for network status changes
@@ -33,11 +34,21 @@ class AuditLogger {
     });
 
     // Flush queue periodically
-    setInterval(() => {
+    this.flushIntervalId = setInterval(() => {
       if (this.isOnline && this.eventQueue.length > 0) {
         this.flushQueue();
       }
     }, 30000); // Every 30 seconds
+  }
+
+  /**
+   * Cleanup method to clear the interval when no longer needed
+   */
+  destroy(): void {
+    if (this.flushIntervalId) {
+      clearInterval(this.flushIntervalId);
+      this.flushIntervalId = null;
+    }
   }
 
   /**

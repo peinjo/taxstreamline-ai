@@ -3,6 +3,9 @@ project_id = "ukuhdrsywxbuhcytjfog"
 [functions.ai-operations]
 verify_jwt = true
 
+[functions.audit-logger]
+verify_jwt = false
+
 [functions.payment-operations]
 verify_jwt = true
 
