@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { SampleDataButton } from "@/components/dashboard/SampleDataButton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { useNavigate } from "react-router-dom";
+import { logger } from "@/lib/logging/logger";
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
@@ -51,7 +52,7 @@ const Dashboard = () => {
         if (error) throw error;
         return data || { full_name: "User" };
       } catch (err) {
-        console.error("Profile fetch error:", err);
+        logger.error("Profile fetch error", err as Error);
         return { full_name: "User" };
       }
     },

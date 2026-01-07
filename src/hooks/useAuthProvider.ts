@@ -104,8 +104,8 @@ export function useAuthProvider(): AuthState & AuthActions {
       // Log authentication attempt for debugging
       await signInWithEmail(email, password);
       // Session will be handled by onAuthStateChange
-    } catch (error: unknown) {
-      const authError = error as Error;
+    } catch (error) {
+      const authError = error instanceof Error ? error : new Error('Unknown error');
       logError(authError, "Authentication - signIn");
       toast.error(authError.message || "Failed to sign in");
       // Important: Set loading to false in case of error
@@ -120,9 +120,10 @@ export function useAuthProvider(): AuthState & AuthActions {
       await signUpWithEmail(email, password);
       // Important: Don't keep loading true forever
       setLoading(false);
-    } catch (error: any) {
-      logger.error("Signup error", error, { email });
-      toast.error(error.message || "Failed to sign up");
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error');
+      logger.error("Signup error", err, { email });
+      toast.error(err.message || "Failed to sign up");
       // Important: Set loading to false in case of error
       setLoading(false);
       throw error;
@@ -134,9 +135,10 @@ export function useAuthProvider(): AuthState & AuthActions {
       setLoading(true);
       await signOutUser();
       // Session will be cleared by onAuthStateChange
-    } catch (error: any) {
-      logger.error("Signout error", error);
-      toast.error(error.message || "Failed to sign out");
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error');
+      logger.error("Signout error", err);
+      toast.error(err.message || "Failed to sign out");
       // Important: Set loading to false in case of error
       setLoading(false);
       throw error;

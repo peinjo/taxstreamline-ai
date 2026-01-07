@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { logger } from "@/lib/logging/logger";
 
 interface ProfileFormData {
   fullName: string;
@@ -47,7 +48,7 @@ export const useProfileForm = () => {
           .single();
 
         if (error) {
-          console.error('Error fetching profile:', error);
+          logger.error('Error fetching profile', error);
           toast.error("Failed to fetch profile information");
           return;
         }
@@ -65,7 +66,7 @@ export const useProfileForm = () => {
           });
         }
       } catch (error) {
-        console.error('Error in fetchUserProfile:', error);
+        logger.error('Error in fetchUserProfile', error as Error);
         toast.error("Failed to fetch profile information");
       }
     };
@@ -109,16 +110,17 @@ export const useProfileForm = () => {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error updating profile:', error);
+        logger.error('Error updating profile', error);
         toast.error("Failed to save profile information");
         return;
       }
 
       toast.success("Profile information saved successfully!");
       navigate("/dashboard");
-    } catch (error: any) {
-      console.error('Error in handleSubmit:', error);
-      toast.error(error.message || "Failed to save profile information");
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error');
+      logger.error('Error in handleSubmit', err);
+      toast.error(err.message || "Failed to save profile information");
     } finally {
       setLoading(false);
     }

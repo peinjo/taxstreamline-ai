@@ -26,9 +26,10 @@ export function useOptimizedQuery<T>(
     },
     staleTime: 5 * 60 * 1000, // 5 minutes default
     gcTime: 10 * 60 * 1000, // 10 minutes default
-    retry: (failureCount: number, error: any) => {
+    retry: (failureCount: number, error: unknown) => {
       // Don't retry on 4xx errors
-      if (error?.status >= 400 && error?.status < 500) {
+      const httpError = error as { status?: number };
+      if (httpError?.status && httpError.status >= 400 && httpError.status < 500) {
         return false;
       }
       return failureCount < 2;

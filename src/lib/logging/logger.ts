@@ -245,9 +245,11 @@ export function withPerformanceTracking<P extends object>(
   const name = componentName || WrappedComponent.displayName || WrappedComponent.name;
   
   const Component = React.memo((props: P) => {
+    // Using empty dependency array for mount-only effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     React.useEffect(() => {
       logger.trackComponentRender(name, props);
-    });
+    }, []);
 
     return React.createElement(WrappedComponent, props);
   });

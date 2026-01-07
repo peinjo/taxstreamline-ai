@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { tours, getTourById, createTourDriver, TourConfig } from '@/lib/help/tours';
 import { trackTourAction } from '@/lib/analytics/events';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logging/logger';
 
 interface TourProgress {
   tourId: string;
@@ -76,7 +77,7 @@ export const HelpProvider: React.FC<HelpProviderProps> = ({ children }) => {
         setCompletedTours(data.map(p => p.tour_id));
       }
     } catch (error) {
-      console.error('Failed to load tour progress:', error);
+      logger.error('Failed to load tour progress', error as Error);
     }
   };
 
@@ -96,14 +97,14 @@ export const HelpProvider: React.FC<HelpProviderProps> = ({ children }) => {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Failed to save tour progress:', error);
+      logger.error('Failed to save tour progress', error as Error);
     }
   };
 
   const startTour = useCallback((tourId: string) => {
     const tourConfig = getTourById(tourId);
     if (!tourConfig) {
-      console.error(`Tour not found: ${tourId}`);
+      logger.warn(`Tour not found: ${tourId}`);
       return;
     }
 
@@ -186,7 +187,7 @@ export const HelpProvider: React.FC<HelpProviderProps> = ({ children }) => {
         description: 'You can now retake all tours.',
       });
     } catch (error) {
-      console.error('Failed to reset tour progress:', error);
+      logger.error('Failed to reset tour progress', error as Error);
       toast.error('Failed to reset tour progress');
     }
   }, [user]);

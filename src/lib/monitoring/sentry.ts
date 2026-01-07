@@ -1,14 +1,12 @@
 import * as Sentry from '@sentry/react';
 
-const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN || '';
+// Sentry configuration - hardcoded for Lovable compatibility
+const SENTRY_DSN = 'https://c1dd4511181101f2f296239122e9f83a@o4510669613694976.ingest.de.sentry.io/4510669632766032';
 
 let isInitialized = false;
 
 export const initSentry = () => {
-  if (isInitialized || !SENTRY_DSN) {
-    if (import.meta.env.DEV) {
-      console.log('[Sentry] Skipping initialization - no DSN configured');
-    }
+  if (isInitialized) {
     return;
   }
 
@@ -24,7 +22,7 @@ export const initSentry = () => {
     replaysOnErrorSampleRate: 1.0,
     
     // Release tracking
-    release: import.meta.env.VITE_APP_VERSION || 'development',
+    release: 'taxflow-1.0.0',
     
     // Error filtering
     beforeSend(event, hint) {
@@ -64,7 +62,7 @@ export const initSentry = () => {
 };
 
 export const setUser = (userId: string, email?: string, username?: string) => {
-  if (!isInitialized && !SENTRY_DSN) return;
+  if (!isInitialized) return;
   
   Sentry.setUser({
     id: userId,
@@ -74,13 +72,13 @@ export const setUser = (userId: string, email?: string, username?: string) => {
 };
 
 export const clearUser = () => {
-  if (!isInitialized && !SENTRY_DSN) return;
+  if (!isInitialized) return;
   
   Sentry.setUser(null);
 };
 
-export const captureException = (error: Error, context?: Record<string, any>) => {
-  if (!isInitialized && !SENTRY_DSN) {
+export const captureException = (error: Error, context?: Record<string, unknown>) => {
+  if (!isInitialized) {
     if (import.meta.env.DEV) {
       console.error('[Sentry] Exception (dev mode):', error, context);
     }
@@ -92,8 +90,8 @@ export const captureException = (error: Error, context?: Record<string, any>) =>
   });
 };
 
-export const captureMessage = (message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) => {
-  if (!isInitialized && !SENTRY_DSN) {
+export const captureMessage = (message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, unknown>) => {
+  if (!isInitialized) {
     if (import.meta.env.DEV) {
       console.log('[Sentry] Message (dev mode):', message, level, context);
     }
@@ -110,9 +108,9 @@ export const addBreadcrumb = (
   message: string,
   category?: string,
   level: Sentry.SeverityLevel = 'info',
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ) => {
-  if (!isInitialized && !SENTRY_DSN) return;
+  if (!isInitialized) return;
   
   Sentry.addBreadcrumb({
     message,
@@ -122,21 +120,21 @@ export const addBreadcrumb = (
   });
 };
 
-export const setContext = (name: string, context: Record<string, any>) => {
-  if (!isInitialized && !SENTRY_DSN) return;
+export const setContext = (name: string, context: Record<string, unknown>) => {
+  if (!isInitialized) return;
   
   Sentry.setContext(name, context);
 };
 
 export const setTag = (key: string, value: string) => {
-  if (!isInitialized && !SENTRY_DSN) return;
+  if (!isInitialized) return;
   
   Sentry.setTag(key, value);
 };
 
 // Transaction for performance monitoring
 export const startTransaction = (name: string, op: string) => {
-  if (!isInitialized && !SENTRY_DSN) return null;
+  if (!isInitialized) return null;
   
   return Sentry.startInactiveSpan({ name, op });
 };

@@ -1,17 +1,14 @@
 import posthog from 'posthog-js';
 
-// PostHog configuration
-const POSTHOG_API_KEY = import.meta.env.VITE_POSTHOG_API_KEY || '';
-const POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com';
+// PostHog configuration - hardcoded for Lovable compatibility
+const POSTHOG_API_KEY = 'phc_a7IzILHvLzFXYyX1hHDN2ecwflY2WclQ7Mkijt5M5zR';
+const POSTHOG_HOST = 'https://app.posthog.com';
 
 let isInitialized = false;
 
 export const initPostHog = () => {
-  // Only initialize in production or if explicitly enabled
-  if (isInitialized || !POSTHOG_API_KEY) {
-    if (import.meta.env.DEV) {
-      console.log('[PostHog] Skipping initialization - no API key configured');
-    }
+  // Only initialize if not already done
+  if (isInitialized) {
     return;
   }
 
@@ -33,7 +30,7 @@ export const initPostHog = () => {
       element_allowlist: ['button', 'a', 'input', 'select', 'textarea'],
     },
     // Loaded callback
-    loaded: (posthogInstance) => {
+    loaded: () => {
       if (import.meta.env.DEV) {
         console.log('[PostHog] Initialized successfully');
       }
@@ -42,8 +39,8 @@ export const initPostHog = () => {
   });
 };
 
-export const identifyUser = (userId: string, traits?: Record<string, any>) => {
-  if (!isInitialized && !POSTHOG_API_KEY) return;
+export const identifyUser = (userId: string, traits?: Record<string, unknown>) => {
+  if (!isInitialized) return;
   
   posthog.identify(userId, traits);
   
@@ -53,7 +50,7 @@ export const identifyUser = (userId: string, traits?: Record<string, any>) => {
 };
 
 export const resetUser = () => {
-  if (!isInitialized && !POSTHOG_API_KEY) return;
+  if (!isInitialized) return;
   
   posthog.reset();
   
@@ -62,8 +59,8 @@ export const resetUser = () => {
   }
 };
 
-export const trackEvent = (eventName: string, properties?: Record<string, any>) => {
-  if (!isInitialized && !POSTHOG_API_KEY) {
+export const trackEvent = (eventName: string, properties?: Record<string, unknown>) => {
+  if (!isInitialized) {
     if (import.meta.env.DEV) {
       console.log('[PostHog] Event (dev mode):', eventName, properties);
     }
@@ -73,14 +70,14 @@ export const trackEvent = (eventName: string, properties?: Record<string, any>) 
   posthog.capture(eventName, properties);
 };
 
-export const setUserProperties = (properties: Record<string, any>) => {
-  if (!isInitialized && !POSTHOG_API_KEY) return;
+export const setUserProperties = (properties: Record<string, unknown>) => {
+  if (!isInitialized) return;
   
   posthog.setPersonProperties(properties);
 };
 
-export const trackPageView = (pageName?: string, properties?: Record<string, any>) => {
-  if (!isInitialized && !POSTHOG_API_KEY) return;
+export const trackPageView = (pageName?: string, properties?: Record<string, unknown>) => {
+  if (!isInitialized) return;
   
   posthog.capture('$pageview', {
     $current_url: window.location.href,
@@ -91,13 +88,13 @@ export const trackPageView = (pageName?: string, properties?: Record<string, any
 
 // Feature flags
 export const isFeatureEnabled = (flagKey: string): boolean => {
-  if (!isInitialized && !POSTHOG_API_KEY) return false;
+  if (!isInitialized) return false;
   
   return posthog.isFeatureEnabled(flagKey) || false;
 };
 
 export const getFeatureFlag = (flagKey: string): string | boolean | undefined => {
-  if (!isInitialized && !POSTHOG_API_KEY) return undefined;
+  if (!isInitialized) return undefined;
   
   return posthog.getFeatureFlag(flagKey);
 };
