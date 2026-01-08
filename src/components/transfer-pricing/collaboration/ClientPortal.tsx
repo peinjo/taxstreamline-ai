@@ -161,22 +161,28 @@ export function ClientPortal() {
         ? new Date(Date.now() + parseInt(shareExpiryDays) * 24 * 60 * 60 * 1000).toISOString()
         : null;
 
-      const { data, error } = await supabase
-        .from('tp_document_shares')
-        .insert({
+      // Get the current session for authorization
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('You must be logged in to create share links');
+        return;
+      }
+
+      // Call edge function to securely hash password and create share link
+      const { data, error } = await supabase.functions.invoke('create-share-link', {
+        body: {
           document_id: selectedDocumentId,
           access_level: accessLevel,
-          password_hash: sharePassword ? 'hashed_password' : null, // In real implementation, hash the password
+          password: sharePassword || undefined,
           expires_at: expiresAt,
-          max_uses: shareMaxUses ? parseInt(shareMaxUses) : null,
-          created_by: 'current-user-id' // Replace with actual user ID
-        })
-        .select()
-        .single();
+          max_uses: shareMaxUses ? parseInt(shareMaxUses) : undefined
+        }
+      });
 
       if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'Failed to create share link');
 
-      const shareUrl = `${window.location.origin}/shared/${data.share_token}`;
+      const shareUrl = `${window.location.origin}/shared/${data.data.share_token}`;
       navigator.clipboard.writeText(shareUrl);
       
       toast.success('Share link created and copied to clipboard');
