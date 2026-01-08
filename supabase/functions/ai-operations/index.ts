@@ -185,13 +185,14 @@ Provide accurate, professional guidance while being helpful and conversational.`
         )
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
+    // Log detailed error server-side only
     console.error('AI operations error:', error)
     
+    // Return generic error to client - never expose internal details
     return new Response(
       JSON.stringify({ 
-        error: 'Internal server error',
-        message: error.message 
+        error: 'An error occurred processing your request. Please try again.' 
       }),
       { 
         status: 500, 
