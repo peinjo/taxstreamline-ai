@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logging/logger";
 
 export interface NotificationChannels {
   email: boolean;
@@ -28,10 +29,10 @@ export const getUserNotificationPreferences = async (
     .from("user_profiles")
     .select("email, phone_number, sms_enabled, whatsapp_enabled, whatsapp_number, email_notifications_enabled")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
-    console.error("Error fetching user preferences:", error);
+    logger.error("Error fetching user preferences", error as Error, { component: 'multiChannelNotification', userId });
     return null;
   }
 
@@ -60,7 +61,7 @@ export const sendEmail = async (
     if (error) throw error;
     return { success: true };
   } catch (error: any) {
-    console.error("Email send error:", error);
+    logger.error("Email send error", error as Error, { component: 'multiChannelNotification', to });
     return { success: false, error: error.message };
   }
 };
@@ -77,7 +78,7 @@ export const sendSMS = async (
     if (error) throw error;
     return { success: true };
   } catch (error: any) {
-    console.error("SMS send error:", error);
+    logger.error("SMS send error", error as Error, { component: 'multiChannelNotification', to });
     return { success: false, error: error.message };
   }
 };
@@ -94,7 +95,7 @@ export const sendWhatsApp = async (
     if (error) throw error;
     return { success: true };
   } catch (error: any) {
-    console.error("WhatsApp send error:", error);
+    logger.error("WhatsApp send error", error as Error, { component: 'multiChannelNotification', to });
     return { success: false, error: error.message };
   }
 };

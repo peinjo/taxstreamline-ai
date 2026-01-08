@@ -25,7 +25,7 @@ export const useDeadlineChecker = () => {
             .eq("user_id", user.id)
             .eq("type", "deadline")
             .eq("title", `Upcoming Event: ${event.title}`)
-            .single();
+            .maybeSingle();
 
           if (!existingNotification) {
             await supabase.from("notifications").insert([
@@ -55,7 +55,7 @@ export const useDeadlineChecker = () => {
             .eq("user_id", user.id)
             .eq("type", "compliance")
             .eq("title", `Compliance Reminder: ${rule.title}`)
-            .single();
+            .maybeSingle();
 
           if (!existingNotification) {
             await supabase.from("notifications").insert([

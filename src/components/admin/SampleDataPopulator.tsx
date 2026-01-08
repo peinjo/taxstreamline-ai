@@ -33,11 +33,11 @@ export const SampleDataPopulator = () => {
 
       // Create sample tax reports
       const sampleReports = [
-        { tax_type: "Income Tax", tax_year: 2024, amount: 125000, status: "Paid", country: "Nigeria", user_id: user.id },
-        { tax_type: "VAT", tax_year: 2024, amount: 45000, status: "Pending", country: "Nigeria", user_id: user.id },
-        { tax_type: "Corporate Tax", tax_year: 2024, amount: 250000, status: "Paid", country: "Nigeria", user_id: user.id },
-        { tax_type: "WHT", tax_year: 2023, amount: 32000, status: "Paid", country: "Nigeria", user_id: user.id },
-        { tax_type: "Income Tax", tax_year: 2023, amount: 115000, status: "Paid", country: "Nigeria", user_id: user.id },
+        { tax_type: "Income Tax", tax_year: 2024, amount: 125000, status: "paid", country: "Nigeria", user_id: user.id },
+        { tax_type: "VAT", tax_year: 2024, amount: 45000, status: "unpaid", country: "Nigeria", user_id: user.id },
+        { tax_type: "Corporate Tax", tax_year: 2024, amount: 250000, status: "paid", country: "Nigeria", user_id: user.id },
+        { tax_type: "WHT", tax_year: 2023, amount: 32000, status: "paid", country: "Nigeria", user_id: user.id },
+        { tax_type: "Income Tax", tax_year: 2023, amount: 115000, status: "paid", country: "Nigeria", user_id: user.id },
       ];
 
       const { error: reportsError } = await supabase
