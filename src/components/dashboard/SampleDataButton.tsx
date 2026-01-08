@@ -95,7 +95,7 @@ export const SampleDataButton = () => {
           tax_type: "VAT",
           tax_year: 2024,
           amount: 87500,
-          status: "pending",
+          status: "unpaid",
           country: "Nigeria",
         },
         {
@@ -103,7 +103,7 @@ export const SampleDataButton = () => {
           tax_type: "Corporate Tax",
           tax_year: 2024,
           amount: 450000,
-          status: "overdue",
+          status: "unpaid",
           country: "Nigeria",
         },
       ];

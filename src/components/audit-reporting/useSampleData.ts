@@ -36,7 +36,7 @@ export const useSampleData = () => {
         { tax_type: "vat", tax_year: currentYear, amount: 850000, status: "paid" },
         { tax_type: "vat", tax_year: currentYear, amount: 780000, status: "paid" },
         { tax_type: "vat", tax_year: currentYear, amount: 830000, status: "paid" },
-        { tax_type: "vat", tax_year: currentYear, amount: 795000, status: "pending" },
+        { tax_type: "vat", tax_year: currentYear, amount: 795000, status: "unpaid" },
         
         // VAT reports - previous years
         { tax_type: "vat", tax_year: currentYear - 1, amount: 770000, status: "paid" },
@@ -51,12 +51,12 @@ export const useSampleData = () => {
         { tax_type: "paye", tax_year: currentYear - 2, amount: 980000, status: "paid" },
         
         // Withholding Tax reports
-        { tax_type: "withholding", tax_year: currentYear, amount: 320000, status: "pending" },
+        { tax_type: "withholding", tax_year: currentYear, amount: 320000, status: "unpaid" },
         { tax_type: "withholding", tax_year: currentYear - 1, amount: 300000, status: "paid" },
         { tax_type: "withholding", tax_year: currentYear - 2, amount: 270000, status: "paid" },
         
         // Capital Gains Tax
-        { tax_type: "capital_gains", tax_year: currentYear, amount: 180000, status: "pending" },
+        { tax_type: "capital_gains", tax_year: currentYear, amount: 180000, status: "unpaid" },
         { tax_type: "capital_gains", tax_year: currentYear - 1, amount: 150000, status: "paid" },
         
         // Education Tax
@@ -64,7 +64,7 @@ export const useSampleData = () => {
         { tax_type: "education", tax_year: currentYear - 1, amount: 210000, status: "paid" },
         
         // Stamp Duty
-        { tax_type: "stamp_duty", tax_year: currentYear, amount: 75000, status: "pending" },
+        { tax_type: "stamp_duty", tax_year: currentYear, amount: 75000, status: "unpaid" },
         { tax_type: "stamp_duty", tax_year: currentYear - 1, amount: 68000, status: "paid" },
       ];
       
