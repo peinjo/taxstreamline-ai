@@ -1,14 +1,17 @@
 import posthog from 'posthog-js';
 
-// PostHog configuration - hardcoded for Lovable compatibility
-const POSTHOG_API_KEY = 'phc_a7IzILHvLzFXYyX1hHDN2ecwflY2WclQ7Mkijt5M5zR';
+// PostHog configuration - read from environment variable with fallback
+const POSTHOG_API_KEY = import.meta.env.VITE_POSTHOG_API_KEY || '';
 const POSTHOG_HOST = 'https://app.posthog.com';
 
 let isInitialized = false;
 
 export const initPostHog = () => {
-  // Only initialize if not already done
-  if (isInitialized) {
+  // Only initialize if not already done or if API key is not configured
+  if (isInitialized || !POSTHOG_API_KEY) {
+    if (!POSTHOG_API_KEY && import.meta.env.DEV) {
+      console.warn('[PostHog] API key not configured - analytics disabled');
+    }
     return;
   }
 
