@@ -245,7 +245,23 @@ export const integrationActions: AIAction[] = [
               };
             }
 
-            // Send events to webhook
+            // Validate webhook URL format before sending
+            try {
+              const webhookUrl = new URL(params.webhook_url);
+              if (webhookUrl.protocol !== 'https:') {
+                return {
+                  success: false,
+                  message: "Only HTTPS webhook URLs are allowed for security reasons."
+                };
+              }
+            } catch {
+              return {
+                success: false,
+                message: "Invalid webhook URL format."
+              };
+            }
+
+            // Send events to webhook via secure edge function
             const webhookPayload = {
               sync_direction: syncDirection,
               event_filter: eventFilter,
@@ -264,24 +280,38 @@ export const integrationActions: AIAction[] = [
             };
 
             try {
-              const response = await fetch(params.webhook_url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                mode: 'no-cors',
-                body: JSON.stringify(webhookPayload)
+              const { data: webhookResult, error: webhookError } = await supabase.functions.invoke('webhook-caller', {
+                body: {
+                  webhook_url: params.webhook_url,
+                  payload: webhookPayload,
+                  timeout_ms: 10000
+                }
               });
 
+              if (webhookError) {
+                return {
+                  success: false,
+                  message: `Failed to send events to webhook: ${webhookError.message}`
+                };
+              }
+
+              if (!webhookResult?.success) {
+                return {
+                  success: false,
+                  message: `Webhook delivery failed: ${webhookResult?.error || 'Unknown error'}. Note: Only approved webhook domains are allowed (Slack, Discord, Zapier, IFTTT).`
+                };
+              }
+
               syncResult = {
-                webhook_url: params.webhook_url,
+                webhook_url: params.webhook_url.replace(/^(https:\/\/[^/]+).*$/, '$1/***'),
                 events_sent: events.length,
-                status: "sent"
+                status: webhookResult.status || "delivered"
               };
-            } catch (webhookError) {
+            } catch (webhookError: unknown) {
+              const errorMessage = webhookError instanceof Error ? webhookError.message : 'Unknown error';
               return {
                 success: false,
-                message: `Failed to send events to webhook: ${webhookError.message}`
+                message: `Failed to send events to webhook: ${errorMessage}`
               };
             }
             break;
