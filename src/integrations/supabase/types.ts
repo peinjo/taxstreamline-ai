@@ -59,6 +59,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_secrets: {
+        Row: {
+          created_at: string | null
+          key: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          key: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          key?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       application_logs: {
         Row: {
           action: string | null
@@ -2579,7 +2600,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tp_document_shares_safe: {
+        Row: {
+          access_level: string | null
+          created_at: string | null
+          created_by: string | null
+          current_uses: number | null
+          document_id: string | null
+          expires_at: string | null
+          has_password: boolean | null
+          id: string | null
+          max_uses: number | null
+          share_token: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          document_id?: string | null
+          expires_at?: string | null
+          has_password?: never
+          id?: string | null
+          max_uses?: number | null
+          share_token?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          current_uses?: number | null
+          document_id?: string | null
+          expires_at?: string | null
+          has_password?: never
+          id?: string | null
+          max_uses?: number | null
+          share_token?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_risk_trends: {
@@ -2604,6 +2663,11 @@ export type Database = {
         Returns: string
       }
       get_current_user_role: { Args: never; Returns: string }
+      get_edge_function_url: {
+        Args: { function_name: string }
+        Returns: string
+      }
+      get_internal_service_key: { Args: never; Returns: string }
       get_log_statistics: {
         Args: { p_end_date?: string; p_start_date?: string; p_user_id?: string }
         Returns: Json
