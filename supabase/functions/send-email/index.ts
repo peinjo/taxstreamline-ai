@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import React from 'npm:react@18.3.1';
 import { renderAsync } from 'npm:@react-email/components@0.0.22';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { DeadlineReminderEmail } from './_templates/deadline-reminder.tsx';
 import { ComplianceAlertEmail } from './_templates/compliance-alert.tsx';
 import { ReportStatusEmail } from './_templates/report-status.tsx';
@@ -19,6 +20,40 @@ interface EmailRequest {
   data: any;
 }
 
+// Validate authentication - accepts either user JWT or service role key
+async function validateAuth(req: Request): Promise<{ valid: boolean; error?: string }> {
+  const authHeader = req.headers.get('Authorization');
+  const apiKey = req.headers.get('apikey');
+  
+  // Check for service role key (internal calls from other edge functions or database triggers)
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (apiKey === serviceRoleKey) {
+    return { valid: true };
+  }
+  
+  // Check for valid user JWT
+  if (!authHeader) {
+    return { valid: false, error: 'Missing authorization header' };
+  }
+  
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+  
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: { Authorization: authHeader },
+    },
+  });
+  
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (error || !user) {
+    return { valid: false, error: 'Invalid or expired token' };
+  }
+  
+  return { valid: true };
+}
+
 serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -26,6 +61,19 @@ serve(async (req: Request) => {
   }
 
   try {
+    // Validate authentication before processing
+    const authResult = await validateAuth(req);
+    if (!authResult.valid) {
+      console.error("Authentication failed:", authResult.error);
+      return new Response(
+        JSON.stringify({ error: authResult.error }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
     const { type, to, data }: EmailRequest = await req.json();
     
     console.log(`Sending ${type} email to ${to}`);
