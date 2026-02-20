@@ -56,6 +56,14 @@ class AuditLogger {
    */
   async logEvent(event: Omit<AuditEvent, 'ip_address' | 'user_agent'>): Promise<void> {
     try {
+      // Validate user_id is a proper UUID before sending
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (event.user_id && !uuidRegex.test(event.user_id)) {
+        // Try to get the actual user ID from the current session
+        const { data: { user } } = await supabase.auth.getUser();
+        event.user_id = user?.id || undefined;
+      }
+
       const fullEvent: AuditEvent = {
         ...event,
         user_agent: navigator.userAgent,
@@ -161,6 +169,15 @@ class AuditLogger {
   private async flushQueue(): Promise<void> {
     if (this.eventQueue.length === 0) return;
 
+    // Filter out events with invalid user_ids before flushing
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    this.eventQueue = this.eventQueue.map(event => {
+      if (event.user_id && !uuidRegex.test(event.user_id)) {
+        return { ...event, user_id: undefined };
+      }
+      return event;
+    });
+
     const events = [...this.eventQueue];
     this.eventQueue = [];
 
@@ -172,6 +189,23 @@ class AuditLogger {
       console.error('Failed to flush audit queue:', error);
       // Re-queue failed events
       this.eventQueue.unshift(...events);
+    }
+
+    // Also clean up any stale localStorage events
+    try {
+      const stored = localStorage.getItem('audit_events');
+      if (stored) {
+        const storedEvents = JSON.parse(stored);
+        const cleanedEvents = storedEvents.map((e: AuditEvent) => {
+          if (e.user_id && !uuidRegex.test(e.user_id)) {
+            return { ...e, user_id: undefined };
+          }
+          return e;
+        });
+        localStorage.setItem('audit_events', JSON.stringify(cleanedEvents));
+      }
+    } catch {
+      // Ignore localStorage errors
     }
   }
 
