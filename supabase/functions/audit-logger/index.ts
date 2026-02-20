@@ -56,12 +56,17 @@ Deno.serve(async (req) => {
                      req.headers.get('x-real-ip') || 
                      'unknown';
 
+    // Validate user_id is a proper UUID before inserting
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const rawUserId = event.user_id || userId;
+    const validUserId = rawUserId && uuidRegex.test(rawUserId) ? rawUserId : null;
+
     // Insert the audit log
     const { error: insertError } = await supabase
       .from('audit_logs')
       .insert({
         event_type: event.event_type,
-        user_id: event.user_id || userId,
+        user_id: validUserId,
         email: event.email,
         ip_address: clientIp,
         user_agent: event.user_agent || req.headers.get('user-agent'),
