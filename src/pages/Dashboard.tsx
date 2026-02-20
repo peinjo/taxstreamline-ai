@@ -127,7 +127,7 @@ const Dashboard = () => {
             title="Welcome to Your Dashboard"
             description="Start by loading sample data or creating your first tax calculation to see your metrics and insights here."
             actionLabel="Calculate Tax"
-            onAction={() => navigate("/tax")}
+            onAction={() => navigate("/tax-web-app")}
             secondaryActionLabel="View Calendar"
             onSecondaryAction={() => navigate("/calendar")}
           />

@@ -17,13 +17,22 @@ export interface AuditEvent {
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
+interface QueuedEvent extends AuditEvent {
+  _retries?: number;
+}
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_RETRIES = 3;
+
 class AuditLogger {
-  private eventQueue: AuditEvent[] = [];
+  private eventQueue: QueuedEvent[] = [];
   private isOnline = navigator.onLine;
   private flushIntervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
-    // Listen for network status changes
+    // Clean stale localStorage on startup
+    this.cleanStaleStorage();
+
     window.addEventListener('online', () => {
       this.isOnline = true;
       this.flushQueue();
@@ -33,12 +42,32 @@ class AuditLogger {
       this.isOnline = false;
     });
 
-    // Flush queue periodically
     this.flushIntervalId = setInterval(() => {
       if (this.isOnline && this.eventQueue.length > 0) {
         this.flushQueue();
       }
-    }, 30000); // Every 30 seconds
+    }, 30000);
+  }
+
+  private cleanStaleStorage(): void {
+    try {
+      const stored = localStorage.getItem('audit_events');
+      if (stored) {
+        const events = JSON.parse(stored) as QueuedEvent[];
+        const clean = events.filter(e => {
+          if (e.user_id && !UUID_REGEX.test(e.user_id)) return false;
+          if ((e._retries || 0) >= MAX_RETRIES) return false;
+          return true;
+        });
+        if (clean.length === 0) {
+          localStorage.removeItem('audit_events');
+        } else {
+          localStorage.setItem('audit_events', JSON.stringify(clean));
+        }
+      }
+    } catch {
+      localStorage.removeItem('audit_events');
+    }
   }
 
   /**
@@ -57,8 +86,7 @@ class AuditLogger {
   async logEvent(event: Omit<AuditEvent, 'ip_address' | 'user_agent'>): Promise<void> {
     try {
       // Validate user_id is a proper UUID before sending
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (event.user_id && !uuidRegex.test(event.user_id)) {
+      if (event.user_id && !UUID_REGEX.test(event.user_id)) {
         // Try to get the actual user ID from the current session
         const { data: { user } } = await supabase.auth.getUser();
         event.user_id = user?.id || undefined;
@@ -158,80 +186,49 @@ class AuditLogger {
   }
 
   private queueEvent(event: AuditEvent): void {
-    this.eventQueue.push(event);
+    const queued: QueuedEvent = { ...event, _retries: 0 };
+    this.eventQueue.push(queued);
     
-    // Keep queue size manageable
     if (this.eventQueue.length > 100) {
-      this.eventQueue = this.eventQueue.slice(-50); // Keep last 50 events
+      this.eventQueue = this.eventQueue.slice(-50);
     }
   }
 
   private async flushQueue(): Promise<void> {
     if (this.eventQueue.length === 0) return;
 
-    // Filter out events with invalid user_ids before flushing
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    this.eventQueue = this.eventQueue.map(event => {
-      if (event.user_id && !uuidRegex.test(event.user_id)) {
-        return { ...event, user_id: undefined };
-      }
-      return event;
+    // Remove invalid and over-retried events
+    this.eventQueue = this.eventQueue.filter(event => {
+      if (event.user_id && !UUID_REGEX.test(event.user_id)) return false;
+      if ((event._retries || 0) >= MAX_RETRIES) return false;
+      return true;
     });
 
     const events = [...this.eventQueue];
     this.eventQueue = [];
+    const failed: QueuedEvent[] = [];
 
-    try {
-      for (const event of events) {
+    for (const event of events) {
+      try {
         await this.sendToServer(event);
+      } catch {
+        event._retries = (event._retries || 0) + 1;
+        if (event._retries < MAX_RETRIES) {
+          failed.push(event);
+        }
       }
-    } catch (error) {
-      console.error('Failed to flush audit queue:', error);
-      // Re-queue failed events
-      this.eventQueue.unshift(...events);
     }
 
-    // Also clean up any stale localStorage events
-    try {
-      const stored = localStorage.getItem('audit_events');
-      if (stored) {
-        const storedEvents = JSON.parse(stored);
-        const cleanedEvents = storedEvents.map((e: AuditEvent) => {
-          if (e.user_id && !uuidRegex.test(e.user_id)) {
-            return { ...e, user_id: undefined };
-          }
-          return e;
-        });
-        localStorage.setItem('audit_events', JSON.stringify(cleanedEvents));
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
+    this.eventQueue.unshift(...failed);
+    this.cleanStaleStorage();
   }
 
   private async sendToServer(event: AuditEvent): Promise<void> {
-    try {
-      const { error } = await supabase.functions.invoke('audit-logger', {
-        body: { event }
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      // Fallback: store in local storage temporarily
-      const stored = localStorage.getItem('audit_events');
-      const events = stored ? JSON.parse(stored) : [];
-      events.push(event);
-      
-      // Keep only last 50 events in localStorage
-      if (events.length > 50) {
-        events.splice(0, events.length - 50);
-      }
-      
-      localStorage.setItem('audit_events', JSON.stringify(events));
-      throw error;
-    }
+    const { _retries, ...cleanEvent } = event as QueuedEvent;
+    const { error } = await supabase.functions.invoke('audit-logger', {
+      body: { event: cleanEvent }
+    });
+    if (error) throw error;
   }
 
   private async getClientIP(): Promise<string> {
