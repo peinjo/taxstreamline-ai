@@ -11,6 +11,7 @@ import { logError } from "@/lib/errorHandler";
 import { validateInput, loginSchema } from "@/lib/validation/schemas";
 import { checkAuthRateLimit } from "@/lib/security/rateLimiter";
 import { auditLogger } from "@/lib/security/auditLogger";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -70,8 +71,11 @@ const Login = () => {
     try {
       // Login attempt - handled by AuthProvider
       await signIn(email, password);
-      // Log successful authentication
-      await auditLogger.logAuthSuccess('pending', email);
+      // Log successful authentication with actual user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id) {
+        await auditLogger.logAuthSuccess(user.id, email);
+      }
       // Navigation will happen automatically via auth state change
       
     } catch (error: unknown) {
