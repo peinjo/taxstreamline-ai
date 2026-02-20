@@ -70,9 +70,8 @@ const Signup = () => {
       // Begin signup process
       await signUp(email, password);
 
-      // Signup successful, redirect to profile completion
-      toast.success("Account created successfully! Please check your email to confirm your account.");
-      navigate("/auth/personal-info");
+      // Signup successful, show confirmation page
+      navigate("/auth/signup-confirmation", { state: { email } });
     } catch (err) {
       // Handle signup errors with proper logging
       const error = err as Error;

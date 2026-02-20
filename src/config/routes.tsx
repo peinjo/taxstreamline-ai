@@ -2,6 +2,9 @@ import { ReactNode } from "react";
 import Index from "@/pages/Index";
 import Login from "@/pages/auth/Login";
 import Signup from "@/pages/auth/Signup";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import SignupConfirmation from "@/pages/auth/SignupConfirmation";
 import PersonalInfoForm from "@/components/auth/PersonalInfoForm";
 import Dashboard from "@/pages/Dashboard";
 import TransferPricing from "@/pages/TransferPricing";
@@ -37,6 +40,21 @@ export const routes: RouteConfig[] = [
   {
     path: "/auth/signup",
     element: <Signup />,
+    isProtected: false,
+  },
+  {
+    path: "/auth/forgot-password",
+    element: <ForgotPassword />,
+    isProtected: false,
+  },
+  {
+    path: "/auth/reset-password",
+    element: <ResetPassword />,
+    isProtected: false,
+  },
+  {
+    path: "/auth/signup-confirmation",
+    element: <SignupConfirmation />,
     isProtected: false,
   },
   
