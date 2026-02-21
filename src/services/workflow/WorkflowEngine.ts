@@ -3,6 +3,7 @@ import { Workflow, WorkflowStep, WorkflowExecution } from "@/types/workflow";
 import { actionRegistry } from "../aiActionRegistry";
 import { AIActionContext } from "@/types/aiAssistant";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export class WorkflowEngine {
   private executions: Map<string, WorkflowExecution> = new Map();
@@ -24,6 +25,22 @@ export class WorkflowEngine {
 
     this.executions.set(execution.id, execution);
 
+    // Persist to DB
+    const userId = context.user?.id;
+    if (userId) {
+      await supabase.from('workflow_executions').insert({
+        id: execution.id.replace('exec_', '').length === 36 ? execution.id : undefined,
+        user_id: userId,
+        workflow_id: workflow.id,
+        workflow_name: workflow.name,
+        status: 'running',
+        started_at: execution.startedAt,
+        current_step_id: execution.currentStepId,
+        results: execution.results,
+        errors: [],
+      } as any);
+    }
+
     try {
       await this.executeSteps(workflow, execution, context);
       execution.status = 'completed';
@@ -32,6 +49,20 @@ export class WorkflowEngine {
       execution.status = 'failed';
       execution.errors?.push(error.message);
       execution.completedAt = new Date().toISOString();
+    }
+
+    // Update DB with final status
+    if (userId) {
+      await supabase.from('workflow_executions')
+        .update({
+          status: execution.status,
+          completed_at: execution.completedAt,
+          results: execution.results,
+          errors: execution.errors,
+        } as any)
+        .eq('workflow_id', workflow.id)
+        .eq('user_id', userId)
+        .eq('status', 'running');
     }
 
     return execution;
@@ -54,7 +85,6 @@ export class WorkflowEngine {
         const result = await this.executeStep(step, execution, context);
         execution.results[step.id] = result;
         
-        // Determine next step
         if (step.type === 'condition' && result.conditionMet === false && step.alternativeStepId) {
           currentStepId = step.alternativeStepId;
         } else {
@@ -103,18 +133,12 @@ export class WorkflowEngine {
     const value = this.getNestedValue(results, condition.field);
     
     switch (condition.operator) {
-      case 'equals':
-        return { conditionMet: value === condition.value };
-      case 'not_equals':
-        return { conditionMet: value !== condition.value };
-      case 'greater_than':
-        return { conditionMet: Number(value) > Number(condition.value) };
-      case 'less_than':
-        return { conditionMet: Number(value) < Number(condition.value) };
-      case 'contains':
-        return { conditionMet: String(value).includes(String(condition.value)) };
-      default:
-        return { conditionMet: false };
+      case 'equals': return { conditionMet: value === condition.value };
+      case 'not_equals': return { conditionMet: value !== condition.value };
+      case 'greater_than': return { conditionMet: Number(value) > Number(condition.value) };
+      case 'less_than': return { conditionMet: Number(value) < Number(condition.value) };
+      case 'contains': return { conditionMet: String(value).includes(String(condition.value)) };
+      default: return { conditionMet: false };
     }
   }
 
@@ -142,10 +166,8 @@ export class WorkflowEngine {
         toast.info(notification.message);
         break;
       case 'in_app':
-        // Integration with notification system would happen here
         break;
       case 'email':
-        // Integration with email service would happen here
         break;
     }
     return { notificationSent: true };
@@ -157,6 +179,29 @@ export class WorkflowEngine {
 
   getAllExecutions(): WorkflowExecution[] {
     return Array.from(this.executions.values());
+  }
+
+  // Load past executions from DB
+  async loadExecutions(userId: string): Promise<WorkflowExecution[]> {
+    const { data, error } = await supabase
+      .from('workflow_executions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('started_at', { ascending: false })
+      .limit(50);
+
+    if (error || !data) return [];
+
+    return (data as any[]).map(row => ({
+      id: row.id,
+      workflowId: row.workflow_id,
+      status: row.status,
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
+      currentStepId: row.current_step_id,
+      results: row.results || {},
+      errors: row.errors || [],
+    }));
   }
 }
 

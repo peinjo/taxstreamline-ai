@@ -40,13 +40,9 @@ Try commands like:
   const navigate = useNavigate();
   const location = useLocation();
 
-  // AI operations now handled via secure edge function
-
   const executeAction = useCallback(async (functionCall: { name: string; arguments?: string }): Promise<AIActionResult> => {
     const actionName = functionCall.name;
     const params = JSON.parse(functionCall.arguments || "{}");
-
-    // Action execution logging would be handled by proper logging service
 
     const result = await actionRegistry.executeAction(actionName, params, {
       user,
@@ -54,13 +50,24 @@ Try commands like:
       currentRoute: location.pathname
     });
 
-    // Handle navigation requests
     if (result.success && result.data?.navigation) {
       navigate(result.data.navigation);
     }
 
     return result;
   }, [user, queryClient, location.pathname, navigate]);
+
+  // Build OpenAI-compatible tool definitions from the action registry
+  const getToolDefinitions = useCallback(() => {
+    return actionRegistry.getAllActions().map(action => ({
+      type: 'function' as const,
+      function: {
+        name: action.name,
+        description: action.description,
+        parameters: action.parameters,
+      }
+    }));
+  }, []);
 
   const buildContextualPrompt = useCallback(() => {
     const currentPage = location.pathname.split('/')[1] || 'dashboard';
@@ -86,30 +93,16 @@ Key capabilities:
 - **Data Analysis & Insights** (compliance trends, tax optimization, risk assessment)
 - **Integration & Export** (Excel export, calendar sync, API reports)
 
-Phase 4 Advanced Features:
-- Smart Automation: Set up intelligent automation for compliance notifications, client onboarding workflows, and recurring task templates
-- Data Analysis: Analyze compliance performance trends, identify tax optimization opportunities, generate comprehensive risk assessments
-- Integration & Export: Export data to Excel, sync calendar events with external systems, generate API reports for third-party tools
-
-Workflow Features:
-- Pre-built templates for common tasks (compliance reminders, tax reporting)
-- Custom workflow creation with steps, conditions, and triggers
-- Automated execution based on schedules or events
-- Real-time execution monitoring and status tracking
+IMPORTANT: When the user asks you to perform an action, you MUST call the appropriate function. Do not just describe what you would do.
 
 Guidelines:
 - Always try to use the appropriate function when the user requests an action
 - Be proactive in suggesting workflow automation for repetitive tasks
-- Recommend data analysis when users mention performance or optimization
-- Suggest export/integration options when users need to share or sync data
-- For workflow requests, start by showing available templates
 - Provide context-aware responses based on the current page
 - If multiple actions could help, suggest the most relevant one
 - For navigation requests, use the navigate_to_page function
 - When creating items, suggest reasonable defaults for optional fields
-- Always confirm successful actions and provide next steps
-- Suggest workflow automation when users mention repetitive tasks or schedules
-- Offer insights and recommendations based on data analysis results`;
+- Always confirm successful actions and provide next steps`;
   }, [user, location.pathname]);
 
   const handleUserMessage = async (userMessage: string) => {
@@ -125,9 +118,6 @@ Guidelines:
     setIsLoading(true);
 
     try {
-      // OpenAI operations now handled securely via edge function
-
-      // Build conversation history with context
       const conversationHistory = [
         {
           role: "system" as const,
@@ -141,7 +131,9 @@ Guidelines:
         { role: "user" as const, content: userMessage }
       ];
 
-      // Call secure AI edge function instead of direct OpenAI
+      // Pass tool definitions to the edge function
+      const toolDefs = getToolDefinitions();
+
       const { data: aiResponse, error: aiError } = await supabase.functions.invoke('ai-operations', {
         body: {
           action: 'chat',
@@ -150,7 +142,8 @@ Guidelines:
             context: {
               currentPath: location.pathname,
               userRole: user?.role || 'user'
-            }
+            },
+            tools: toolDefs
           }
         }
       });
@@ -163,35 +156,24 @@ Guidelines:
         throw new Error(aiResponse.error || 'AI service failed');
       }
 
-      // Mock the OpenAI response format for compatibility
-      const response = {
-        choices: [{
-          message: {
-            content: aiResponse.response,
-            function_call: null // Functions handled separately in edge function
-          }
-        }]
-      };
-
-      const choice = response.choices[0];
-      
-      if (choice.message.function_call) {
-        // Execute the function
-        const actionResult = await executeAction(choice.message.function_call);
+      // Check if the AI wants to call a function
+      if (aiResponse.function_call) {
+        const actionResult = await executeAction(aiResponse.function_call);
         
         const assistantMessage: ConversationMessage = {
           role: "assistant",
-          content: actionResult.message,
+          content: aiResponse.response 
+            ? `${aiResponse.response}\n\n${actionResult.message}` 
+            : actionResult.message,
           timestamp: new Date().toISOString(),
           actionResult
         };
 
         setMessages(prev => [...prev, assistantMessage]);
 
-        // Update conversation context for better continuity
         setConversationContext(prev => [...prev.slice(-5), {
           role: "assistant",
-          content: `Executed ${choice.message.function_call.name} with result: ${actionResult.success ? 'success' : 'failure'}`
+          content: `Executed ${aiResponse.function_call.name} with result: ${actionResult.success ? 'success' : 'failure'} - ${actionResult.message}`
         }]);
 
         if (actionResult.success) {
@@ -200,10 +182,9 @@ Guidelines:
           toast.error("Action failed");
         }
       } else {
-        // Regular response
         const assistantMessage: ConversationMessage = {
           role: "assistant",
-          content: choice.message.content || "I'm sorry, I couldn't process that request.",
+          content: aiResponse.response || "I'm sorry, I couldn't process that request.",
           timestamp: new Date().toISOString()
         };
 
@@ -240,7 +221,7 @@ Guidelines:
   };
 
   const clearConversation = useCallback(() => {
-    setMessages([messages[0]]); // Keep the initial greeting
+    setMessages([messages[0]]);
     setConversationContext([]);
   }, [messages]);
 

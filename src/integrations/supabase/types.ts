@@ -1313,6 +1313,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_optimization_plans: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          suggestions: Json
+          tax_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          suggestions?: Json
+          tax_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          suggestions?: Json
+          tax_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tax_rates: {
         Row: {
           category: string
@@ -2595,6 +2622,48 @@ export type Database = {
           id?: never
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_step_id: string | null
+          errors: Json | null
+          id: string
+          results: Json | null
+          started_at: string
+          status: string
+          user_id: string
+          workflow_id: string
+          workflow_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_step_id?: string | null
+          errors?: Json | null
+          id?: string
+          results?: Json | null
+          started_at?: string
+          status?: string
+          user_id: string
+          workflow_id: string
+          workflow_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_step_id?: string | null
+          errors?: Json | null
+          id?: string
+          results?: Json | null
+          started_at?: string
+          status?: string
+          user_id?: string
+          workflow_id?: string
+          workflow_name?: string
         }
         Relationships: []
       }
