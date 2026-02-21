@@ -23,6 +23,10 @@ export function FilingForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-200">
+        <strong>⚠️ Draft Mode:</strong> Filings are saved locally only and are <em>not</em> submitted to FIRS. Real FIRS integration is coming soon.
+      </div>
+
       <div className="space-y-4">
         <div>
           <label htmlFor="filingType" className="block text-sm font-medium mb-1">
@@ -80,7 +84,7 @@ export function FilingForm() {
       </div>
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Submitting..." : "Submit Filing"}
+        {isPending ? "Saving Draft..." : "Save Draft Filing"}
       </Button>
     </form>
   );

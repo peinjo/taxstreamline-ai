@@ -162,24 +162,10 @@ const Signup = () => {
               </div>
             )}
           </form>
-          <div className="mt-4 text-center">
-            <div className="relative mb-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-            {/* Placeholder for ReplitAuthButton -  Requires implementation */}
-            <div>ReplitAuthButton Placeholder</div> 
-          </div>
 
-          <p className="text-center mt-4 text-sm text-gray-600">
+          <p className="text-center mt-4 text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/auth/login" className="text-blue-600 hover:underline">
+            <Link to="/auth/login" className="text-primary hover:underline">
               Log In
             </Link>
           </p>

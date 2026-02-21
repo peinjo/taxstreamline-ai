@@ -5,11 +5,15 @@ import type { Activity, Deadline, DashboardMetrics } from '@/types';
 export const useDashboardMetrics = () => {
   return useQuery({
     queryKey: ['dashboard-metrics'],
-    queryFn: async (): Promise<DashboardMetrics> => {
+    queryFn: async (): Promise<DashboardMetrics | null> => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      
       const { data, error } = await supabase
         .from('dashboard_metrics')
         .select('*')
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
       
       if (error) throw error;
       return data;
