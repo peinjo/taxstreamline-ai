@@ -1,93 +1,172 @@
 
-# TaxEase V1 - Remaining Items Review
 
-Here's a complete breakdown of what's done, what needs attention, and what's left to do in your TaxEase application.
+# TaxEase - Functions Audit: What's Not Working or Needs Improvement
 
----
-
-## Active Bug (Fix Required)
-
-### 1. Audit Logger - Stale "pending" Events in Browser Storage
-The edge function is now fixed and working, but your browser's localStorage likely still contains old failed events with `user_id: "pending"`. The client retries these every 30 seconds, causing repeated 500 errors.
-
-**Fix:** Clear `audit_events` from localStorage. The code changes already sanitize invalid IDs, but stale data cached before the fix may still be stuck. A one-time migration in the `flushQueue` method should **delete** (not just sanitize) old invalid entries, and add a max retry count to prevent infinite retries of failing events.
+After a thorough review of every page, service, hook, and edge function in the app, here is a categorized list of issues.
 
 ---
 
-## Missing Features
+## 1. Broken / Non-Functional
 
-### 2. Forgot Password / Password Reset Flow
-There is no "Forgot Password" link on the Login page, and no password reset page exists. The rate limiter has a `PASSWORD_RESET` config, and the help FAQ mentions it, but the actual feature is not implemented.
+### 1.1 Replit Auth Button (Signup Page)
+The Signup page displays a visible "ReplitAuthButton Placeholder" text to users. The underlying component (`ReplitAuthButton.tsx`) loads a third-party Replit script that has nothing to do with TaxEase. This is dead code from a different platform.
 
-**Fix:** Add a `/auth/reset-password` page and a "Forgot Password" link to the Login page.
-
-### 3. Email Confirmation Handling
-After signup, there's no UI feedback telling users to check their email for a confirmation link. Users could be confused about why they can't log in.
-
-**Fix:** Add a post-signup confirmation screen.
+**Fix:** Remove the placeholder `<div>ReplitAuthButton Placeholder</div>` and the "Or continue with" divider from `src/pages/auth/Signup.tsx`. Delete `src/components/auth/ReplitAuthButton.tsx`.
 
 ---
 
-## Security Items (Manual - Supabase Dashboard)
+### 1.2 FIRS Filing Integration is Simulated
+The `src/integrations/firs.ts` `submitFiling()` function generates a fake `FIRS-{timestamp}` reference and never actually calls the FIRS API. It always returns `status: "success"` locally but inserts `status: "pending"` in the database. The `getFilingStatus()` function just reads back from the local database, not from FIRS.
 
-These cannot be fixed via code:
+**Impact:** Users may think their tax filing was submitted to the government when it was not. This needs either a real integration or a clear "Draft/Simulated" label.
 
-### 4. Enable Leaked Password Protection
-Go to **Supabase Dashboard -> Authentication -> Settings -> Password Security** and enable it.
-
-### 5. Upgrade Postgres Version
-Go to **Supabase Dashboard -> Settings -> Infrastructure** and upgrade to the latest version.
-
-### 6. Function Search Path Mutable
-The `handle_new_user` and `log_organization_activity` database functions have mutable search paths.
-
-**Fix:** Add `SET search_path = ''` to these functions via a migration.
+**Fix:** Add prominent UI labels like "Draft Filing - Not Submitted to FIRS" so users are not misled, or implement the actual FIRS API when available.
 
 ---
 
-## Known Vulnerability
+### 1.3 `check-deadlines` Edge Function Has No Trigger
+The edge function exists and works, but nothing in the client code ever calls it (`check-deadlines` returns zero search results in `/src`). It is not connected to a cron job or scheduled invocation. The client-side `useDeadlineChecker` hook duplicates some of this logic locally but does not use the edge function.
 
-### 7. xlsx Package
-The `xlsx` package has known security vulnerabilities (Prototype Pollution, ReDoS). It's used in 4 files for Excel import/export. Replacing it with `ExcelJS` requires a significant refactor. This is a decision for you - accept the risk or invest in the refactor.
+**Fix:** Either invoke `check-deadlines` from a cron job (Supabase Cron or `pg_cron`) or remove it and rely solely on the client-side hook.
 
 ---
 
-## Polish / Quality of Life
+### 1.4 `send-email` and `send-whatsapp` Missing from `config.toml`
+The edge functions `send-email`, `send-whatsapp`, and `check-deadlines` exist in `supabase/functions/` but are not declared in `supabase/config.toml`. Without entries, their JWT verification defaults may not match expectations.
 
-### 8. Dead Navigation Link
-The Dashboard's empty state has a "Calculate Tax" button pointing to `/tax`, but the actual route is `/tax-web-app`. This would show a blank page.
+**Fix:** Add entries for all missing functions in `config.toml`.
 
-### 9. IP Address Placeholder
-The `auditLogger.getClientIP()` method always returns `'client'` instead of the actual IP. The edge function already captures the real IP from headers, so the client-side placeholder is harmless but misleading.
+---
+
+## 2. Partially Working / Needs Improvement
+
+### 2.1 AI Assistant - Function Calling is Disabled
+The `useAIAssistant` hook sends messages to the `ai-operations` edge function, which returns a plain text response. The edge function does **not** pass any function definitions to OpenAI, so function calling never triggers. The client code has logic to handle `function_call` responses, but the server always returns `function_call: null`. All the registered AI actions (calendar, compliance, tax, workflow, automation, etc.) are effectively dead code.
+
+**Fix:** Pass the action registry's function definitions to the OpenAI API call in the edge function, or implement a separate action-parsing layer.
+
+---
+
+### 2.2 Workflow Engine is In-Memory Only
+`WorkflowEngine.ts` stores all workflow executions in a local `Map`. Nothing persists to the database. If the user refreshes the page, all workflow state is lost. There's no UI to view past executions.
+
+**Fix:** Persist workflow executions to a Supabase table and add a history/status view.
+
+---
+
+### 2.3 Tax Optimization Plans are In-Memory Only
+`useTaxOptimization.ts` uses `useState` to store saved optimization plans. They disappear on page refresh. The `savePlan` function just pushes to local state.
+
+**Fix:** Persist saved plans to Supabase or clearly label them as session-only.
+
+---
+
+### 2.4 Dashboard Metrics Query Expects a Single Row
+`useDashboardMetrics()` calls `.single()` on `dashboard_metrics`, which will throw an error if there are zero or multiple rows for the user. The table likely needs a user-scoped query (`.eq("user_id", user.id)`).
+
+**Fix:** Add a `.eq("user_id", user.id)` filter and use `.maybeSingle()` to handle the zero-row case gracefully.
+
+---
+
+### 2.5 Notification Service References Missing `deadlines` Table
+`src/services/notificationService.ts` queries a `deadlines` table, which appears to be a simple table populated by the SampleDataButton. The client-side `useDeadlineChecker` hook queries `calendar_events` and `compliance_rules` instead, creating a disconnect where two different systems handle deadline checking with different data sources.
+
+**Fix:** Consolidate deadline logic to use one source of truth.
+
+---
+
+### 2.6 Audit Logger `getClientIP()` Always Returns `'client'`
+The method is a placeholder that never fetches the real IP. While the server-side edge function captures the real IP from headers, the client sends `'client'` as the IP value, which gets stored in the database.
+
+**Fix:** Either remove the client-side IP field (let the server handle it) or use a service like `api.ipify.org`.
+
+---
+
+## 3. UI / UX Issues
+
+### 3.1 Signup Page Shows "ReplitAuthButton Placeholder" Text
+Users see raw placeholder text "ReplitAuthButton Placeholder" below the signup form. This looks unprofessional.
+
+**Fix:** Remove it (covered in item 1.1).
+
+---
+
+### 3.2 Reset Password - Recovery Token Detection May Fail
+`ResetPassword.tsx` checks `window.location.hash` for `type=recovery`, but Supabase may use query parameters or a different hash format depending on configuration. If the token isn't detected, users see "Invalid Reset Link" even with a valid link.
+
+**Fix:** Also check URL search params, and handle the Supabase `onAuthStateChange` `PASSWORD_RECOVERY` event.
+
+---
+
+## 4. Security / Configuration
+
+### 4.1 `xlsx` Package Vulnerability
+Still present with known Prototype Pollution and ReDoS vulnerabilities. Used in 4 files.
+
+### 4.2 Leaked Password Protection (Manual)
+Needs to be enabled in Supabase Dashboard > Authentication > Settings.
+
+### 4.3 Postgres Version Upgrade (Manual)
+Needs to be done in Supabase Dashboard > Settings > Infrastructure.
 
 ---
 
 ## Summary Table
 
-| Item | Type | Effort | Action |
-|------|------|--------|--------|
-| Audit logger stale events | Bug | Small | Code fix: clear stale localStorage, add retry limit |
-| Forgot Password flow | Missing feature | Medium | Add reset password page and link |
-| Post-signup confirmation UI | Missing feature | Small | Add confirmation screen after signup |
-| Leaked Password Protection | Security | Manual | Enable in Supabase Dashboard |
-| Postgres upgrade | Security | Manual | Upgrade in Supabase Dashboard |
-| Function search path | Security | Small | Migration to set search_path |
-| xlsx vulnerability | Security | Large | Replace with ExcelJS (optional) |
-| Dead /tax link | Bug | Tiny | Change `/tax` to `/tax-web-app` |
-| IP address placeholder | Polish | Tiny | Remove or keep as-is (server handles it) |
+| # | Issue | Status | Effort | Priority |
+|---|-------|--------|--------|----------|
+| 1.1 | Replit Auth placeholder on Signup page | Broken | Tiny | High |
+| 1.2 | FIRS filing is simulated, no label | Misleading | Small | High |
+| 1.3 | `check-deadlines` edge function never called | Dead code | Small | Medium |
+| 1.4 | Missing `config.toml` entries for edge functions | Misconfigured | Tiny | Medium |
+| 2.1 | AI function calling is disabled | Partially working | Medium | Medium |
+| 2.2 | Workflow executions not persisted | In-memory only | Medium | Low |
+| 2.3 | Tax optimization plans not persisted | In-memory only | Small | Low |
+| 2.4 | Dashboard metrics query missing user filter | Bug | Tiny | High |
+| 2.5 | Duplicate deadline logic across services | Inconsistent | Small | Medium |
+| 2.6 | Client IP placeholder in audit logger | Cosmetic | Tiny | Low |
+| 3.2 | Password reset token detection fragile | May break | Small | Medium |
+| 4.1 | xlsx vulnerability | Security | Large | Medium |
+| 4.2 | Leaked password protection | Manual | Manual | High |
+| 4.3 | Postgres version upgrade | Manual | Manual | Medium |
 
 ---
 
-## Technical Implementation Details
+## Recommended Fix Order
 
-**Audit logger fix:** Add a `maxRetries` counter to queued events. After 3 failed attempts, discard the event. Also clear `audit_events` from localStorage on app startup if they contain invalid UUIDs.
+1. Remove Replit Auth placeholder (1.1) - users see this immediately
+2. Fix Dashboard metrics query (2.4) - may cause errors for all users
+3. Add "Simulated" labels to FIRS filing (1.2) - prevents user confusion
+4. Fix password reset token detection (3.2) - new feature may not work
+5. Add missing `config.toml` entries (1.4) - quick fix
+6. Wire up `check-deadlines` or remove it (1.3)
+7. Everything else based on your priorities
 
-**Password reset:** Use `supabase.auth.resetPasswordForEmail()` for the request and `supabase.auth.updateUser()` on the callback page. Add route `/auth/reset-password` with a form for email input, and handle the magic link redirect.
+## Technical Details
 
-**Function search path migration:**
+**1.1 - Replit Auth removal:**
+- In `src/pages/auth/Signup.tsx`, delete lines 166-178 (the "Or continue with" section and placeholder)
+- Delete `src/components/auth/ReplitAuthButton.tsx`
+
+**2.4 - Dashboard metrics fix:**
+- In `src/hooks/useDashboard.ts`, change the query to filter by `user_id` and use `.maybeSingle()`
+
+**1.4 - config.toml entries:**
+Add to `supabase/config.toml`:
 ```text
-ALTER FUNCTION public.handle_new_user() SET search_path = '';
-ALTER FUNCTION public.log_organization_activity() SET search_path = '';
+[functions.send-email]
+verify_jwt = false
+
+[functions.send-sms]
+verify_jwt = true
+
+[functions.send-whatsapp]
+verify_jwt = true
+
+[functions.check-deadlines]
+verify_jwt = false
 ```
 
-**Dead link fix:** In `src/pages/Dashboard.tsx`, change `navigate("/tax")` to `navigate("/tax-web-app")`.
+**3.2 - Password reset fix:**
+Listen for `supabase.auth.onAuthStateChange` with `PASSWORD_RECOVERY` event in addition to checking the URL hash.
+
