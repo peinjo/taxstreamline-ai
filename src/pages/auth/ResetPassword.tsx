@@ -16,11 +16,21 @@ const ResetPassword = () => {
   const [hasRecoveryToken, setHasRecoveryToken] = useState(false);
 
   useEffect(() => {
-    // Check for recovery token in URL hash
+    // Check for recovery token in URL hash or query params
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
+    const search = window.location.search;
+    if (hash.includes("type=recovery") || search.includes("type=recovery")) {
       setHasRecoveryToken(true);
     }
+
+    // Also listen for Supabase PASSWORD_RECOVERY event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setHasRecoveryToken(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
