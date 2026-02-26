@@ -41,24 +41,6 @@ export type Database = {
         }
         Relationships: []
       }
-      Activities: {
-        Row: {
-          created_at: string
-          id: number
-          text: number | null
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          text?: number | null
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          text?: number | null
-        }
-        Relationships: []
-      }
       app_secrets: {
         Row: {
           created_at: string | null
@@ -449,27 +431,6 @@ export type Database = {
         }
         Relationships: []
       }
-      "Dashboard Metrics": {
-        Row: {
-          "Active clients": number
-          "Compliance Alert": number | null
-          "Document Pending": number | null
-          "Upcoming Deadline": number
-        }
-        Insert: {
-          "Active clients": number
-          "Compliance Alert"?: number | null
-          "Document Pending"?: number | null
-          "Upcoming Deadline": number
-        }
-        Update: {
-          "Active clients"?: number
-          "Compliance Alert"?: number | null
-          "Document Pending"?: number | null
-          "Upcoming Deadline"?: number
-        }
-        Relationships: []
-      }
       dashboard_metrics: {
         Row: {
           active_clients: number
@@ -521,24 +482,6 @@ export type Database = {
           id?: never
           text?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      Deadlines: {
-        Row: {
-          Date: string
-          ID: number
-          Text: number | null
-        }
-        Insert: {
-          Date?: string
-          ID?: number
-          Text?: number | null
-        }
-        Update: {
-          Date?: string
-          ID?: number
-          Text?: number | null
         }
         Relationships: []
       }

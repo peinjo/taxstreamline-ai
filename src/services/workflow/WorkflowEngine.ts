@@ -14,7 +14,7 @@ export class WorkflowEngine {
     triggerData?: Record<string, any>
   ): Promise<WorkflowExecution> {
     const execution: WorkflowExecution = {
-      id: `exec_${Date.now()}`,
+      id: crypto.randomUUID(),
       workflowId: workflow.id,
       status: 'running',
       startedAt: new Date().toISOString(),
@@ -29,7 +29,7 @@ export class WorkflowEngine {
     const userId = context.user?.id;
     if (userId) {
       await supabase.from('workflow_executions').insert({
-        id: execution.id.replace('exec_', '').length === 36 ? execution.id : undefined,
+        id: execution.id,
         user_id: userId,
         workflow_id: workflow.id,
         workflow_name: workflow.name,
@@ -160,14 +160,44 @@ export class WorkflowEngine {
     }
   }
 
-  private sendNotification(notification: any): { notificationSent: boolean } {
+  private async sendNotification(notification: any): Promise<{ notificationSent: boolean }> {
     switch (notification.type) {
       case 'toast':
         toast.info(notification.message);
         break;
       case 'in_app':
+        // Insert into notifications table for in-app delivery
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from('notifications').insert({
+              user_id: user.id,
+              title: 'Workflow Notification',
+              message: notification.message,
+              type: 'workflow',
+              status: 'unread',
+            });
+          }
+        } catch (e) {
+          console.error('Failed to create in-app notification:', e);
+        }
         break;
       case 'email':
+        // Send via send-email edge function
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.functions.invoke('send-email', {
+              body: {
+                to: notification.recipients?.[0] || user.email,
+                subject: 'Workflow Notification',
+                html: `<p>${notification.message}</p>`,
+              },
+            });
+          }
+        } catch (e) {
+          console.error('Failed to send email notification:', e);
+        }
         break;
     }
     return { notificationSent: true };

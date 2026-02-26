@@ -232,12 +232,8 @@ class AuditLogger {
   }
 
   private async getClientIP(): Promise<string> {
-    try {
-      // Note: This is a simplified approach. In production, you'd get IP from server
-      return 'client'; // Placeholder
-    } catch {
-      return 'unknown';
-    }
+    // Client-side cannot reliably determine IP; let the server-side audit-logger handle it
+    return 'server-resolved';
   }
 }
 
