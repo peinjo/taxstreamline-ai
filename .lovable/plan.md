@@ -1,172 +1,190 @@
 
 
-# TaxEase - Functions Audit: What's Not Working or Needs Improvement
+# TaxEase - Complete Functions Audit
 
-After a thorough review of every page, service, hook, and edge function in the app, here is a categorized list of issues.
-
----
-
-## 1. Broken / Non-Functional
-
-### 1.1 Replit Auth Button (Signup Page)
-The Signup page displays a visible "ReplitAuthButton Placeholder" text to users. The underlying component (`ReplitAuthButton.tsx`) loads a third-party Replit script that has nothing to do with TaxEase. This is dead code from a different platform.
-
-**Fix:** Remove the placeholder `<div>ReplitAuthButton Placeholder</div>` and the "Or continue with" divider from `src/pages/auth/Signup.tsx`. Delete `src/components/auth/ReplitAuthButton.tsx`.
+After reviewing every page, hook, service, edge function, and database trigger, here is a full breakdown of what is not working or needs improvement.
 
 ---
 
-### 1.2 FIRS Filing Integration is Simulated
-The `src/integrations/firs.ts` `submitFiling()` function generates a fake `FIRS-{timestamp}` reference and never actually calls the FIRS API. It always returns `status: "success"` locally but inserts `status: "pending"` in the database. The `getFilingStatus()` function just reads back from the local database, not from FIRS.
+## 1. BROKEN - Will Not Work At All
 
-**Impact:** Users may think their tax filing was submitted to the government when it was not. This needs either a real integration or a clear "Draft/Simulated" label.
+### 1.1 Database Triggers Missing for Report Status Notifications
+The function `notify_report_status_change()` exists but is **not attached to any table as a trigger**. When a tax report's status changes, no email notification is sent. The trigger should be on the `tax_reports` table.
 
-**Fix:** Add prominent UI labels like "Draft Filing - Not Submitted to FIRS" so users are not misled, or implement the actual FIRS API when available.
-
----
-
-### 1.3 `check-deadlines` Edge Function Has No Trigger
-The edge function exists and works, but nothing in the client code ever calls it (`check-deadlines` returns zero search results in `/src`). It is not connected to a cron job or scheduled invocation. The client-side `useDeadlineChecker` hook duplicates some of this logic locally but does not use the edge function.
-
-**Fix:** Either invoke `check-deadlines` from a cron job (Supabase Cron or `pg_cron`) or remove it and rely solely on the client-side hook.
+**Fix:** Create a migration to attach the trigger to `tax_reports`.
 
 ---
 
-### 1.4 `send-email` and `send-whatsapp` Missing from `config.toml`
-The edge functions `send-email`, `send-whatsapp`, and `check-deadlines` exist in `supabase/functions/` but are not declared in `supabase/config.toml`. Without entries, their JWT verification defaults may not match expectations.
+### 1.2 Duplicate Tables Causing Data Confusion
+The database has **both** uppercase and lowercase versions of three tables:
+- `Activities` and `activities`
+- `Dashboard Metrics` and `dashboard_metrics`
+- `Deadlines` and `deadlines`
 
-**Fix:** Add entries for all missing functions in `config.toml`.
+The code references the lowercase versions. The uppercase ones appear to be leftover artifacts. This can cause confusion and wasted storage.
 
----
-
-## 2. Partially Working / Needs Improvement
-
-### 2.1 AI Assistant - Function Calling is Disabled
-The `useAIAssistant` hook sends messages to the `ai-operations` edge function, which returns a plain text response. The edge function does **not** pass any function definitions to OpenAI, so function calling never triggers. The client code has logic to handle `function_call` responses, but the server always returns `function_call: null`. All the registered AI actions (calendar, compliance, tax, workflow, automation, etc.) are effectively dead code.
-
-**Fix:** Pass the action registry's function definitions to the OpenAI API call in the edge function, or implement a separate action-parsing layer.
+**Fix:** Migrate any data from the uppercase tables to lowercase, then drop the uppercase tables.
 
 ---
 
-### 2.2 Workflow Engine is In-Memory Only
-`WorkflowEngine.ts` stores all workflow executions in a local `Map`. Nothing persists to the database. If the user refreshes the page, all workflow state is lost. There's no UI to view past executions.
+### 1.3 `check-deadlines` Edge Function Never Invoked
+The function exists and works, but nothing calls it. No cron job, no client code. The client-side `useDeadlineChecker` hook does similar work but only for the currently logged-in user, and doesn't send emails/SMS.
 
-**Fix:** Persist workflow executions to a Supabase table and add a history/status view.
-
----
-
-### 2.3 Tax Optimization Plans are In-Memory Only
-`useTaxOptimization.ts` uses `useState` to store saved optimization plans. They disappear on page refresh. The `savePlan` function just pushes to local state.
-
-**Fix:** Persist saved plans to Supabase or clearly label them as session-only.
+**Fix:** Set up a `pg_cron` job to invoke `check-deadlines` daily, or remove the edge function if client-side is sufficient.
 
 ---
 
-### 2.4 Dashboard Metrics Query Expects a Single Row
-`useDashboardMetrics()` calls `.single()` on `dashboard_metrics`, which will throw an error if there are zero or multiple rows for the user. The table likely needs a user-scoped query (`.eq("user_id", user.id)`).
+### 1.4 Email Sender Uses `onboarding@resend.dev`
+The `send-email` edge function sends from `onboarding@resend.dev`, which is Resend's sandbox domain. Emails will likely be rejected or land in spam for real users. You need a verified custom domain.
 
-**Fix:** Add a `.eq("user_id", user.id)` filter and use `.maybeSingle()` to handle the zero-row case gracefully.
-
----
-
-### 2.5 Notification Service References Missing `deadlines` Table
-`src/services/notificationService.ts` queries a `deadlines` table, which appears to be a simple table populated by the SampleDataButton. The client-side `useDeadlineChecker` hook queries `calendar_events` and `compliance_rules` instead, creating a disconnect where two different systems handle deadline checking with different data sources.
-
-**Fix:** Consolidate deadline logic to use one source of truth.
+**Fix:** Set up a custom domain in Resend and update the `from` address.
 
 ---
 
-### 2.6 Audit Logger `getClientIP()` Always Returns `'client'`
-The method is a placeholder that never fetches the real IP. While the server-side edge function captures the real IP from headers, the client sends `'client'` as the IP value, which gets stored in the database.
+### 1.5 FIRS Filing is Simulated
+`src/integrations/firs.ts` generates a fake reference number and never contacts the FIRS API. Users see "Tax filing submitted successfully" but nothing is actually filed.
 
-**Fix:** Either remove the client-side IP field (let the server handle it) or use a service like `api.ipify.org`.
-
----
-
-## 3. UI / UX Issues
-
-### 3.1 Signup Page Shows "ReplitAuthButton Placeholder" Text
-Users see raw placeholder text "ReplitAuthButton Placeholder" below the signup form. This looks unprofessional.
-
-**Fix:** Remove it (covered in item 1.1).
+**Status:** A "Draft Mode" banner was already added to the filing form. Verify it's visible and clear enough.
 
 ---
 
-### 3.2 Reset Password - Recovery Token Detection May Fail
-`ResetPassword.tsx` checks `window.location.hash` for `type=recovery`, but Supabase may use query parameters or a different hash format depending on configuration. If the token isn't detected, users see "Invalid Reset Link" even with a valid link.
+## 2. PARTIALLY WORKING - Functional But With Issues
 
-**Fix:** Also check URL search params, and handle the Supabase `onAuthStateChange` `PASSWORD_RECOVERY` event.
+### 2.1 Notification Service Uses Wrong Data Source
+`src/services/notificationService.ts` queries the `deadlines` table, while `useDeadlineChecker` queries `calendar_events` and `compliance_rules`. Two systems check deadlines using different data, leading to inconsistent notifications.
+
+**Fix:** Consolidate to use one source of truth (likely `calendar_events` + `compliance_items`).
 
 ---
 
-## 4. Security / Configuration
+### 2.2 Workflow Engine - DB Persistence Has ID Mismatch
+The `WorkflowEngine.ts` generates IDs like `exec_1234567890` but tries to insert them into a UUID column. The code has a workaround (`execution.id.replace('exec_', '').length === 36 ? ...`) that will almost always fail since timestamps aren't 36 chars. The row is inserted without a proper ID, or fails silently.
 
-### 4.1 `xlsx` Package Vulnerability
-Still present with known Prototype Pollution and ReDoS vulnerabilities. Used in 4 files.
+**Fix:** Use `crypto.randomUUID()` for execution IDs, or let the DB generate them.
 
-### 4.2 Leaked Password Protection (Manual)
-Needs to be enabled in Supabase Dashboard > Authentication > Settings.
+---
 
-### 4.3 Postgres Version Upgrade (Manual)
-Needs to be done in Supabase Dashboard > Settings > Infrastructure.
+### 2.3 Workflow Engine - Notification Steps Are No-ops
+The `sendNotification` method in `WorkflowEngine.ts` handles `email` and `in_app` notification types as empty `break` statements. Only `toast` actually works. Workflows that include email or in-app notification steps silently do nothing.
+
+**Fix:** Wire email notifications to the `send-email` edge function, and in-app to the `notifications` table.
+
+---
+
+### 2.4 AI Assistant - CORS Headers May Be Incomplete
+The `ai-operations` edge function uses a basic CORS header set that's missing newer Supabase client headers (`x-supabase-client-platform`, `x-supabase-client-platform-version`, etc.). This could cause preflight failures with newer SDK versions.
+
+**Fix:** Update CORS headers to include the full set.
+
+---
+
+### 2.5 `send-email` Authentication Mismatch  
+The `send-email` function has `verify_jwt = false` in `config.toml` but implements its own auth check. The function checks for service role key OR user JWT. However, the `check-deadlines` function calls `send-email` using `supabase.functions.invoke()` with the service role client, passing the key as `apikey` header - but `send-email` checks `req.headers.get('apikey')` against the service role key. This should work, but if the internal call format changes, it will break silently.
+
+---
+
+### 2.6 Resend Email - From Address Limitation
+Even with a valid Resend API key, using `onboarding@resend.dev` limits you to sending only to the account owner's email. No other recipients will receive emails. This affects ALL email features: deadline reminders, compliance alerts, and report status updates.
+
+---
+
+## 3. MISSING FUNCTIONALITY
+
+### 3.1 No Cron/Scheduled Jobs
+The app has time-sensitive features (deadline checking, compliance alerts) but no scheduled execution mechanism. Everything relies on:
+- A user being logged in (client-side `useDeadlineChecker`)
+- Or manual invocation of edge functions
+
+**Fix:** Add `pg_cron` jobs for `check-deadlines` and potentially compliance status updates.
+
+---
+
+### 3.2 Audit Logger `getClientIP()` Returns Placeholder
+The client always sends `'client'` as the IP. The server captures the real IP, but the client field in the database is misleading.
+
+**Fix:** Remove the client-side IP field entirely and let the server handle it.
+
+---
+
+## 4. CONFIGURATION ISSUES
+
+### 4.1 `webhook-caller` Missing from `config.toml`
+The edge function exists but has no entry in `supabase/config.toml`. It defaults to `verify_jwt = true`, which happens to be correct, but it should be explicit.
+
+**Fix:** Add `[functions.webhook-caller]` with `verify_jwt = true`.
+
+---
+
+### 4.2 Paystack Webhook - No Signature Verification
+The `paystack-webhook` function processes incoming webhooks but should verify the Paystack signature header (`x-paystack-signature`) to prevent spoofed payment confirmations.
+
+**Fix:** Add HMAC signature verification using `PAYSTACK_SECRET_KEY`.
 
 ---
 
 ## Summary Table
 
-| # | Issue | Status | Effort | Priority |
+| # | Issue | Impact | Effort | Priority |
 |---|-------|--------|--------|----------|
-| 1.1 | Replit Auth placeholder on Signup page | Broken | Tiny | High |
-| 1.2 | FIRS filing is simulated, no label | Misleading | Small | High |
-| 1.3 | `check-deadlines` edge function never called | Dead code | Small | Medium |
-| 1.4 | Missing `config.toml` entries for edge functions | Misconfigured | Tiny | Medium |
-| 2.1 | AI function calling is disabled | Partially working | Medium | Medium |
-| 2.2 | Workflow executions not persisted | In-memory only | Medium | Low |
-| 2.3 | Tax optimization plans not persisted | In-memory only | Small | Low |
-| 2.4 | Dashboard metrics query missing user filter | Bug | Tiny | High |
-| 2.5 | Duplicate deadline logic across services | Inconsistent | Small | Medium |
-| 2.6 | Client IP placeholder in audit logger | Cosmetic | Tiny | Low |
-| 3.2 | Password reset token detection fragile | May break | Small | Medium |
-| 4.1 | xlsx vulnerability | Security | Large | Medium |
-| 4.2 | Leaked password protection | Manual | Manual | High |
-| 4.3 | Postgres version upgrade | Manual | Manual | Medium |
+| 1.1 | Report status trigger not attached | Emails never sent on report status change | Tiny | High |
+| 1.2 | Duplicate uppercase tables | Data confusion, wasted storage | Small | Medium |
+| 1.3 | `check-deadlines` never invoked | Deadline emails never sent automatically | Small | High |
+| 1.4 | Email from `onboarding@resend.dev` | Emails only reach account owner | Manual | High |
+| 1.5 | FIRS filing simulated | Already has draft label - verify | None | Low |
+| 2.1 | Notification service wrong data source | Inconsistent deadline checking | Small | Medium |
+| 2.2 | Workflow execution ID mismatch | DB inserts may fail silently | Tiny | Medium |
+| 2.3 | Workflow notification steps are no-ops | Email/in-app workflow steps do nothing | Small | Medium |
+| 2.4 | AI CORS headers incomplete | May cause preflight failures | Tiny | Medium |
+| 2.5 | Email auth flow fragile | Could break on SDK updates | Small | Low |
+| 2.6 | Resend sandbox limitation | Emails only to account owner | Manual | High |
+| 3.1 | No cron jobs | Time-sensitive features unreliable | Medium | High |
+| 3.2 | Client IP placeholder | Misleading data in audit logs | Tiny | Low |
+| 4.1 | `webhook-caller` not in config.toml | Using implicit defaults | Tiny | Low |
+| 4.2 | Paystack webhook no signature check | Payment fraud risk | Small | High |
 
 ---
 
 ## Recommended Fix Order
 
-1. Remove Replit Auth placeholder (1.1) - users see this immediately
-2. Fix Dashboard metrics query (2.4) - may cause errors for all users
-3. Add "Simulated" labels to FIRS filing (1.2) - prevents user confusion
-4. Fix password reset token detection (3.2) - new feature may not work
-5. Add missing `config.toml` entries (1.4) - quick fix
-6. Wire up `check-deadlines` or remove it (1.3)
-7. Everything else based on your priorities
+1. **Attach report status trigger** (1.1) - emails are completely broken
+2. **Fix workflow execution IDs** (2.2) - quick fix, prevents silent DB failures
+3. **Update AI CORS headers** (2.4) - may be causing current errors
+4. **Add `webhook-caller` to config.toml** (4.1) - 10-second fix
+5. **Add Paystack signature verification** (4.2) - security risk
+6. **Fix notification data source** (2.1) - consolidate deadline logic
+7. **Wire workflow notification steps** (2.3) - complete the feature
+8. **Drop duplicate tables** (1.2) - clean up the database
+9. **Set up cron job for deadlines** (3.1) - requires pg_cron extension
+10. **Configure custom email domain** (1.4, 2.6) - manual Resend setup
+
+---
 
 ## Technical Details
 
-**1.1 - Replit Auth removal:**
-- In `src/pages/auth/Signup.tsx`, delete lines 166-178 (the "Or continue with" section and placeholder)
-- Delete `src/components/auth/ReplitAuthButton.tsx`
-
-**2.4 - Dashboard metrics fix:**
-- In `src/hooks/useDashboard.ts`, change the query to filter by `user_id` and use `.maybeSingle()`
-
-**1.4 - config.toml entries:**
-Add to `supabase/config.toml`:
-```text
-[functions.send-email]
-verify_jwt = false
-
-[functions.send-sms]
-verify_jwt = true
-
-[functions.send-whatsapp]
-verify_jwt = true
-
-[functions.check-deadlines]
-verify_jwt = false
+**1.1 - Attach report status trigger:**
+```sql
+CREATE TRIGGER report_status_notification
+  AFTER UPDATE ON public.tax_reports
+  FOR EACH ROW
+  EXECUTE FUNCTION public.notify_report_status_change();
 ```
 
-**3.2 - Password reset fix:**
-Listen for `supabase.auth.onAuthStateChange` with `PASSWORD_RECOVERY` event in addition to checking the URL hash.
+**2.2 - Fix workflow execution IDs:**
+In `WorkflowEngine.ts`, replace `exec_${Date.now()}` with `crypto.randomUUID()`.
+
+**2.4 - Update CORS headers in `ai-operations`:**
+Add `x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version` to `Access-Control-Allow-Headers`.
+
+**4.2 - Paystack signature verification:**
+```typescript
+const hash = crypto.createHmac('sha512', secret).update(body).digest('hex');
+if (hash !== req.headers.get('x-paystack-signature')) { return 401; }
+```
+
+**1.2 - Drop duplicate tables:**
+```sql
+DROP TABLE IF EXISTS public."Activities";
+DROP TABLE IF EXISTS public."Dashboard Metrics";
+DROP TABLE IF EXISTS public."Deadlines";
+```
 
