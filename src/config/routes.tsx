@@ -18,6 +18,7 @@ import AuditReporting from "@/pages/AuditReporting";
 import Settings from "@/pages/Settings";
 import BulkOperations from "@/pages/BulkOperations";
 import LoggingDashboard from "@/pages/LoggingDashboard";
+import Pricing from "@/pages/Pricing";
 
 interface RouteConfig {
   path: string;
@@ -55,6 +56,11 @@ export const routes: RouteConfig[] = [
   {
     path: "/auth/signup-confirmation",
     element: <SignupConfirmation />,
+    isProtected: false,
+  },
+  {
+    path: "/pricing",
+    element: <Pricing />,
     isProtected: false,
   },
   
