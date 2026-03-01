@@ -1,74 +1,141 @@
 
 
-# Investor Documentation for TaxEase
+# Gap Analysis: Investor Plan vs Current App
 
-I will create a professional investor-ready document as a new page in your project that you can also export/copy. Here is the plan:
+After reading your full investor document and comparing it against every feature in your codebase, here is what is **already built**, what is **partially built**, and what is **missing entirely**.
 
-## What I Will Create
+---
 
-A single markdown-based document file at `public/TaxEase_Investor_Deck.md` and a dedicated `/investor-docs` page that renders it beautifully, covering:
+## Already Built (matches investor plan)
 
-### Document Structure
+These features exist and work in the app:
 
-**1. Executive Summary**
-- TaxEase: AI-powered self-service tax preparation platform for Nigerian individuals and SMEs
-- Problem statement: Tax compliance in Nigeria is complex, manual, and error-prone
-- Solution: Calculate, prepare, and guide users through tax filing
+- Tax Reporting Engine: VAT, CIT, PAYE, WHT, Capital Gains calculators
+- Transfer Pricing Toolkit with Master/Local File templates, risk assessment, benchmarking
+- Compliance Deadline Tracker with calendar and alerts
+- Audit Documentation Management Portal (document upload, categorization, version history)
+- AI-Powered Regulatory Drafting Assistant (OpenAI integration)
+- Role-Based Access Controls (RBAC) with RLS
+- Client Portal for Transfer Pricing (read-only document sharing)
+- Paystack payment integration
+- Resend email integration
+- Activity/audit logging
+- Onboarding wizard
+- Error tracking (Sentry) and analytics (PostHog)
+- Stamp Duty, Education Tax, Petroleum Profit Tax calculators (bonus - beyond investor plan)
 
-**2. Problem**
-- 41M+ SMEs in Nigeria, most struggle with tax compliance
-- Manual processes lead to errors, penalties, and missed deadlines
-- Professional tax services are expensive and inaccessible to most SMEs
-- FIRS digitization creates opportunity for tech-enabled solutions
+---
 
-**3. Solution - Product Overview**
-- Tax Calculator (VAT, CIT, PIT, WHT, Capital Gains)
-- Filing Pack Generator with step-by-step guides
-- AI Tax Assistant for instant answers
-- Compliance Tracker with automated reminders (Email, SMS, WhatsApp)
-- Document Management for receipts and records
-- Transfer Pricing documentation
-- Audit & Reporting tools
-- Calendar with deadline tracking
-- Payment processing via Paystack
-- Multi-channel notifications
+## Partially Built (needs work to match investor plan)
 
-**4. Technology & Architecture**
-- Modern stack: React, TypeScript, Supabase (PostgreSQL), Edge Functions
-- AI-powered assistant (OpenAI integration)
-- Multi-channel notifications (Email via Resend, SMS, WhatsApp)
-- Secure: Row-Level Security, audit logging, encrypted storage
-- Scalable serverless architecture
+| Feature | What Exists | What's Missing |
+|---------|-------------|----------------|
+| **Tiered Pricing/Subscriptions** | Paystack integration exists but no pricing page or plan selection UI | Need a `/pricing` page with Starter (₦5,000), Pro (₦12,000), Enterprise tiers, plan gating, and subscription management |
+| **Multi-Factor Authentication** | OTP input component exists | No actual MFA enrollment flow - need TOTP setup, backup codes, and enforcement for admin users |
+| **Filing Pack Generator** | Filing form and history exist | Step-by-step guided filing workflow is basic; needs the "institutional-grade" output described in the plan |
+| **Notification System** | Email/in-app notifications exist | Workflow notification steps were no-ops (recently fixed), but SMS and WhatsApp channels are not implemented |
 
-**5. Business Model**
-- Freemium SaaS with tiered pricing
-- Revenue streams: subscriptions, filing pack generation, premium AI features
-- Target: 1,000 initial users, expand to pan-African markets
+---
 
-**6. Market Opportunity**
-- Nigeria tax tech market sizing
-- Government push for tax compliance digitization
-- Expanding formal sector
+## Missing Entirely (promised in investor plan but not in the app)
 
-**7. Traction & Current Status**
-- MVP built and functional
-- Core features operational: tax calculation, filing packs, compliance tracking, AI assistant
-- 10+ edge functions deployed
-- Database with full RLS security
+### High Priority - Core product promises
 
-**8. Team** (placeholder for you to fill in)
+1. **Invoicing & Payment Portal** (Section 8.3)
+   - No invoice creation, sending, or tracking
+   - No client-facing payment links
+   - No accounts receivable/payable module
+   - This is listed as a core Starter plan feature
 
-**9. Use of Funds** (placeholder for you to fill in)
+2. **OCR Receipt Capture - "Snap, Upload, Comply"** (Section 8.2)
+   - This is your primary marketing hook per the investor plan
+   - No camera/OCR integration exists
+   - No automatic receipt categorization
+   - No VAT extraction from receipts
 
-**10. Contact Information** (placeholder)
+3. **Payroll Module** (Section 8.3)
+   - PAYE calculator exists but no actual payroll processing
+   - No employee records management
+   - No payslip generation
+   - No pension tracking beyond calculation
+   - No monthly remittance summaries
 
-## Implementation
+4. **Subscription/Pricing Page** (Section 7)
+   - No visible pricing page or plan selection
+   - No feature gating by plan tier (Starter vs Pro vs Enterprise)
+   - No subscription management UI
+   - No annual prepayment option
 
-- Create `src/pages/InvestorDocs.tsx` - a beautifully styled, printable page with all sections
-- Add route at `/investor-docs` (public, unprotected)
-- Include a "Download as PDF" button using the existing `jspdf` dependency
-- Professional styling with your brand colors
-- All content inline (no external dependencies)
+5. **PWA / Offline Capabilities** (Section 4.5)
+   - No service worker, no manifest.json
+   - No offline data entry or sync
+   - Plan promises "Progressive Web App architecture"
 
-This gives you a shareable URL (yourdomain.com/investor-docs) and a downloadable PDF, both investor-ready.
+### Medium Priority - Competitive differentiators
+
+6. **Predictive Analytics / Forecasting** (Section 8.3)
+   - No cash flow forecasting
+   - No "What-If" scenario planning
+   - No tax liability projections
+   - No growth scenario modeling
+
+7. **Bank Statement Import** (Section 8.2)
+   - No bank API integration
+   - No statement upload and parsing
+   - No automatic transaction categorization from bank data
+
+8. **MFA Enrollment Flow** (Section 5.4)
+   - No TOTP authenticator app setup
+   - No backup codes
+   - No device fingerprinting
+   - Critical for the security claims in the investor plan
+
+9. **SMS & WhatsApp Notifications** (Section 3.4)
+   - Referenced multiple times as multi-channel alerts
+   - Only email exists currently
+   - WhatsApp Business API integration needed
+
+10. **Landing Page / Marketing Site** (Section 8.2)
+    - App goes straight to auth/dashboard
+    - No public-facing landing page explaining the product
+    - No SEO-optimized content pages
+    - Investors will want to see a proper marketing presence
+
+### Lower Priority - Future roadmap items
+
+11. **QuickBooks/Xero Integration** (Section 4.4) - listed as Phase 3
+12. **NIN/TIN Verification** (Section 4.6) - identity validation
+13. **Penalty Calculator** (Section 4.6) - late filing penalties
+14. **Two-way Calendar Sync** (Section 3.4) - Google/Outlook integration
+15. **White-labeling** (Section 7.5) - Enterprise feature
+
+---
+
+## Recommended Build Order
+
+For investor readiness, I recommend building in this order:
+
+### Phase 1: Make core promises real (what investors will click on)
+1. **Pricing/Subscription page** with plan tiers and Paystack checkout
+2. **Landing page** with product overview, pricing, and signup CTA
+3. **PWA setup** (manifest + service worker) - quick win, validates "mobile-first" claim
+
+### Phase 2: Build the marketing hook
+4. **OCR Receipt Capture** using an OCR API or OpenAI vision
+5. **Invoicing module** with payment links via Paystack
+
+### Phase 3: Deepen the product
+6. **Payroll module** building on existing PAYE calculator
+7. **MFA enrollment** flow
+8. **Predictive analytics** dashboard
+
+### Phase 4: Scale features
+9. **SMS/WhatsApp notifications**
+10. **Bank statement import**
+
+---
+
+## Summary
+
+Your app has strong bones - the tax calculators, transfer pricing toolkit, compliance tracker, AI assistant, and security infrastructure are solid. The biggest gaps are in the **revenue-generating features** (invoicing, subscriptions, pricing page) and the **primary marketing hook** (OCR receipt capture) that your investor plan heavily promotes. Building the pricing page, landing page, and receipt capture would make the app match what investors will expect to see after reading your plan.
 
