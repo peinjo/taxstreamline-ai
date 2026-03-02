@@ -7,12 +7,13 @@ import {
   ShieldCheck,
   Bot,
   Bell,
-  
   Calculator,
   ChartBar,
   Upload,
   Activity,
   Settings,
+  Camera,
+  Receipt,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -52,6 +53,8 @@ const Sidebar = () => {
       progress: getUnlockProgress('bulk_operations'),
     },
     { icon: Bot, text: "AI Assistant", path: "/ai-assistant" },
+    { icon: Camera, text: "Receipt Capture", path: "/receipts" },
+    { icon: Receipt, text: "Invoices", path: "/invoices" },
     { icon: Activity, text: "System Logs", path: "/logs" },
   ];
 

@@ -19,6 +19,8 @@ import Settings from "@/pages/Settings";
 import BulkOperations from "@/pages/BulkOperations";
 import LoggingDashboard from "@/pages/LoggingDashboard";
 import Pricing from "@/pages/Pricing";
+import Receipts from "@/pages/Receipts";
+import Invoices from "@/pages/Invoices";
 
 interface RouteConfig {
   path: string;
@@ -128,6 +130,16 @@ export const routes: RouteConfig[] = [
   {
     path: "/logs",
     element: <LoggingDashboard />,
+    isProtected: true,
+  },
+  {
+    path: "/receipts",
+    element: <Receipts />,
+    isProtected: true,
+  },
+  {
+    path: "/invoices",
+    element: <Invoices />,
     isProtected: true,
   },
 ];
