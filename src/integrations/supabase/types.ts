@@ -930,6 +930,113 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_items: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          quantity?: number
+          unit_price: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          client_address: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          currency: string | null
+          due_date: string
+          id: string
+          invoice_number: string
+          issue_date: string
+          notes: string | null
+          paid_at: string | null
+          payment_link: string | null
+          payment_reference: string | null
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+          user_id: string
+          vat_amount: number
+          vat_rate: number | null
+        }
+        Insert: {
+          client_address?: string | null
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          currency?: string | null
+          due_date: string
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_link?: string | null
+          payment_reference?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id: string
+          vat_amount?: number
+          vat_rate?: number | null
+        }
+        Update: {
+          client_address?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          currency?: string | null
+          due_date?: string
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_link?: string | null
+          payment_reference?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+          vat_amount?: number
+          vat_rate?: number | null
+        }
+        Relationships: []
+      }
       materiality_calculations: {
         Row: {
           created_at: string | null
@@ -1041,6 +1148,63 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      ocr_receipts: {
+        Row: {
+          amount: number | null
+          category: string | null
+          confidence_score: number | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          file_name: string
+          file_path: string
+          id: string
+          raw_ocr_data: Json | null
+          receipt_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          vat_amount: number | null
+          vendor_name: string | null
+        }
+        Insert: {
+          amount?: number | null
+          category?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          file_name: string
+          file_path: string
+          id?: string
+          raw_ocr_data?: Json | null
+          receipt_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          vat_amount?: number | null
+          vendor_name?: string | null
+        }
+        Update: {
+          amount?: number | null
+          category?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          id?: string
+          raw_ocr_data?: Json | null
+          receipt_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vat_amount?: number | null
+          vendor_name?: string | null
         }
         Relationships: []
       }
@@ -2674,6 +2838,7 @@ export type Database = {
         }
         Returns: string
       }
+      generate_invoice_number: { Args: { p_user_id: string }; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
       get_edge_function_url: {
         Args: { function_name: string }

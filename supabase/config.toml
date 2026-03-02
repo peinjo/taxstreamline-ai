@@ -29,3 +29,6 @@ verify_jwt = true
 
 [functions.webhook-caller]
 verify_jwt = true
+
+[functions.ocr-receipt]
+verify_jwt = false
