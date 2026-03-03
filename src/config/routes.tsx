@@ -21,6 +21,9 @@ import LoggingDashboard from "@/pages/LoggingDashboard";
 import Pricing from "@/pages/Pricing";
 import Receipts from "@/pages/Receipts";
 import Invoices from "@/pages/Invoices";
+import Payroll from "@/pages/Payroll";
+import MFASetup from "@/pages/MFASetup";
+import PredictiveAnalytics from "@/pages/PredictiveAnalytics";
 
 interface RouteConfig {
   path: string;
@@ -140,6 +143,21 @@ export const routes: RouteConfig[] = [
   {
     path: "/invoices",
     element: <Invoices />,
+    isProtected: true,
+  },
+  {
+    path: "/payroll",
+    element: <Payroll />,
+    isProtected: true,
+  },
+  {
+    path: "/mfa-setup",
+    element: <MFASetup />,
+    isProtected: true,
+  },
+  {
+    path: "/analytics",
+    element: <PredictiveAnalytics />,
     isProtected: true,
   },
 ];

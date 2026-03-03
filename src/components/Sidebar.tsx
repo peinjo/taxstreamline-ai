@@ -14,6 +14,8 @@ import {
   Settings,
   Camera,
   Receipt,
+  Wallet,
+  BarChart3,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -55,6 +57,8 @@ const Sidebar = () => {
     { icon: Bot, text: "AI Assistant", path: "/ai-assistant" },
     { icon: Camera, text: "Receipt Capture", path: "/receipts" },
     { icon: Receipt, text: "Invoices", path: "/invoices" },
+    { icon: Wallet, text: "Payroll", path: "/payroll" },
+    { icon: BarChart3, text: "Analytics", path: "/analytics" },
     { icon: Activity, text: "System Logs", path: "/logs" },
   ];
 
