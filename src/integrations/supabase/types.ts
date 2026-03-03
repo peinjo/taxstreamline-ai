@@ -712,6 +712,81 @@ export type Database = {
           },
         ]
       }
+      employees: {
+        Row: {
+          bank_account_number: string | null
+          bank_name: string | null
+          basic_salary: number
+          created_at: string | null
+          department: string | null
+          email: string | null
+          employment_type: string | null
+          full_name: string
+          hire_date: string
+          housing_allowance: number | null
+          id: string
+          is_active: boolean | null
+          job_title: string | null
+          nhf_id: string | null
+          other_allowances: number | null
+          pension_id: string | null
+          phone: string | null
+          tax_id: string | null
+          termination_date: string | null
+          transport_allowance: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          bank_account_number?: string | null
+          bank_name?: string | null
+          basic_salary?: number
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          employment_type?: string | null
+          full_name: string
+          hire_date?: string
+          housing_allowance?: number | null
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          nhf_id?: string | null
+          other_allowances?: number | null
+          pension_id?: string | null
+          phone?: string | null
+          tax_id?: string | null
+          termination_date?: string | null
+          transport_allowance?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          bank_account_number?: string | null
+          bank_name?: string | null
+          basic_salary?: number
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          employment_type?: string | null
+          full_name?: string
+          hire_date?: string
+          housing_allowance?: number | null
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          nhf_id?: string | null
+          other_allowances?: number | null
+          pension_id?: string | null
+          phone?: string | null
+          tax_id?: string | null
+          termination_date?: string | null
+          transport_allowance?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       filing_packs: {
         Row: {
           generated_at: string | null
@@ -1246,6 +1321,129 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      payroll_runs: {
+        Row: {
+          created_at: string | null
+          employee_count: number | null
+          id: string
+          notes: string | null
+          period_month: number
+          period_year: number
+          processed_at: string | null
+          status: string | null
+          total_gross: number | null
+          total_net: number | null
+          total_nhf: number | null
+          total_paye: number | null
+          total_pension: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          employee_count?: number | null
+          id?: string
+          notes?: string | null
+          period_month: number
+          period_year: number
+          processed_at?: string | null
+          status?: string | null
+          total_gross?: number | null
+          total_net?: number | null
+          total_nhf?: number | null
+          total_paye?: number | null
+          total_pension?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          employee_count?: number | null
+          id?: string
+          notes?: string | null
+          period_month?: number
+          period_year?: number
+          processed_at?: string | null
+          status?: string | null
+          total_gross?: number | null
+          total_net?: number | null
+          total_nhf?: number | null
+          total_paye?: number | null
+          total_pension?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payslips: {
+        Row: {
+          basic_salary: number
+          created_at: string | null
+          employee_id: string
+          gross_pay: number
+          housing_allowance: number | null
+          id: string
+          net_pay: number
+          nhf: number | null
+          other_allowances: number | null
+          other_deductions: number | null
+          paye_tax: number | null
+          payroll_run_id: string
+          pension_employee: number | null
+          pension_employer: number | null
+          transport_allowance: number | null
+        }
+        Insert: {
+          basic_salary: number
+          created_at?: string | null
+          employee_id: string
+          gross_pay: number
+          housing_allowance?: number | null
+          id?: string
+          net_pay: number
+          nhf?: number | null
+          other_allowances?: number | null
+          other_deductions?: number | null
+          paye_tax?: number | null
+          payroll_run_id: string
+          pension_employee?: number | null
+          pension_employer?: number | null
+          transport_allowance?: number | null
+        }
+        Update: {
+          basic_salary?: number
+          created_at?: string | null
+          employee_id?: string
+          gross_pay?: number
+          housing_allowance?: number | null
+          id?: string
+          net_pay?: number
+          nhf?: number | null
+          other_allowances?: number | null
+          other_deductions?: number | null
+          paye_tax?: number | null
+          payroll_run_id?: string
+          pension_employee?: number | null
+          pension_employer?: number | null
+          transport_allowance?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payslips_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payslips_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
