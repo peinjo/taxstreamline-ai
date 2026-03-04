@@ -16,6 +16,7 @@ import {
   Receipt,
   Wallet,
   BarChart3,
+  Landmark,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -59,6 +60,7 @@ const Sidebar = () => {
     { icon: Receipt, text: "Invoices", path: "/invoices" },
     { icon: Wallet, text: "Payroll", path: "/payroll" },
     { icon: BarChart3, text: "Analytics", path: "/analytics" },
+    { icon: Landmark, text: "Bank Statements", path: "/bank-statements" },
     { icon: Activity, text: "System Logs", path: "/logs" },
   ];
 
