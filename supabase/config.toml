@@ -32,3 +32,6 @@ verify_jwt = true
 
 [functions.ocr-receipt]
 verify_jwt = false
+
+[functions.validate-share-link]
+verify_jwt = false
