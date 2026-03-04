@@ -92,7 +92,7 @@ export function ClientPortal() {
       setLoading(true);
       
       const { data, error } = await supabase
-        .from('tp_document_shares')
+        .from('tp_document_shares_safe')
         .select('*')
         .order('created_at', { ascending: false });
 
