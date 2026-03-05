@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import Sidebar from "@/components/Sidebar";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -192,9 +192,7 @@ const Payroll = () => {
   const formatCurrency = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <main className="ml-64 flex-1 p-6">
+    <DashboardLayout>
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Payroll Management</h1>
@@ -467,8 +465,7 @@ const Payroll = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

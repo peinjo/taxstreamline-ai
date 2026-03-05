@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import DashboardLayout from "@/components/DashboardLayout";
 import { Helmet } from "react-helmet-async";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -208,6 +209,7 @@ const Invoices = () => {
       <Helmet>
         <title>Invoices | TaxEase</title>
       </Helmet>
+      <DashboardLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -421,6 +423,7 @@ const Invoices = () => {
           </CardContent>
         </Card>
       </div>
+      </DashboardLayout>
     </>
   );
 };
