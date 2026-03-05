@@ -340,7 +340,7 @@ const PredictiveAnalytics = () => {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </DashboardLayout>
   );
 };
 

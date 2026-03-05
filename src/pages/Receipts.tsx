@@ -324,7 +324,9 @@ const Receipts = () => {
           </CardContent>
         </Card>
       </div>
+    </DashboardLayout>
     </>
+
   );
 };
 

@@ -465,8 +465,7 @@ const Payroll = () => {
             </div>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </DashboardLayout>
   );
 };
 
