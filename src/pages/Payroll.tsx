@@ -192,9 +192,7 @@ const Payroll = () => {
   const formatCurrency = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <main className="ml-64 flex-1 p-6">
+    <DashboardLayout>
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Payroll Management</h1>
