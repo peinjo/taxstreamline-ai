@@ -423,6 +423,7 @@ const Invoices = () => {
           </CardContent>
         </Card>
       </div>
+      </DashboardLayout>
     </>
   );
 };
