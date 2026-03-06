@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Helmet } from "react-helmet-async";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -15,14 +15,13 @@ import { format } from "date-fns";
 
 const Referrals = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
 
   // Get or create referral code
   const { data: referralCode, isLoading: codeLoading } = useQuery({
     queryKey: ["referral-code", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data, error } = await supabase.rpc("generate_referral_code", { p_user_id: user.id });
+      const { data, error } = await supabase.rpc("generate_referral_code" as any, { p_user_id: user.id });
       if (error) throw error;
       return data as string;
     },
@@ -34,11 +33,11 @@ const Referrals = () => {
     queryKey: ["referrals", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("referral_tracking")
+        .from("referral_tracking" as any)
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data || [];
+      return (data || []) as any[];
     },
     enabled: !!user,
   });
@@ -47,12 +46,12 @@ const Referrals = () => {
     queryKey: ["referral-stats", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("referral_codes")
+        .from("referral_codes" as any)
         .select("total_referrals, credits_earned")
         .eq("user_id", user!.id)
         .single();
       if (error) return { total_referrals: 0, credits_earned: 0 };
-      return data;
+      return data as any;
     },
     enabled: !!user,
   });
@@ -72,8 +71,7 @@ const Referrals = () => {
     }
   };
 
-  const completedReferrals = referrals?.filter(r => r.status === "completed").length || 0;
-  const pendingReferrals = referrals?.filter(r => r.status === "pending").length || 0;
+  const completedReferrals = referrals?.filter((r: any) => r.status === "completed").length || 0;
 
   return (
     <>
@@ -134,8 +132,8 @@ const Referrals = () => {
             </Card>
             <Card>
               <CardContent className="pt-6 flex items-center gap-4">
-                <div className="bg-green-500/10 rounded-full p-3">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
+                <div className="bg-primary/10 rounded-full p-3">
+                  <TrendingUp className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{completedReferrals}</p>
@@ -145,8 +143,8 @@ const Referrals = () => {
             </Card>
             <Card>
               <CardContent className="pt-6 flex items-center gap-4">
-                <div className="bg-yellow-500/10 rounded-full p-3">
-                  <Gift className="h-5 w-5 text-yellow-600" />
+                <div className="bg-primary/10 rounded-full p-3">
+                  <Gift className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">₦{(Number(codeStats?.credits_earned) || 0).toLocaleString()}</p>

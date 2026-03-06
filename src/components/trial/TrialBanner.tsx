@@ -16,11 +16,12 @@ export const TrialBanner: React.FC = () => {
       if (!user) return null;
       const { data, error } = await supabase
         .from("user_profiles")
-        .select("trial_ends_at, subscription_status, subscription_plan")
+        .select("*")
         .eq("user_id", user.id)
         .single();
       if (error) return null;
-      return data;
+      // Cast since columns were just added via migration
+      return data as any;
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
@@ -53,7 +54,7 @@ export const TrialBanner: React.FC = () => {
   }
 
   return (
-    <div className={`${isUrgent ? "bg-yellow-500/10 border-yellow-500/20 text-yellow-700 dark:text-yellow-400" : "bg-primary/5 border-primary/10 text-primary"} border px-4 py-2 flex items-center justify-between gap-3 text-sm`}>
+    <div className={`${isUrgent ? "bg-destructive/10 border-destructive/20 text-destructive" : "bg-primary/5 border-primary/10 text-primary"} border px-4 py-2 flex items-center justify-between gap-3 text-sm`}>
       <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 shrink-0" />
         <span>
