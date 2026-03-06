@@ -62,6 +62,7 @@ const Sidebar = () => {
     { icon: Wallet, text: "Payroll", path: "/payroll" },
     { icon: BarChart3, text: "Analytics", path: "/analytics" },
     { icon: Landmark, text: "Bank Statements", path: "/bank-statements" },
+    { icon: Gift, text: "Referrals", path: "/referrals" },
     { icon: Activity, text: "System Logs", path: "/logs" },
   ];
 
