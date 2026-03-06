@@ -173,4 +173,9 @@ export const routes: RouteConfig[] = [
     element: <BankStatements />,
     isProtected: true,
   },
+  {
+    path: "/referrals",
+    element: <Referrals />,
+    isProtected: true,
+  },
 ];

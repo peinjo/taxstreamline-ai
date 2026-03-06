@@ -158,7 +158,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div data-tour="recent-activity" className="grid gap-8 md:grid-cols-2">
           <TaskManagement />
           <TeamWorkspace />
         </div>
