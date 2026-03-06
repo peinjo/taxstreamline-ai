@@ -71,6 +71,11 @@ export const routes: RouteConfig[] = [
     element: <Pricing />,
     isProtected: false,
   },
+  {
+    path: "/pay",
+    element: <PublicInvoice />,
+    isProtected: false,
+  },
   
   // Protected routes
   {
