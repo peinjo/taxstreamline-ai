@@ -134,7 +134,7 @@ const Dashboard = () => {
         ) : (
           <>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div data-tour="metrics-cards" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {metricItems.map((metric) => (
             <Card key={metric.title}>
               <CardContent className="flex items-center p-6">
@@ -158,7 +158,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div data-tour="recent-activity" className="grid gap-8 md:grid-cols-2">
           <TaskManagement />
           <TeamWorkspace />
         </div>

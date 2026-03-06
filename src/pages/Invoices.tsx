@@ -36,6 +36,7 @@ import {
   CheckCircle2,
   XCircle,
   Eye,
+  Link as LinkIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -186,6 +187,38 @@ const Invoices = () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       toast.success("Invoice marked as paid");
     },
+  });
+
+  const shareInvoice = useMutation({
+    mutationFn: async (invoiceId: string) => {
+      // Check for existing active token
+      const { data: existing } = await supabase
+        .from("invoice_share_tokens" as any)
+        .select("token")
+        .eq("invoice_id", invoiceId)
+        .eq("is_active", true)
+        .single();
+
+      if (existing) return (existing as any).token as string;
+
+      // Create new token
+      const { data, error } = await supabase
+        .from("invoice_share_tokens" as any)
+        .insert({ invoice_id: invoiceId } as any)
+        .select("token")
+        .single();
+
+      if (error) throw error;
+      return (data as any).token as string;
+    },
+    onSuccess: (token) => {
+      const link = `${window.location.origin}/pay?token=${token}`;
+      navigator.clipboard.writeText(link);
+      toast.success("Payment link copied to clipboard!", {
+        description: "Share this link with your client so they can pay directly.",
+      });
+    },
+    onError: () => toast.error("Failed to generate payment link"),
   });
 
   const resetForm = () => {
@@ -406,6 +439,11 @@ const Invoices = () => {
                               {["sent", "viewed", "overdue"].includes(inv.status) && (
                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => markAsPaid.mutate(inv.id)} title="Mark as Paid">
                                   <CheckCircle2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {inv.status !== "paid" && inv.status !== "cancelled" && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => shareInvoice.mutate(inv.id)} title="Copy Payment Link">
+                                  <LinkIcon className="h-4 w-4" />
                                 </Button>
                               )}
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">

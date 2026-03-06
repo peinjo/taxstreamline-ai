@@ -68,8 +68,8 @@ const AppContent: React.FC = () => {
   return (
     <Routes>
         {routes.map((route) => {
-          // Handle the index route
-          if (route.path === "/") {
+          // Handle the index route and truly public routes (no auth redirect)
+          if (route.path === "/" || route.path === "/pay" || route.path === "/pricing") {
             return (
               <Route
                 key={route.path}

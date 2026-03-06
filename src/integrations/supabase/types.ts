@@ -1043,6 +1043,41 @@ export type Database = {
           },
         ]
       }
+      invoice_share_tokens: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          invoice_id: string
+          is_active: boolean | null
+          token: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invoice_id: string
+          is_active?: boolean | null
+          token?: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invoice_id?: string
+          is_active?: boolean | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_share_tokens_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           client_address: string | null
