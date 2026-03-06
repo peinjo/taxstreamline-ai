@@ -189,6 +189,38 @@ const Invoices = () => {
     },
   });
 
+  const shareInvoice = useMutation({
+    mutationFn: async (invoiceId: string) => {
+      // Check for existing active token
+      const { data: existing } = await supabase
+        .from("invoice_share_tokens" as any)
+        .select("token")
+        .eq("invoice_id", invoiceId)
+        .eq("is_active", true)
+        .single();
+
+      if (existing) return (existing as any).token as string;
+
+      // Create new token
+      const { data, error } = await supabase
+        .from("invoice_share_tokens" as any)
+        .insert({ invoice_id: invoiceId } as any)
+        .select("token")
+        .single();
+
+      if (error) throw error;
+      return (data as any).token as string;
+    },
+    onSuccess: (token) => {
+      const link = `${window.location.origin}/pay?token=${token}`;
+      navigator.clipboard.writeText(link);
+      toast.success("Payment link copied to clipboard!", {
+        description: "Share this link with your client so they can pay directly.",
+      });
+    },
+    onError: () => toast.error("Failed to generate payment link"),
+  });
+
   const resetForm = () => {
     setClientName("");
     setClientEmail("");
