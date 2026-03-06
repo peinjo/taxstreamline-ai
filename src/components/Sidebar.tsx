@@ -17,6 +17,7 @@ import {
   Wallet,
   BarChart3,
   Landmark,
+  Gift,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
