@@ -25,6 +25,8 @@ import Payroll from "@/pages/Payroll";
 import MFASetup from "@/pages/MFASetup";
 import PredictiveAnalytics from "@/pages/PredictiveAnalytics";
 import BankStatements from "@/pages/BankStatements";
+import PublicInvoice from "@/pages/PublicInvoice";
+import Referrals from "@/pages/Referrals";
 
 interface RouteConfig {
   path: string;
