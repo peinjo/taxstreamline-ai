@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar";
 import { useDeadlineChecker } from "@/hooks/useDeadlineChecker";
 import { QuickActionsFAB } from "@/components/common/QuickActionsFAB";
 import { CommandPalette } from "@/components/common/CommandPalette";
+import { TrialBanner } from "@/components/trial/TrialBanner";
 
 interface DashboardLayoutProps {
   children: ReactNode;
