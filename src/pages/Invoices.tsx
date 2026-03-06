@@ -441,6 +441,11 @@ const Invoices = () => {
                                   <CheckCircle2 className="h-4 w-4" />
                                 </Button>
                               )}
+                              {inv.status !== "paid" && inv.status !== "cancelled" && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => shareInvoice.mutate(inv.id)} title="Copy Payment Link">
+                                  <LinkIcon className="h-4 w-4" />
+                                </Button>
+                              )}
                               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteInvoice.mutate(inv.id)} title="Delete">
                                 <Trash2 className="h-4 w-4 text-muted-foreground" />
                               </Button>
