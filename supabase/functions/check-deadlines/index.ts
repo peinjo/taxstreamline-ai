@@ -16,6 +16,16 @@ serve(async (req: Request) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Validate cron secret to prevent unauthorized access
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const requestSecret = req.headers.get("x-cron-secret");
+  if (!cronSecret || requestSecret !== cronSecret) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  }
+
   try {
     console.log("Checking for upcoming deadlines...");
 
@@ -123,12 +133,7 @@ serve(async (req: Request) => {
     console.log(`Sent ${emailPromises.length} deadline reminders`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        complianceReminders: complianceItems?.length || 0,
-        globalReminders: globalDeadlines?.length || 0,
-        totalEmails: emailPromises.length,
-      }),
+      JSON.stringify({ success: true }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
