@@ -133,12 +133,7 @@ serve(async (req: Request) => {
     console.log(`Sent ${emailPromises.length} deadline reminders`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        complianceReminders: complianceItems?.length || 0,
-        globalReminders: globalDeadlines?.length || 0,
-        totalEmails: emailPromises.length,
-      }),
+      JSON.stringify({ success: true }),
       {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
