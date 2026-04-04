@@ -2842,7 +2842,7 @@ export type Database = {
       user_profiles: {
         Row: {
           accounting_basis: string | null
-          address: string
+          address: string | null
           avatar_url: string | null
           bio: string | null
           business_name: string | null
@@ -2855,7 +2855,7 @@ export type Database = {
           email: string | null
           email_notifications_enabled: boolean | null
           feature_usage_stats: Json | null
-          full_name: string
+          full_name: string | null
           id: number
           job_title: string | null
           onboarding_completed: boolean | null
@@ -2876,7 +2876,7 @@ export type Database = {
         }
         Insert: {
           accounting_basis?: string | null
-          address: string
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
@@ -2889,7 +2889,7 @@ export type Database = {
           email?: string | null
           email_notifications_enabled?: boolean | null
           feature_usage_stats?: Json | null
-          full_name: string
+          full_name?: string | null
           id?: never
           job_title?: string | null
           onboarding_completed?: boolean | null
@@ -2910,7 +2910,7 @@ export type Database = {
         }
         Update: {
           accounting_basis?: string | null
-          address?: string
+          address?: string | null
           avatar_url?: string | null
           bio?: string | null
           business_name?: string | null
@@ -2923,7 +2923,7 @@ export type Database = {
           email?: string | null
           email_notifications_enabled?: boolean | null
           feature_usage_stats?: Json | null
-          full_name?: string
+          full_name?: string | null
           id?: never
           job_title?: string | null
           onboarding_completed?: boolean | null
