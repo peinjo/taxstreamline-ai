@@ -115,17 +115,16 @@ export const signInWithEmail = async (email: string, password: string) => {
  * Signs up a user with email and password
  */
 export const signUpWithEmail = async (email: string, password: string) => {
-  // Clean up before signing up to prevent auth conflicts
   cleanupAuthState();
-  
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${window.location.origin}/auth/login`,
       data: {
-        email: email
-      }
+        email,
+      },
     },
   });
 
@@ -137,11 +136,6 @@ export const signUpWithEmail = async (email: string, password: string) => {
     throw new Error("Signup failed - no user data");
   }
 
-  // Create user profile during signup
-  if (data.user.id) {
-    await ensureUserProfile(data.user.id, email);
-  }
-  
   toast.success("Signup successful! Please check your email to confirm your account.");
   return data;
 };
