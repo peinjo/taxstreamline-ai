@@ -27,6 +27,10 @@ import PredictiveAnalytics from "@/pages/PredictiveAnalytics";
 import BankStatements from "@/pages/BankStatements";
 import PublicInvoice from "@/pages/PublicInvoice";
 import Referrals from "@/pages/Referrals";
+import About from "@/pages/About";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsOfService from "@/pages/TermsOfService";
+import Blog from "@/pages/Blog";
 
 interface RouteConfig {
   path: string;
