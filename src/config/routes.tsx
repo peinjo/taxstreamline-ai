@@ -80,6 +80,26 @@ export const routes: RouteConfig[] = [
     element: <PublicInvoice />,
     isProtected: false,
   },
+  {
+    path: "/about",
+    element: <About />,
+    isProtected: false,
+  },
+  {
+    path: "/privacy",
+    element: <PrivacyPolicy />,
+    isProtected: false,
+  },
+  {
+    path: "/terms",
+    element: <TermsOfService />,
+    isProtected: false,
+  },
+  {
+    path: "/blog",
+    element: <Blog />,
+    isProtected: false,
+  },
   
   // Protected routes
   {
