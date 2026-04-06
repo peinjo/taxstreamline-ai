@@ -1,7 +1,7 @@
 
 import { AIAction } from "@/types/aiAssistant";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export const integrationActions: AIAction[] = [
   {
