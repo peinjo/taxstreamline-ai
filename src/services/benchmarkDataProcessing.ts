@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logging/logger';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface BenchmarkData {
   comparable_name: string;
