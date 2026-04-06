@@ -16,7 +16,6 @@ interface CreateShareLinkRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -25,7 +24,6 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    // Get the authorization header to identify the user
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(
@@ -34,14 +32,12 @@ serve(async (req) => {
       );
     }
 
-    // Create client with user's token to get their ID
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
     
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user) {
-      console.error('Auth error:', userError);
       return new Response(
         JSON.stringify({ error: 'Invalid authorization token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -50,7 +46,6 @@ serve(async (req) => {
 
     const body: CreateShareLinkRequest = await req.json();
     
-    // Validate required fields
     if (!body.document_id) {
       return new Response(
         JSON.stringify({ error: 'document_id is required' }),
@@ -65,15 +60,22 @@ serve(async (req) => {
       );
     }
 
-    // Hash password if provided using bcrypt
+    // Hash password if provided, enforcing minimum length
     let passwordHash: string | null = null;
     if (body.password && body.password.trim() !== '') {
+      const password = body.password.trim();
+
+      if (password.length < 8) {
+        return new Response(
+          JSON.stringify({ error: 'Password must be at least 8 characters' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       const salt = await bcrypt.genSalt(10);
-      passwordHash = await bcrypt.hash(body.password, salt);
-      console.log('Password hashed successfully');
+      passwordHash = await bcrypt.hash(password, salt);
     }
 
-    // Insert the share link with hashed password
     const { data, error } = await supabaseClient
       .from('tp_document_shares')
       .insert({
@@ -94,8 +96,6 @@ serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
-    console.log('Share link created successfully:', data.id);
 
     return new Response(
       JSON.stringify({ 

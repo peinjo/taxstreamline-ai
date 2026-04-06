@@ -2850,6 +2850,7 @@ export type Database = {
           compliance_alerts_enabled: boolean | null
           created_at: string
           date_of_birth: string | null
+          deadline_notifications_enabled: boolean | null
           deadline_reminder_days: number[] | null
           display_name: string | null
           email: string | null
@@ -2884,6 +2885,7 @@ export type Database = {
           compliance_alerts_enabled?: boolean | null
           created_at?: string
           date_of_birth?: string | null
+          deadline_notifications_enabled?: boolean | null
           deadline_reminder_days?: number[] | null
           display_name?: string | null
           email?: string | null
@@ -2918,6 +2920,7 @@ export type Database = {
           compliance_alerts_enabled?: boolean | null
           created_at?: string
           date_of_birth?: string | null
+          deadline_notifications_enabled?: boolean | null
           deadline_reminder_days?: number[] | null
           display_name?: string | null
           email?: string | null

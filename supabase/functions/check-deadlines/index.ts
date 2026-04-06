@@ -70,7 +70,7 @@ serve(async (req: Request) => {
         const userName = item.user_profiles?.display_name || 'User';
 
         if (userEmail) {
-          console.log(`Sending deadline reminder for: ${item.title} to ${userEmail}`);
+          console.log(`Sending deadline reminder for: ${item.title}`);
           
           emailPromises.push(
             supabase.functions.invoke('send-email', {
@@ -92,10 +92,12 @@ serve(async (req: Request) => {
       }
     }
 
-    // Get all users with email preferences for global deadlines
+    // Get only users who have opted in to email notifications
     const { data: users, error: usersError } = await supabase
       .from('user_profiles')
-      .select('email, display_name, user_id');
+      .select('email, display_name, user_id')
+      .eq('deadline_notifications_enabled', true)
+      .not('email', 'is', null);
 
     if (usersError) throw usersError;
 
@@ -106,8 +108,6 @@ serve(async (req: Request) => {
 
       if ([7, 3, 1].includes(daysUntilDue)) {
         for (const user of users || []) {
-          console.log(`Sending global deadline reminder: ${deadline.title} to ${user.email}`);
-          
           emailPromises.push(
             supabase.functions.invoke('send-email', {
               body: {
@@ -130,7 +130,7 @@ serve(async (req: Request) => {
 
     await Promise.all(emailPromises);
 
-    console.log(`Sent ${emailPromises.length} deadline reminders`);
+    console.log(`Processed ${emailPromises.length} deadline reminders`);
 
     return new Response(
       JSON.stringify({ success: true }),
@@ -142,7 +142,7 @@ serve(async (req: Request) => {
   } catch (error: any) {
     console.error("Error checking deadlines:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Internal server error" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
