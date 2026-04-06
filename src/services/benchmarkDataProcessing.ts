@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logging/logger';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface BenchmarkData {
   comparable_name: string;
@@ -36,44 +36,60 @@ export class BenchmarkDataProcessingService {
   }
 
   private async readFileData(file: File): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        try {
-          const data = e.target?.result;
-          if (!data) throw new Error('Failed to read file data');
+    const buffer = await file.arrayBuffer();
 
-          let jsonData: any[] = [];
-          
-          if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-            const workbook = XLSX.read(data, { type: 'binary' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            jsonData = XLSX.utils.sheet_to_json(worksheet);
-          } else if (file.name.endsWith('.csv')) {
-            const workbook = XLSX.read(data, { type: 'binary' });
-            const sheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[sheetName];
-            jsonData = XLSX.utils.sheet_to_json(worksheet);
-          } else {
-            throw new Error('Unsupported file format');
-          }
-          
-          resolve(jsonData);
-        } catch (error) {
-          reject(error);
+    if (file.name.endsWith('.csv')) {
+      const text = new TextDecoder().decode(buffer);
+      return this.parseCsv(text);
+    }
+
+    if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) throw new Error('No worksheet found');
+
+      const jsonData: any[] = [];
+      const headers: string[] = [];
+
+      worksheet.eachRow((row, rowNumber) => {
+        const values = row.values as any[];
+        // ExcelJS row.values is 1-indexed (index 0 is undefined)
+        const cells = values.slice(1);
+
+        if (rowNumber === 1) {
+          cells.forEach(cell => headers.push(String(cell ?? '')));
+          return;
         }
-      };
-      
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      
-      if (file.name.endsWith('.csv')) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsBinaryString(file);
-      }
-    });
+
+        const obj: Record<string, any> = {};
+        cells.forEach((cell, i) => {
+          if (headers[i] && cell !== undefined && cell !== null && cell !== '') {
+            obj[headers[i]] = cell;
+          }
+        });
+        if (Object.keys(obj).length > 0) jsonData.push(obj);
+      });
+
+      return jsonData;
+    }
+
+    throw new Error('Unsupported file format');
+  }
+
+  private parseCsv(text: string): any[] {
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(',').map(h => h.trim());
+    return lines.slice(1).map(line => {
+      const values = line.split(',');
+      const obj: Record<string, any> = {};
+      values.forEach((v, i) => {
+        const val = v.trim();
+        if (headers[i] && val) obj[headers[i]] = isNaN(Number(val)) ? val : Number(val);
+      });
+      return obj;
+    }).filter(o => Object.keys(o).length > 0);
   }
 
   private async processFileData(rawData: any[]): Promise<FileProcessingResult> {

@@ -1,7 +1,7 @@
 
 import { AIAction } from "@/types/aiAssistant";
 import { supabase } from "@/integrations/supabase/client";
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 export const integrationActions: AIAction[] = [
   {
@@ -113,13 +113,16 @@ export const integrationActions: AIAction[] = [
             break;
         }
 
-        // Create Excel workbook
-        const ws = XLSX.utils.json_to_sheet(exportData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Compliance Data");
+        // Create Excel workbook with ExcelJS
+        const wb = new ExcelJS.Workbook();
+        const ws = wb.addWorksheet("Compliance Data");
 
-        // Generate download
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        if (exportData.length > 0) {
+          ws.columns = Object.keys(exportData[0]).map(key => ({ header: key, key }));
+          exportData.forEach(row => ws.addRow(row));
+        }
+
+        const excelBuffer = await wb.xlsx.writeBuffer();
         const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = URL.createObjectURL(blob);
         
