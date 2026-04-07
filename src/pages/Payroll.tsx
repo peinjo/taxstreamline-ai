@@ -13,41 +13,21 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Plus, Play, FileText, DollarSign, TrendingUp, Building2 } from "lucide-react";
-
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-
-// Nigerian PAYE tax calculation (annual basis)
-function calculatePAYE(annualGross: number): number {
-  const cra = Math.max(200000, annualGross * 0.01) + (annualGross * 0.2);
-  const taxableIncome = Math.max(0, annualGross - cra);
-  
-  const bands = [
-    { limit: 300000, rate: 0.07 },
-    { limit: 300000, rate: 0.11 },
-    { limit: 500000, rate: 0.15 },
-    { limit: 500000, rate: 0.19 },
-    { limit: 1600000, rate: 0.21 },
-    { limit: Infinity, rate: 0.24 },
-  ];
-  
-  let tax = 0;
-  let remaining = taxableIncome;
-  for (const band of bands) {
-    if (remaining <= 0) break;
-    const taxable = Math.min(remaining, band.limit);
-    tax += taxable * band.rate;
-    remaining -= taxable;
-  }
-  
-  return Math.max(tax, annualGross * 0.01) / 12; // Monthly PAYE
-}
+import { Users, Plus, Play, FileText, DollarSign, Building2, Search, Eye } from "lucide-react";
+import { calculateEmployeePayroll, formatNaira, MONTHS } from "@/components/payroll/PayrollCalculations";
+import EmployeeDetailSheet from "@/components/payroll/EmployeeDetailSheet";
+import RemittanceTable from "@/components/payroll/RemittanceTable";
+import PayslipViewerDialog from "@/components/payroll/PayslipViewerDialog";
 
 const Payroll = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [showAddEmployee, setShowAddEmployee] = useState(false);
   const [showRunPayroll, setShowRunPayroll] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [payslipRun, setPayslipRun] = useState<{ id: string; month: number; year: number } | null>(null);
   const [newEmployee, setNewEmployee] = useState({
     full_name: "", email: "", department: "", job_title: "",
     basic_salary: "", housing_allowance: "", transport_allowance: "", other_allowances: "",
@@ -84,11 +64,21 @@ const Payroll = () => {
     enabled: !!user,
   });
 
+  const filteredEmployees = employees.filter((emp) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      emp.full_name.toLowerCase().includes(term) ||
+      (emp.department || "").toLowerCase().includes(term) ||
+      (emp.job_title || "").toLowerCase().includes(term)
+    );
+  });
+
   const addEmployeeMutation = useMutation({
     mutationFn: async () => {
+      if (!newEmployee.full_name.trim()) throw new Error("Name is required");
       const { error } = await supabase.from("employees").insert({
         user_id: user!.id,
-        full_name: newEmployee.full_name,
+        full_name: newEmployee.full_name.trim(),
         email: newEmployee.email || null,
         department: newEmployee.department || null,
         job_title: newEmployee.job_title || null,
@@ -109,28 +99,21 @@ const Payroll = () => {
       setShowAddEmployee(false);
       setNewEmployee({ full_name: "", email: "", department: "", job_title: "", basic_salary: "", housing_allowance: "", transport_allowance: "", other_allowances: "", bank_name: "", bank_account_number: "", tax_id: "", pension_id: "" });
     },
-    onError: () => toast.error("Failed to add employee"),
+    onError: (e: Error) => toast.error(e.message || "Failed to add employee"),
   });
 
   const runPayrollMutation = useMutation({
     mutationFn: async () => {
       if (employees.length === 0) throw new Error("No employees to process");
 
-      // Create payroll run
       const totals = employees.reduce((acc, emp) => {
-        const gross = Number(emp.basic_salary) + Number(emp.housing_allowance) + Number(emp.transport_allowance) + Number(emp.other_allowances);
-        const annualGross = gross * 12;
-        const paye = calculatePAYE(annualGross);
-        const pensionEmp = gross * 0.08;
-        const pensionEr = gross * 0.10;
-        const nhf = Number(emp.basic_salary) * 0.025;
-        const net = gross - paye - pensionEmp - nhf;
+        const calc = calculateEmployeePayroll(emp);
         return {
-          totalGross: acc.totalGross + gross,
-          totalNet: acc.totalNet + net,
-          totalPaye: acc.totalPaye + paye,
-          totalPension: acc.totalPension + pensionEmp + pensionEr,
-          totalNhf: acc.totalNhf + nhf,
+          totalGross: acc.totalGross + calc.gross,
+          totalNet: acc.totalNet + calc.net,
+          totalPaye: acc.totalPaye + calc.paye,
+          totalPension: acc.totalPension + calc.pensionEmployee + calc.pensionEmployer,
+          totalNhf: acc.totalNhf + calc.nhf,
         };
       }, { totalGross: 0, totalNet: 0, totalPaye: 0, totalPension: 0, totalNhf: 0 });
 
@@ -149,28 +132,22 @@ const Payroll = () => {
       }).select().single();
       if (runError) throw runError;
 
-      // Create payslips
-      const payslips = employees.map(emp => {
-        const gross = Number(emp.basic_salary) + Number(emp.housing_allowance) + Number(emp.transport_allowance) + Number(emp.other_allowances);
-        const paye = calculatePAYE(gross * 12);
-        const pensionEmp = gross * 0.08;
-        const pensionEr = gross * 0.10;
-        const nhf = Number(emp.basic_salary) * 0.025;
-        const net = gross - paye - pensionEmp - nhf;
+      const payslips = employees.map((emp) => {
+        const calc = calculateEmployeePayroll(emp);
         return {
           payroll_run_id: run.id,
           employee_id: emp.id,
-          basic_salary: Number(emp.basic_salary),
-          housing_allowance: Number(emp.housing_allowance),
-          transport_allowance: Number(emp.transport_allowance),
-          other_allowances: Number(emp.other_allowances),
-          gross_pay: gross,
-          paye_tax: paye,
-          pension_employee: pensionEmp,
-          pension_employer: pensionEr,
-          nhf,
+          basic_salary: calc.basic,
+          housing_allowance: calc.housing,
+          transport_allowance: calc.transport,
+          other_allowances: calc.other,
+          gross_pay: calc.gross,
+          paye_tax: calc.paye,
+          pension_employee: calc.pensionEmployee,
+          pension_employer: calc.pensionEmployer,
+          nhf: calc.nhf,
           other_deductions: 0,
-          net_pay: net,
+          net_pay: calc.net,
         };
       });
 
@@ -186,178 +163,196 @@ const Payroll = () => {
   });
 
   const totalMonthlyPayroll = employees.reduce((sum, emp) => {
-    return sum + Number(emp.basic_salary) + Number(emp.housing_allowance) + Number(emp.transport_allowance) + Number(emp.other_allowances);
+    return sum + calculateEmployeePayroll(emp).gross;
   }, 0);
 
-  const formatCurrency = (n: number) => `₦${n.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+  const totalMonthlyPaye = employees.reduce((sum, emp) => {
+    return sum + calculateEmployeePayroll(emp).paye;
+  }, 0);
+
+  const totalMonthlyNet = employees.reduce((sum, emp) => {
+    return sum + calculateEmployeePayroll(emp).net;
+  }, 0);
 
   return (
     <DashboardLayout>
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Payroll Management</h1>
-            <p className="text-muted-foreground">Manage employees, run payroll, and track remittances</p>
-          </div>
-          <div className="flex gap-2">
-            <Dialog open={showAddEmployee} onOpenChange={setShowAddEmployee}>
-              <DialogTrigger asChild>
-                <Button><Plus className="mr-2 h-4 w-4" />Add Employee</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Add New Employee</DialogTitle>
-                  <DialogDescription>Enter employee details and salary information</DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Full Name *</Label>
-                    <Input value={newEmployee.full_name} onChange={e => setNewEmployee(p => ({ ...p, full_name: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input value={newEmployee.email} onChange={e => setNewEmployee(p => ({ ...p, email: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Department</Label>
-                    <Input value={newEmployee.department} onChange={e => setNewEmployee(p => ({ ...p, department: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Job Title</Label>
-                    <Input value={newEmployee.job_title} onChange={e => setNewEmployee(p => ({ ...p, job_title: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Basic Salary (₦/month) *</Label>
-                    <Input type="number" value={newEmployee.basic_salary} onChange={e => setNewEmployee(p => ({ ...p, basic_salary: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Housing Allowance</Label>
-                    <Input type="number" value={newEmployee.housing_allowance} onChange={e => setNewEmployee(p => ({ ...p, housing_allowance: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Transport Allowance</Label>
-                    <Input type="number" value={newEmployee.transport_allowance} onChange={e => setNewEmployee(p => ({ ...p, transport_allowance: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Other Allowances</Label>
-                    <Input type="number" value={newEmployee.other_allowances} onChange={e => setNewEmployee(p => ({ ...p, other_allowances: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Bank Name</Label>
-                    <Input value={newEmployee.bank_name} onChange={e => setNewEmployee(p => ({ ...p, bank_name: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Account Number</Label>
-                    <Input value={newEmployee.bank_account_number} onChange={e => setNewEmployee(p => ({ ...p, bank_account_number: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tax ID (TIN)</Label>
-                    <Input value={newEmployee.tax_id} onChange={e => setNewEmployee(p => ({ ...p, tax_id: e.target.value }))} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Pension PIN</Label>
-                    <Input value={newEmployee.pension_id} onChange={e => setNewEmployee(p => ({ ...p, pension_id: e.target.value }))} />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowAddEmployee(false)}>Cancel</Button>
-                  <Button onClick={() => addEmployeeMutation.mutate()} disabled={!newEmployee.full_name || addEmployeeMutation.isPending}>
-                    {addEmployeeMutation.isPending ? "Adding..." : "Add Employee"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            <Dialog open={showRunPayroll} onOpenChange={setShowRunPayroll}>
-              <DialogTrigger asChild>
-                <Button variant="secondary"><Play className="mr-2 h-4 w-4" />Run Payroll</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Run Monthly Payroll</DialogTitle>
-                  <DialogDescription>Process payroll for {employees.length} active employees</DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Month</Label>
-                    <Select value={String(payrollMonth)} onValueChange={v => setPayrollMonth(Number(v))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {MONTHS.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Year</Label>
-                    <Input type="number" value={payrollYear} onChange={e => setPayrollYear(Number(e.target.value))} />
-                  </div>
-                </div>
-                <div className="rounded-lg border p-4 space-y-2 bg-muted/50">
-                  <p className="text-sm font-medium">Payroll Summary</p>
-                  <p className="text-sm text-muted-foreground">Employees: {employees.length}</p>
-                  <p className="text-sm text-muted-foreground">Est. Gross: {formatCurrency(totalMonthlyPayroll)}</p>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowRunPayroll(false)}>Cancel</Button>
-                  <Button onClick={() => runPayrollMutation.mutate()} disabled={employees.length === 0 || runPayrollMutation.isPending}>
-                    {runPayrollMutation.isPending ? "Processing..." : "Process Payroll"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Payroll Management</h1>
+          <p className="text-muted-foreground">Manage employees, run payroll, generate payslips & track remittances</p>
         </div>
+        <div className="flex gap-2">
+          <Dialog open={showAddEmployee} onOpenChange={setShowAddEmployee}>
+            <DialogTrigger asChild>
+              <Button><Plus className="mr-2 h-4 w-4" />Add Employee</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Add New Employee</DialogTitle>
+                <DialogDescription>Enter employee details and salary information</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4">
+                {([
+                  ["full_name", "Full Name *", "text"],
+                  ["email", "Email", "email"],
+                  ["department", "Department", "text"],
+                  ["job_title", "Job Title", "text"],
+                  ["basic_salary", "Basic Salary (₦/month) *", "number"],
+                  ["housing_allowance", "Housing Allowance", "number"],
+                  ["transport_allowance", "Transport Allowance", "number"],
+                  ["other_allowances", "Other Allowances", "number"],
+                  ["bank_name", "Bank Name", "text"],
+                  ["bank_account_number", "Account Number", "text"],
+                  ["tax_id", "Tax ID (TIN)", "text"],
+                  ["pension_id", "Pension PIN", "text"],
+                ] as const).map(([key, label, type]) => (
+                  <div key={key} className="space-y-2">
+                    <Label>{label}</Label>
+                    <Input
+                      type={type}
+                      value={newEmployee[key]}
+                      onChange={(e) => setNewEmployee((p) => ({ ...p, [key]: e.target.value }))}
+                    />
+                  </div>
+                ))}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowAddEmployee(false)}>Cancel</Button>
+                <Button
+                  onClick={() => addEmployeeMutation.mutate()}
+                  disabled={!newEmployee.full_name.trim() || addEmployeeMutation.isPending}
+                >
+                  {addEmployeeMutation.isPending ? "Adding..." : "Add Employee"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-        {/* Stats */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent><p className="text-2xl font-bold">{employees.length}</p></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Monthly Gross</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent><p className="text-2xl font-bold">{formatCurrency(totalMonthlyPayroll)}</p></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Payroll Runs</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent><p className="text-2xl font-bold">{payrollRuns.length}</p></CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Departments</CardTitle>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent><p className="text-2xl font-bold">{new Set(employees.map(e => e.department).filter(Boolean)).size}</p></CardContent>
-          </Card>
+          <Dialog open={showRunPayroll} onOpenChange={setShowRunPayroll}>
+            <DialogTrigger asChild>
+              <Button variant="secondary"><Play className="mr-2 h-4 w-4" />Run Payroll</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Run Monthly Payroll</DialogTitle>
+                <DialogDescription>Process payroll for {employees.length} active employee{employees.length !== 1 ? "s" : ""}</DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Month</Label>
+                  <Select value={String(payrollMonth)} onValueChange={(v) => setPayrollMonth(Number(v))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {MONTHS.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Year</Label>
+                  <Input type="number" value={payrollYear} onChange={(e) => setPayrollYear(Number(e.target.value))} />
+                </div>
+              </div>
+              <div className="rounded-lg border p-4 space-y-2 bg-muted/50">
+                <p className="text-sm font-semibold">Payroll Preview</p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><span className="text-muted-foreground">Employees:</span> {employees.length}</div>
+                  <div><span className="text-muted-foreground">Gross:</span> {formatNaira(totalMonthlyPayroll)}</div>
+                  <div><span className="text-muted-foreground">Est. PAYE:</span> {formatNaira(totalMonthlyPaye)}</div>
+                  <div><span className="text-muted-foreground">Est. Net:</span> {formatNaira(totalMonthlyNet)}</div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowRunPayroll(false)}>Cancel</Button>
+                <Button
+                  onClick={() => runPayrollMutation.mutate()}
+                  disabled={employees.length === 0 || runPayrollMutation.isPending}
+                >
+                  {runPayrollMutation.isPending ? "Processing..." : "Process Payroll"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
+      </div>
 
-        <Tabs defaultValue="employees">
-          <TabsList>
-            <TabsTrigger value="employees">Employees</TabsTrigger>
-            <TabsTrigger value="history">Payroll History</TabsTrigger>
-            <TabsTrigger value="remittances">Remittance Summary</TabsTrigger>
-          </TabsList>
+      {/* Stats */}
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{employees.length}</p>
+            <p className="text-xs text-muted-foreground">{new Set(employees.map((e) => e.department).filter(Boolean)).size} departments</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Monthly Gross</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatNaira(totalMonthlyPayroll)}</p>
+            <p className="text-xs text-muted-foreground">Total compensation</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Monthly PAYE</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatNaira(totalMonthlyPaye)}</p>
+            <p className="text-xs text-muted-foreground">Tax withholding</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Payroll Runs</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{payrollRuns.length}</p>
+            <p className="text-xs text-muted-foreground">Processed to date</p>
+          </CardContent>
+        </Card>
+      </div>
 
-          <TabsContent value="employees">
-            <Card>
-              <CardHeader>
+      <Tabs defaultValue="employees">
+        <TabsList>
+          <TabsTrigger value="employees">Employees</TabsTrigger>
+          <TabsTrigger value="history">Payroll History</TabsTrigger>
+          <TabsTrigger value="remittances">Remittances</TabsTrigger>
+        </TabsList>
+
+        {/* ── EMPLOYEES TAB ── */}
+        <TabsContent value="employees">
+          <Card>
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
                 <CardTitle>Employee Register</CardTitle>
-                <CardDescription>All active employees and their compensation</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingEmployees ? (
-                  <p className="text-muted-foreground text-center py-8">Loading...</p>
-                ) : employees.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No employees yet. Add your first employee to get started.</p>
-                ) : (
+                <CardDescription>{employees.length} active employee{employees.length !== 1 ? "s" : ""}</CardDescription>
+              </div>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search employees..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loadingEmployees ? (
+                <p className="text-muted-foreground text-center py-8">Loading...</p>
+              ) : filteredEmployees.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  {employees.length === 0 ? "No employees yet. Add your first employee to get started." : "No employees match your search."}
+                </p>
+              ) : (
+                <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -366,105 +361,114 @@ const Payroll = () => {
                         <TableHead>Job Title</TableHead>
                         <TableHead className="text-right">Basic Salary</TableHead>
                         <TableHead className="text-right">Gross Pay</TableHead>
-                        <TableHead className="text-right">Est. PAYE</TableHead>
-                        <TableHead className="text-right">Est. Net</TableHead>
+                        <TableHead className="text-right">PAYE</TableHead>
+                        <TableHead className="text-right">Net Pay</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {employees.map(emp => {
-                        const gross = Number(emp.basic_salary) + Number(emp.housing_allowance) + Number(emp.transport_allowance) + Number(emp.other_allowances);
-                        const paye = calculatePAYE(gross * 12);
-                        const pension = gross * 0.08;
-                        const nhf = Number(emp.basic_salary) * 0.025;
-                        const net = gross - paye - pension - nhf;
+                      {filteredEmployees.map((emp) => {
+                        const calc = calculateEmployeePayroll(emp);
                         return (
-                          <TableRow key={emp.id}>
+                          <TableRow
+                            key={emp.id}
+                            className="cursor-pointer hover:bg-muted/50"
+                            onClick={() => { setSelectedEmployee(emp); setDetailOpen(true); }}
+                          >
                             <TableCell className="font-medium">{emp.full_name}</TableCell>
                             <TableCell>{emp.department || "—"}</TableCell>
                             <TableCell>{emp.job_title || "—"}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(Number(emp.basic_salary))}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(gross)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(paye)}</TableCell>
-                            <TableCell className="text-right">{formatCurrency(net)}</TableCell>
+                            <TableCell className="text-right">{formatNaira(calc.basic)}</TableCell>
+                            <TableCell className="text-right">{formatNaira(calc.gross)}</TableCell>
+                            <TableCell className="text-right">{formatNaira(calc.paye)}</TableCell>
+                            <TableCell className="text-right font-semibold">{formatNaira(calc.net)}</TableCell>
                           </TableRow>
                         );
                       })}
                     </TableBody>
                   </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle>Payroll History</CardTitle>
-                <CardDescription>All processed payroll runs</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {payrollRuns.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">No payroll runs yet.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Period</TableHead>
-                        <TableHead>Employees</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Gross</TableHead>
-                        <TableHead className="text-right">PAYE</TableHead>
-                        <TableHead className="text-right">Pension</TableHead>
-                        <TableHead className="text-right">Net</TableHead>
+        {/* ── PAYROLL HISTORY TAB ── */}
+        <TabsContent value="history">
+          <Card>
+            <CardHeader>
+              <CardTitle>Payroll History</CardTitle>
+              <CardDescription>All processed payroll runs — click to view payslips</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {payrollRuns.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No payroll runs yet. Run your first payroll to see history.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Period</TableHead>
+                      <TableHead>Employees</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Gross</TableHead>
+                      <TableHead className="text-right">PAYE</TableHead>
+                      <TableHead className="text-right">Pension</TableHead>
+                      <TableHead className="text-right">Net</TableHead>
+                      <TableHead />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payrollRuns.map((run) => (
+                      <TableRow key={run.id}>
+                        <TableCell className="font-medium">{MONTHS[(run.period_month ?? 1) - 1]} {run.period_year}</TableCell>
+                        <TableCell>{run.employee_count}</TableCell>
+                        <TableCell>
+                          <Badge variant={run.status === "completed" ? "default" : "secondary"}>
+                            {run.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">{formatNaira(Number(run.total_gross))}</TableCell>
+                        <TableCell className="text-right">{formatNaira(Number(run.total_paye))}</TableCell>
+                        <TableCell className="text-right">{formatNaira(Number(run.total_pension))}</TableCell>
+                        <TableCell className="text-right">{formatNaira(Number(run.total_net))}</TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setPayslipRun({ id: run.id, month: run.period_month, year: run.period_year })}
+                          >
+                            <Eye className="h-4 w-4 mr-1" /> Payslips
+                          </Button>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {payrollRuns.map(run => (
-                        <TableRow key={run.id}>
-                          <TableCell className="font-medium">{MONTHS[(run.period_month ?? 1) - 1]} {run.period_year}</TableCell>
-                          <TableCell>{run.employee_count}</TableCell>
-                          <TableCell>
-                            <Badge variant={run.status === "completed" ? "default" : "secondary"}>
-                              {run.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">{formatCurrency(Number(run.total_gross))}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(Number(run.total_paye))}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(Number(run.total_pension))}</TableCell>
-                          <TableCell className="text-right">{formatCurrency(Number(run.total_net))}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          <TabsContent value="remittances">
-            <div className="grid gap-4 md:grid-cols-3">
-              {[
-                { title: "PAYE Remittance", desc: "Monthly tax deductions to FIRS", total: payrollRuns.reduce((s, r) => s + Number(r.total_paye), 0), icon: TrendingUp },
-                { title: "Pension Remittance", desc: "Employee + Employer contributions", total: payrollRuns.reduce((s, r) => s + Number(r.total_pension), 0), icon: Building2 },
-                { title: "NHF Remittance", desc: "National Housing Fund contributions", total: payrollRuns.reduce((s, r) => s + Number(r.total_nhf), 0), icon: DollarSign },
-              ].map(item => (
-                <Card key={item.title}>
-                  <CardHeader>
-                    <div className="flex items-center gap-2">
-                      <item.icon className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-base">{item.title}</CardTitle>
-                    </div>
-                    <CardDescription>{item.desc}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-2xl font-bold">{formatCurrency(item.total)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Total across {payrollRuns.length} payroll runs</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+        {/* ── REMITTANCES TAB ── */}
+        <TabsContent value="remittances">
+          <RemittanceTable payrollRuns={payrollRuns} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Detail Sheet */}
+      <EmployeeDetailSheet
+        employee={selectedEmployee}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
+
+      {/* Payslip Viewer */}
+      <PayslipViewerDialog
+        runId={payslipRun?.id || null}
+        month={payslipRun?.month || 1}
+        year={payslipRun?.year || 2026}
+        open={!!payslipRun}
+        onOpenChange={(v) => { if (!v) setPayslipRun(null); }}
+      />
     </DashboardLayout>
   );
 };
