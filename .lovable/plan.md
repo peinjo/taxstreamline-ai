@@ -1,34 +1,23 @@
 
 
-# Migrate `xlsx` to `ExcelJS` — Security Vulnerability Fix
+# Fix Remaining `xlsx` Import Errors
 
-## Why
-The `xlsx` package (v0.18.5) has known Prototype Pollution and ReDoS vulnerabilities. ExcelJS is an actively maintained, secure alternative with equivalent read/write capabilities that works in the browser.
+The `xlsx` → `ExcelJS` migration missed three files that still import the removed `xlsx` package. All three need to be converted to use `ExcelJS`.
 
-## Changes
+## Files to Fix
 
-### 1. Update dependencies in `package.json`
-- Remove `"xlsx": "^0.18.5"`
-- Add `"exceljs": "^4.4.0"`
+### 1. `src/services/exportService.ts` (line 3)
+- Replace `import * as XLSX from "xlsx"` with `import ExcelJS from "exceljs"`
+- Rewrite `ExcelExportService.export()` to use ExcelJS:
+  - `new ExcelJS.Workbook()` → `addWorksheet()` → add rows → `writeBuffer()` → trigger download via Blob/URL
 
-### 2. Rewrite `src/services/benchmarkDataProcessing.ts`
-Replace `XLSX.read()` + `XLSX.utils.sheet_to_json()` with ExcelJS's `Workbook.xlsx.load()` and manual row-to-JSON conversion.
+### 2. `src/components/audit/tax-summary/utils.ts` (line 6)
+- Replace `import * as XLSX from "xlsx"` with `import ExcelJS from "exceljs"`
+- Rewrite the Excel export function (~lines 160-173) to use ExcelJS workbook/worksheet API with `writeBuffer()` → Blob download
 
-- Read file as `ArrayBuffer` (not binary string)
-- Load workbook via `new ExcelJS.Workbook().xlsx.load(buffer)`
-- Get first worksheet, iterate rows, map header row to keys
-- Return array of objects (same output shape as before)
+### 3. `src/pages/BankStatements.tsx` (lines 151-157)
+- Replace dynamic `import("xlsx")` with `import("exceljs")`
+- Rewrite Excel reading to use `new ExcelJS.Workbook().xlsx.load(buffer)` then iterate rows to build JSON array (same pattern already used in `benchmarkDataProcessing.ts`)
 
-### 3. Rewrite `src/services/aiActions/integrationActions.ts` (lines 4, 117-129)
-Replace `XLSX.utils.json_to_sheet()` / `XLSX.write()` with ExcelJS equivalents:
-
-- Create `new ExcelJS.Workbook()`, add worksheet
-- Write header row from object keys, then data rows
-- Export via `workbook.xlsx.writeBuffer()` → Blob → download link
-
-### 4. Delete the `xlsx` security finding
-Use the security management tool to remove/update the vulnerability note since it will be resolved.
-
-## No other files affected
-The remaining 9 files referencing "xlsx" only mention it in `accept` attributes or help text strings — no code changes needed there.
+All three follow the same pattern already established in the earlier migration. No new dependencies needed — `exceljs` is already installed.
 
