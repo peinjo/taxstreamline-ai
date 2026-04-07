@@ -3,7 +3,7 @@ import { TaxReport } from "@/types";
 import { format } from "date-fns";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { toast } from "sonner";
 import { logError } from "@/lib/errorHandler";
 
@@ -133,7 +133,7 @@ export const exportToPDF = (sortedData: TaxReport[]): void => {
   }
 };
 
-export const exportToExcel = (sortedData: TaxReport[]): void => {
+export const exportToExcel = async (sortedData: TaxReport[]): Promise<void> => {
   try {
     // Prepare data for Excel with null checks
     const excelData = sortedData.map((report) => ({
@@ -159,18 +159,28 @@ export const exportToExcel = (sortedData: TaxReport[]): void => {
     ];
 
     // Create workbook with multiple sheets
-    const wb = XLSX.utils.book_new();
+    const wb = new ExcelJS.Workbook();
     
     // Add main data sheet
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    XLSX.utils.book_append_sheet(wb, ws, "Tax Reports");
+    const ws = wb.addWorksheet("Tax Reports");
+    const dataHeaders = Object.keys(excelData[0] || {});
+    ws.addRow(dataHeaders);
+    excelData.forEach(row => ws.addRow(dataHeaders.map(h => row[h as keyof typeof row])));
     
     // Add summary sheet
-    const summaryWs = XLSX.utils.json_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+    const summaryWs = wb.addWorksheet("Summary");
+    summaryWs.addRow(["Summary", "Value"]);
+    summaryData.forEach(row => summaryWs.addRow([row["Summary"], row["Value"]]));
 
     // Save Excel file
-    XLSX.writeFile(wb, "tax-report-summary.xlsx");
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tax-report-summary.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
     toast.success("Excel exported successfully");
   } catch (error) {
     logError(error as Error, "TaxSummaryUtils.exportToExcel");
