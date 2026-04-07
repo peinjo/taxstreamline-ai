@@ -148,23 +148,33 @@ export default function BankStatements() {
         });
       } else {
         // Excel files
-        import("xlsx").then((XLSX) => {
-          const reader = new FileReader();
-          reader.onload = (evt) => {
-            try {
-              const wb = XLSX.read(evt.target?.result, { type: "binary" });
-              const ws = wb.Sheets[wb.SheetNames[0]];
-              const jsonData = XLSX.utils.sheet_to_json<Record<string, string>>(ws);
-              const rows = parseStatementRows(jsonData);
-              setParsedRows(rows);
-              setShowPreview(true);
-              setParsing(false);
-            } catch {
-              toast.error("Failed to parse Excel file");
-              setParsing(false);
-            }
-          };
-          reader.readAsBinaryString(file);
+        import("exceljs").then(async (ExcelJS) => {
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const wb = new ExcelJS.default.Workbook();
+            await wb.xlsx.load(arrayBuffer);
+            const ws = wb.worksheets[0];
+            if (!ws) throw new Error("No worksheet found");
+            const headers: string[] = [];
+            const jsonData: Record<string, string>[] = [];
+            ws.eachRow((row, rowNumber) => {
+              const values = row.values as (string | number | null)[];
+              if (rowNumber === 1) {
+                values.forEach((v, i) => { if (i > 0) headers.push(String(v ?? '')); });
+              } else {
+                const obj: Record<string, string> = {};
+                headers.forEach((h, i) => { obj[h] = String(values[i + 1] ?? ''); });
+                jsonData.push(obj);
+              }
+            });
+            const rows = parseStatementRows(jsonData);
+            setParsedRows(rows);
+            setShowPreview(true);
+            setParsing(false);
+          } catch {
+            toast.error("Failed to parse Excel file");
+            setParsing(false);
+          }
         });
       }
     },

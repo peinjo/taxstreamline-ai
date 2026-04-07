@@ -170,41 +170,51 @@ export class ExcelExportService {
       isLoading?.(true);
       toast.info(`Generating ${options.title} Excel...`);
 
-      const wb = XLSX.utils.book_new();
+      const wb = new ExcelJS.Workbook();
 
       // Main data sheet
       const excelData = data.map(item => this.formatItemForExcel(item));
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      
-      // Auto-size columns
-      const colWidths = this.calculateColumnWidths(excelData);
-      ws['!cols'] = colWidths;
-      
-      XLSX.utils.book_append_sheet(wb, ws, "Data");
+      const ws = wb.addWorksheet("Data");
+      if (excelData.length > 0) {
+        const headers = Object.keys(excelData[0]);
+        ws.addRow(headers);
+        excelData.forEach(row => ws.addRow(headers.map(h => row[h])));
+        const colWidths = this.calculateColumnWidths(excelData);
+        headers.forEach((_, i) => {
+          ws.getColumn(i + 1).width = colWidths[i]?.wch ?? 15;
+        });
+      }
 
       // Summary sheet
       if (options.summaryData) {
-        const summaryData = Object.entries(options.summaryData).map(([key, value]) => ({
-          "Metric": key,
-          "Value": value
-        }));
-        const summaryWs = XLSX.utils.json_to_sheet(summaryData);
-        summaryWs['!cols'] = [{ wch: 25 }, { wch: 20 }];
-        XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+        const summaryWs = wb.addWorksheet("Summary");
+        summaryWs.addRow(["Metric", "Value"]);
+        Object.entries(options.summaryData).forEach(([key, value]) => {
+          summaryWs.addRow([key, value]);
+        });
+        summaryWs.getColumn(1).width = 25;
+        summaryWs.getColumn(2).width = 20;
       }
 
       // Metadata sheet
       if (options.includeMetadata !== false) {
-        const metadataSheet = XLSX.utils.json_to_sheet([
-          { "Property": "Generated", "Value": format(new Date(), "PPP 'at' p") },
-          { "Property": "Total Records", "Value": data.length },
-          { "Property": "Export Type", "Value": options.title }
-        ]);
-        metadataSheet['!cols'] = [{ wch: 15 }, { wch: 30 }];
-        XLSX.utils.book_append_sheet(wb, metadataSheet, "Metadata");
+        const metaWs = wb.addWorksheet("Metadata");
+        metaWs.addRow(["Property", "Value"]);
+        metaWs.addRow(["Generated", format(new Date(), "PPP 'at' p")]);
+        metaWs.addRow(["Total Records", data.length]);
+        metaWs.addRow(["Export Type", options.title]);
+        metaWs.getColumn(1).width = 15;
+        metaWs.getColumn(2).width = 30;
       }
 
-      XLSX.writeFile(wb, `${options.filename}.xlsx`);
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${options.filename}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
       toast.success("Excel exported successfully");
     } catch (error) {
       logError(error as Error, "ExcelExportService.export");
