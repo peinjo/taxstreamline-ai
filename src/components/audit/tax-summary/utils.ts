@@ -133,7 +133,7 @@ export const exportToPDF = (sortedData: TaxReport[]): void => {
   }
 };
 
-export const exportToExcel = (sortedData: TaxReport[]): void => {
+export const exportToExcel = async (sortedData: TaxReport[]): Promise<void> => {
   try {
     // Prepare data for Excel with null checks
     const excelData = sortedData.map((report) => ({
