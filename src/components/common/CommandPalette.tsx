@@ -134,6 +134,7 @@ export function CommandPalette() {
             {filteredNavigation.map((item) => (
               <CommandItem 
                 key={item.path}
+                value={`${item.label} ${item.keywords.join(' ')} ${item.path}`}
                 onSelect={() => handleNavigate(item.path)}
                 className="flex items-center justify-between"
               >
@@ -157,6 +158,7 @@ export function CommandPalette() {
               {filteredActions.map((action) => (
                 <CommandItem 
                   key={action.id}
+                  value={`${action.label} ${action.keywords.join(' ')} ${action.path}`}
                   onSelect={() => handleNavigate(action.path)}
                   className="flex items-center"
                 >
