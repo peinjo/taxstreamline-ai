@@ -1,6 +1,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { CalendarEvent } from "@/types/calendar";
 import { toast } from "sonner";
@@ -63,13 +64,26 @@ export function useCalendarEventsMutations() {
   const updateEventMutation = useMutation({
     mutationFn: async (eventData: Partial<CalendarEvent> & { id: number }) => {
       const { id, ...updateData } = eventData;
-      
-      const cleanUpdateData: Record<string, unknown> = {};
-      Object.entries(updateData).forEach(([key, value]) => {
-        if (value !== undefined && key !== 'id') {
-          cleanUpdateData[key] = value;
-        }
-      });
+
+      const cleanUpdateData = Object.fromEntries(
+        Object.entries({
+          title: updateData.title,
+          date: updateData.date,
+          company: updateData.company,
+          category: updateData.category,
+          priority: updateData.priority,
+          status: updateData.status,
+          description: updateData.description,
+          start_time: updateData.start_time,
+          end_time: updateData.end_time,
+          is_all_day: updateData.is_all_day,
+          recurrence_pattern: updateData.recurrence_pattern,
+          recurrence_end_date: updateData.recurrence_end_date,
+          parent_event_id: updateData.parent_event_id,
+          reminder_minutes: updateData.reminder_minutes,
+          color: updateData.color,
+        }).filter(([, value]) => value !== undefined)
+      ) as Database["public"]["Tables"]["calendar_events"]["Update"];
 
       const { data, error } = await supabase
         .from("calendar_events")
