@@ -1,23 +1,26 @@
 
+## Status: What's Left
 
-# Fix Remaining `xlsx` Import Errors
+### Already done ✓
+- Supabase Tax-App project connected
+- Build errors fixed (`useCalendarEventsMutations`, `CommandPalette` cmdk crash)
+- E2E verified: signup → email confirmation redirect → login → dashboard renders
+- xlsx → ExcelJS migration is already complete (the stale `.lovable/plan.md` is outdated; no actual `xlsx` imports remain)
 
-The `xlsx` → `ExcelJS` migration missed three files that still import the removed `xlsx` package. All three need to be converted to use `ExcelJS`.
+### Outstanding / not yet verified
 
-## Files to Fix
+**1. Onboarding tour** — never actually exercised E2E. The login test went straight to a dashboard for an existing confirmed account that had likely already completed onboarding. The 5-step AI-assisted onboarding wizard + driver.js tour for a brand-new user has not been walked through.
 
-### 1. `src/services/exportService.ts` (line 3)
-- Replace `import * as XLSX from "xlsx"` with `import ExcelJS from "exceljs"`
-- Rewrite `ExcelExportService.export()` to use ExcelJS:
-  - `new ExcelJS.Workbook()` → `addWorksheet()` → add rows → `writeBuffer()` → trigger download via Blob/URL
+**2. New-signup full path** — blocked previously by email confirmation. Either:
+   - Disable "Confirm email" in Supabase Auth → Providers → Email (fastest), or
+   - Manually confirm a fresh test user, then resume
 
-### 2. `src/components/audit/tax-summary/utils.ts` (line 6)
-- Replace `import * as XLSX from "xlsx"` with `import ExcelJS from "exceljs"`
-- Rewrite the Excel export function (~lines 160-173) to use ExcelJS workbook/worksheet API with `writeBuffer()` → Blob download
+**3. RLS / security review** — `rls_setup.sql` exists but the project has 71 tables; many likely lack policies. A `supabase--linter` run would surface missing-RLS warnings before production.
 
-### 3. `src/pages/BankStatements.tsx` (lines 151-157)
-- Replace dynamic `import("xlsx")` with `import("exceljs")`
-- Rewrite Excel reading to use `new ExcelJS.Workbook().xlsx.load(buffer)` then iterate rows to build JSON array (same pattern already used in `benchmarkDataProcessing.ts`)
+**4. Cleanup** — delete the stale `.lovable/plan.md` (xlsx fixes already applied).
 
-All three follow the same pattern already established in the earlier migration. No new dependencies needed — `exceljs` is already installed.
-
+### Recommended next step
+Pick ONE:
+- **(A) Finish true E2E**: disable email confirmation → sign up a fresh user → walk through onboarding wizard + driver.js tour → land on dashboard. (~10 min)
+- **(B) Security pass**: run Supabase linter, list tables missing RLS, propose policies. (~15 min)
+- **(C) Move on to a feature** from the roadmap (FIRS e-filing prep, payroll, OCR receipts, etc.).
