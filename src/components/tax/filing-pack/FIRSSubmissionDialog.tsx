@@ -65,19 +65,17 @@ export function FIRSSubmissionDialog({ open, onOpenChange, pack }: FIRSSubmissio
         proofUploadedAt = new Date().toISOString();
       }
 
-      const update: Record<string, unknown> = {
-        firs_reference: firsReference || null,
-        submission_notes: notes || null,
-        payment_amount: paymentAmount ? Number(paymentAmount) : null,
-        payment_date: paymentDate || null,
-        submitted_at: new Date().toISOString(),
-        status: "submitted",
-      };
-      if (proofUploadedAt) update.proof_uploaded_at = proofUploadedAt;
-
       const { error } = await supabase
         .from("filing_packs")
-        .update(update)
+        .update({
+          firs_reference: firsReference || null,
+          submission_notes: notes || null,
+          payment_amount: paymentAmount ? Number(paymentAmount) : null,
+          payment_date: paymentDate || null,
+          submitted_at: new Date().toISOString(),
+          status: "submitted",
+          ...(proofUploadedAt ? { proof_uploaded_at: proofUploadedAt } : {}),
+        })
         .eq("id", pack.id);
       if (error) throw error;
     },
