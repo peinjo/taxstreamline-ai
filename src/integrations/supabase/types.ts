@@ -789,42 +789,54 @@ export type Database = {
       }
       filing_packs: {
         Row: {
+          firs_reference: string | null
           generated_at: string | null
           id: string
+          payment_amount: number | null
+          payment_date: string | null
           pdf_url: string | null
           period_end: string
           period_start: string
           proof_file_id: number | null
           proof_uploaded_at: string | null
           status: string | null
+          submission_notes: string | null
           submitted_at: string | null
           summary_data: Json | null
           tax_type: string
           user_id: string
         }
         Insert: {
+          firs_reference?: string | null
           generated_at?: string | null
           id?: string
+          payment_amount?: number | null
+          payment_date?: string | null
           pdf_url?: string | null
           period_end: string
           period_start: string
           proof_file_id?: number | null
           proof_uploaded_at?: string | null
           status?: string | null
+          submission_notes?: string | null
           submitted_at?: string | null
           summary_data?: Json | null
           tax_type: string
           user_id: string
         }
         Update: {
+          firs_reference?: string | null
           generated_at?: string | null
           id?: string
+          payment_amount?: number | null
+          payment_date?: string | null
           pdf_url?: string | null
           period_end?: string
           period_start?: string
           proof_file_id?: number | null
           proof_uploaded_at?: string | null
           status?: string | null
+          submission_notes?: string | null
           submitted_at?: string | null
           summary_data?: Json | null
           tax_type?: string
